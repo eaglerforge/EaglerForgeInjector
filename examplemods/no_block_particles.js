@@ -1,0 +1,1 @@
+ModAPI.hooks.methods.nmcp_EffectRenderer_addBlockDestroyEffects = ()=>{}
