@@ -1,105 +1,310 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>EaglerForge Injector</title>
     <style>
-        * {
-            font-family: sans-serif;
-        }
-        button {
-            border: 2px solid black;
-            border-radius: 8px;
-            background-color: transparent;
-            padding: 8px 10px;
-        }
-        button:active {
-            border: 2px solid black;
-            border-radius: 8px;
-            background-color: rgba(0,0,0,0.2);
-            padding: 8px 10px;
-        }
+      * {
+        font-family: sans-serif;
+      }
+      button {
+        border: 2px solid black;
+        border-radius: 8px;
+        background-color: transparent;
+        padding: 8px 10px;
+      }
+      button:active {
+        border: 2px solid black;
+        border-radius: 8px;
+        background-color: rgba(0, 0, 0, 0.2);
+        padding: 8px 10px;
+      }
     </style>
-</head>
-<body>
+  </head>
+  <body>
     <h1>EaglerForge Injector</h1>
-    <h4>Adds ModAPI with more functionality (adds hooking into functions, exposes all classes, etc) to unminified unobfuscated EaglercraftX and Eaglercraft builds.</h4>
-    <br>
-    <input type="file" accept=".html,.js"><br><br>
+    <h4>
+      Adds ModAPI with more functionality (adds hooking into functions, exposes
+      all classes, etc) to unminified unobfuscated EaglercraftX and Eaglercraft
+      builds.
+    </h4>
+    <br />
+    <input type="file" accept=".html,.js" /><br /><br />
     <button id="giveme">Make modded build</button>
     <script>
-        (function(a,b){if("function"==typeof define&&define.amd)define([],b);else if("undefined"!=typeof exports)b();else{b(),a.FileSaver={exports:{}}.exports}})(this,function(){"use strict";function b(a,b){return"undefined"==typeof b?b={autoBom:!1}:"object"!=typeof b&&(console.warn("Deprecated: Expected third argument to be a object"),b={autoBom:!b}),b.autoBom&&/^\s*(?:text\/\S*|application\/xml|\S*\/\S*\+xml)\s*;.*charset\s*=\s*utf-8/i.test(a.type)?new Blob(["\uFEFF",a],{type:a.type}):a}function c(a,b,c){var d=new XMLHttpRequest;d.open("GET",a),d.responseType="blob",d.onload=function(){g(d.response,b,c)},d.onerror=function(){console.error("could not download file")},d.send()}function d(a){var b=new XMLHttpRequest;b.open("HEAD",a,!1);try{b.send()}catch(a){}return 200<=b.status&&299>=b.status}function e(a){try{a.dispatchEvent(new MouseEvent("click"))}catch(c){var b=document.createEvent("MouseEvents");b.initMouseEvent("click",!0,!0,window,0,0,0,80,20,!1,!1,!1,!1,0,null),a.dispatchEvent(b)}}var f="object"==typeof window&&window.window===window?window:"object"==typeof self&&self.self===self?self:"object"==typeof global&&global.global===global?global:void 0,a=/Macintosh/.test(navigator.userAgent)&&/AppleWebKit/.test(navigator.userAgent)&&!/Safari/.test(navigator.userAgent),g=f.saveAs||("object"!=typeof window||window!==f?function(){}:"download"in HTMLAnchorElement.prototype&&!a?function(b,g,h){var i=f.URL||f.webkitURL,j=document.createElement("a");g=g||b.name||"download",j.download=g,j.rel="noopener","string"==typeof b?(j.href=b,j.origin===location.origin?e(j):d(j.href)?c(b,g,h):e(j,j.target="_blank")):(j.href=i.createObjectURL(b),setTimeout(function(){i.revokeObjectURL(j.href)},4E4),setTimeout(function(){e(j)},0))}:"msSaveOrOpenBlob"in navigator?function(f,g,h){if(g=g||f.name||"download","string"!=typeof f)navigator.msSaveOrOpenBlob(b(f,h),g);else if(d(f))c(f,g,h);else{var i=document.createElement("a");i.href=f,i.target="_blank",setTimeout(function(){e(i)})}}:function(b,d,e,g){if(g=g||open("","_blank"),g&&(g.document.title=g.document.body.innerText="downloading..."),"string"==typeof b)return c(b,d,e);var h="application/octet-stream"===b.type,i=/constructor/i.test(f.HTMLElement)||f.safari,j=/CriOS\/[\d]+/.test(navigator.userAgent);if((j||h&&i||a)&&"undefined"!=typeof FileReader){var k=new FileReader;k.onloadend=function(){var a=k.result;a=j?a:a.replace(/^data:[^;]*;/,"data:attachment/file;"),g?g.location.href=a:location=a,g=null},k.readAsDataURL(b)}else{var l=f.URL||f.webkitURL,m=l.createObjectURL(b);g?g.location=m:location.href=m,g=null,setTimeout(function(){l.revokeObjectURL(m)},4E4)}});f.saveAs=g.saveAs=g,"undefined"!=typeof module&&(module.exports=g)});
+      (function (a, b) {
+        if ("function" == typeof define && define.amd) define([], b);
+        else if ("undefined" != typeof exports) b();
+        else {
+          b(), (a.FileSaver = { exports: {} }.exports);
+        }
+      })(this, function () {
+        "use strict";
+        function b(a, b) {
+          return (
+            "undefined" == typeof b
+              ? (b = { autoBom: !1 })
+              : "object" != typeof b &&
+                (console.warn(
+                  "Deprecated: Expected third argument to be a object"
+                ),
+                (b = { autoBom: !b })),
+            b.autoBom &&
+            /^\s*(?:text\/\S*|application\/xml|\S*\/\S*\+xml)\s*;.*charset\s*=\s*utf-8/i.test(
+              a.type
+            )
+              ? new Blob(["\uFEFF", a], { type: a.type })
+              : a
+          );
+        }
+        function c(a, b, c) {
+          var d = new XMLHttpRequest();
+          d.open("GET", a),
+            (d.responseType = "blob"),
+            (d.onload = function () {
+              g(d.response, b, c);
+            }),
+            (d.onerror = function () {
+              console.error("could not download file");
+            }),
+            d.send();
+        }
+        function d(a) {
+          var b = new XMLHttpRequest();
+          b.open("HEAD", a, !1);
+          try {
+            b.send();
+          } catch (a) {}
+          return 200 <= b.status && 299 >= b.status;
+        }
+        function e(a) {
+          try {
+            a.dispatchEvent(new MouseEvent("click"));
+          } catch (c) {
+            var b = document.createEvent("MouseEvents");
+            b.initMouseEvent(
+              "click",
+              !0,
+              !0,
+              window,
+              0,
+              0,
+              0,
+              80,
+              20,
+              !1,
+              !1,
+              !1,
+              !1,
+              0,
+              null
+            ),
+              a.dispatchEvent(b);
+          }
+        }
+        var f =
+            "object" == typeof window && window.window === window
+              ? window
+              : "object" == typeof self && self.self === self
+              ? self
+              : "object" == typeof global && global.global === global
+              ? global
+              : void 0,
+          a =
+            /Macintosh/.test(navigator.userAgent) &&
+            /AppleWebKit/.test(navigator.userAgent) &&
+            !/Safari/.test(navigator.userAgent),
+          g =
+            f.saveAs ||
+            ("object" != typeof window || window !== f
+              ? function () {}
+              : "download" in HTMLAnchorElement.prototype && !a
+              ? function (b, g, h) {
+                  var i = f.URL || f.webkitURL,
+                    j = document.createElement("a");
+                  (g = g || b.name || "download"),
+                    (j.download = g),
+                    (j.rel = "noopener"),
+                    "string" == typeof b
+                      ? ((j.href = b),
+                        j.origin === location.origin
+                          ? e(j)
+                          : d(j.href)
+                          ? c(b, g, h)
+                          : e(j, (j.target = "_blank")))
+                      : ((j.href = i.createObjectURL(b)),
+                        setTimeout(function () {
+                          i.revokeObjectURL(j.href);
+                        }, 4e4),
+                        setTimeout(function () {
+                          e(j);
+                        }, 0));
+                }
+              : "msSaveOrOpenBlob" in navigator
+              ? function (f, g, h) {
+                  if (((g = g || f.name || "download"), "string" != typeof f))
+                    navigator.msSaveOrOpenBlob(b(f, h), g);
+                  else if (d(f)) c(f, g, h);
+                  else {
+                    var i = document.createElement("a");
+                    (i.href = f),
+                      (i.target = "_blank"),
+                      setTimeout(function () {
+                        e(i);
+                      });
+                  }
+                }
+              : function (b, d, e, g) {
+                  if (
+                    ((g = g || open("", "_blank")),
+                    g &&
+                      (g.document.title = g.document.body.innerText =
+                        "downloading..."),
+                    "string" == typeof b)
+                  )
+                    return c(b, d, e);
+                  var h = "application/octet-stream" === b.type,
+                    i = /constructor/i.test(f.HTMLElement) || f.safari,
+                    j = /CriOS\/[\d]+/.test(navigator.userAgent);
+                  if (
+                    (j || (h && i) || a) &&
+                    "undefined" != typeof FileReader
+                  ) {
+                    var k = new FileReader();
+                    (k.onloadend = function () {
+                      var a = k.result;
+                      (a = j
+                        ? a
+                        : a.replace(/^data:[^;]*;/, "data:attachment/file;")),
+                        g ? (g.location.href = a) : (location = a),
+                        (g = null);
+                    }),
+                      k.readAsDataURL(b);
+                  } else {
+                    var l = f.URL || f.webkitURL,
+                      m = l.createObjectURL(b);
+                    g ? (g.location = m) : (location.href = m),
+                      (g = null),
+                      setTimeout(function () {
+                        l.revokeObjectURL(m);
+                      }, 4e4);
+                  }
+                });
+        (f.saveAs = g.saveAs = g),
+          "undefined" != typeof module && (module.exports = g);
+      });
     </script>
     <script>
-        var modapi_preinit = `globalThis.ModAPI ||= {};
+      var modapi_preinit = `globalThis.ModAPI ||= {};
 ModAPI.hooks ||= {};
 ModAPI.hooks._rippedData ||= [];
 ModAPI.hooks._rippedConstructors ||= {};
 ModAPI.hooks.methods ||= {};
 ModAPI.hooks._rippedMethodTypeMap ||= {};
 ModAPI.hooks._postInit ||= ()=>{};
-`
-        document.querySelector("#giveme").addEventListener("click", ()=>{
-            if ((!document.querySelector("input").files) || !document.querySelector("input").files[0]) {
-                return;
-            }
+`;
+      document.querySelector("#giveme").addEventListener("click", () => {
+        if (
+          !document.querySelector("input").files ||
+          !document.querySelector("input").files[0]
+        ) {
+          return;
+        }
 
-            // @type File
-            var file = document.querySelector("input").files[0];
-            var fileType = file.name.split(".");
-            fileType = fileType[fileType.length - 1];
-            
-            file.text().then(string => {
-                var patchedFile = string;
-                patchedFile = patchedFile.replace(`(function(root, module) {`, `${modapi_preinit}
-(function(root, module) {`);
-patchedFile = patchedFile.replace("\r", "").replace("var main;\n(function() {", modapi_preinit+"var main;\n(function() {")
-                patchedFile = patchedFile.replace(/function \$rt_metadata\(data\)( ?){/gm, 
-                    `function $rt_metadata(data) {
+        // @type File
+        var file = document.querySelector("input").files[0];
+        var fileType = file.name.split(".");
+        fileType = fileType[fileType.length - 1];
+
+        file.text().then((string) => {
+          var patchedFile = string;
+          patchedFile = patchedFile.replaceAll(
+            `(function(root, module) {`,
+            `${modapi_preinit}
+(function(root, module) {`
+          );
+          patchedFile = patchedFile.replaceAll(
+            `var main;(function(){`,
+            `${modapi_preinit}
+var main;(function(){`
+          );
+          patchedFile = patchedFile
+            .replace("\r", "")
+            .replace(
+              "var main;\n(function() {",
+              modapi_preinit + "var main;\n(function() {"
+            );
+          patchedFile = patchedFile.replace(
+            /function \$rt_metadata\(data\)( ?){/gm,
+            `function $rt_metadata(data) {
                     /*/EaglerForge Client Patch/*/
                     ModAPI.hooks._rippedData.push(data);
                     /*/EaglerForge Client Patch/*/`
-                );
+          );
 
-                patchedFile = patchedFile.replace(` id="game_frame">`, ` id="game_frame">\<script id="modapi_postinit"\>${globalThis.modapi_postinit}\<\/script\>`);
+          patchedFile = patchedFile.replace(
+            ` id="game_frame">`,
+            ` id="game_frame">\<script id="modapi_postinit"\>${globalThis.modapi_postinit}\<\/script\>`
+          );
 
-                const extractConstructorRegex = /^\s*function (\S*?)__init_\d+?\((?!\$)/gm;
-                const extractConstructorFullNameRegex = /function (\S*?)__init_[0-9]+/gm;
-                patchedFile = patchedFile.replaceAll(extractConstructorRegex, (match) => {
-                    var fullName = match.match(extractConstructorFullNameRegex);
-                    fullName = fullName[0].replace("function ", "");
-                    return `ModAPI.hooks._rippedConstructors[\`${fullName}\`] = ${fullName};
-    ` + match;
-                });
-                const extractInstanceMethodRegex = /^[\t ]*function \S+?_\S+?_\S+?\(/gm; // /^[\t ]*function \S+?_\S+?_\S+?\(\$this/gm
-                const extractInstanceMethodFullNameRegex = /function (\S*?)\(/gm; // /function (\S*?)\(\$this/gm
-                patchedFile = patchedFile.replaceAll(extractInstanceMethodRegex, (match) => {
-                    if (match.includes("__init_") || match.includes("__clinit_") || match.includes("_$callClinit")  || match.match(/_\S+?\$\S+?_/gm)) {
-                        return match;
-                    }
-                    var fullName = match.match(extractInstanceMethodFullNameRegex);
-                    fullName = fullName[0].replace("function ", "").replace("(", "");
-                    return `function ${fullName}(...args) {
+          const extractConstructorRegex =
+            /^\s*function (\S*?)__init_\d+?\((?!\$)/gm;
+          const extractConstructorFullNameRegex =
+            /function (\S*?)__init_[0-9]+/gm;
+          patchedFile = patchedFile.replaceAll(
+            extractConstructorRegex,
+            (match) => {
+              var fullName = match.match(extractConstructorFullNameRegex);
+              fullName = fullName[0].replace("function ", "");
+              return (
+                `ModAPI.hooks._rippedConstructors[\`${fullName}\`] = ${fullName};
+    ` + match
+              );
+            }
+          );
+          const extractInstanceMethodRegex =
+            /^[\t ]*function \S+?_\S+?_\S+?\(/gm; // /^[\t ]*function \S+?_\S+?_\S+?\(\$this/gm
+          const extractInstanceMethodFullNameRegex = /function (\S*?)\(/gm; // /function (\S*?)\(\$this/gm
+          patchedFile = patchedFile.replaceAll(
+            extractInstanceMethodRegex,
+            (match) => {
+              if (
+                match.includes("__init_") ||
+                match.includes("__clinit_") ||
+                match.includes("_$callClinit") ||
+                match.match(/_\S+?\$\S+?_/gm)
+              ) {
+                return match;
+              }
+              var fullName = match.match(extractInstanceMethodFullNameRegex);
+              fullName = fullName[0].replace("function ", "").replace("(", "");
+              return (
+                `function ${fullName}(...args) {
                         return ModAPI.hooks.methods[\`${fullName}\`].apply(this, args);
                     }
-                    ModAPI.hooks._rippedMethodTypeMap[\`${fullName}\`] = \`${match.includes("function "+fullName+"($this") ? "instance" : "static"}\`;
-                    ModAPI.hooks.methods[\`${fullName}\`]=`+match.replace(fullName + "(", "(");
-                    return match;
-                });
-                patchedFile = patchedFile.replaceAll(/main\(\);\s*?}/gm, (match)=>{
-                    return match.replace("main();", "main();ModAPI.hooks._postInit();")
-                });
-                var blob = new Blob([patchedFile], {type: file.type});
-                saveAs(blob, "processed."+fileType);
-            });
+                    ModAPI.hooks._rippedMethodTypeMap[\`${fullName}\`] = \`${
+                  match.includes("function " + fullName + "($this")
+                    ? "instance"
+                    : "static"
+                }\`;
+                    ModAPI.hooks.methods[\`${fullName}\`]=` +
+                match.replace(fullName + "(", "(")
+              );
+              return match;
+            }
+          );
+          patchedFile = patchedFile.replaceAll(/main\(\);\s*?}/gm, (match) => {
+            return match.replace("main();", "main();ModAPI.hooks._postInit();");
+          });
+          var blob = new Blob([patchedFile], { type: file.type });
+          saveAs(blob, "processed." + fileType);
         });
+      });
     </script>
 
-
-
     <script>
-        globalThis.modapi_postinit = `(() => {
+      globalThis.modapi_postinit = `(() => {
     //EaglerForge post initialization code.
     ModAPI.hooks._classMap = {};
     globalThis.PluginAPI ||= ModAPI;
@@ -332,5 +537,5 @@ patchedFile = patchedFile.replace("\r", "").replace("var main;\n(function() {", 
     };
 })();`;
     </script>
-</body>
+  </body>
 </html>
