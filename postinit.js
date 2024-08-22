@@ -73,15 +73,13 @@
                     }
                 }
             }
-            
+
             var outProp = "$" + prop;
-            return Reflect.get(target, outProp, receiver) || Reflect.get(target, prop, receiver);
+            console.log(outProp);
+            return Reflect.get(target, outProp, receiver);
         },
         set(object, prop, value) {
-            var outProp = prop;
-            if (outProp.startsWith("$")) {
-                outProp = outProp.replace("$", "");
-            }
+            var outProp = "$" + prop;
             object[outProp] = value;
             return true;
         },
@@ -96,19 +94,16 @@
                     }
                 }
             }
-            
+
             var outProp = "$" + prop;
-            var outputValue = Reflect.get(target, outProp, receiver) || Reflect.get(target, prop, receiver);
+            var outputValue = Reflect.get(target, outProp, receiver);
             if (outputValue && typeof outputValue === "object") {
                 return new Proxy(outputValue, TeaVM_to_Recursive_BaseData_ProxyConf);
             }
             return outputValue;
         },
         set(object, prop, value) {
-            var outProp = prop;
-            if (outProp.startsWith("$")) {
-                outProp = outProp.replace("$", "");
-            }
+            var outProp = "$" + prop;
             object[outProp] = value;
             return true;
         },
@@ -185,8 +180,6 @@
         ModAPI.events.listeners.event.forEach((func) => {
             func({ event: name, data: data });
         });
-
-        ModAPI.globals._initUpdate();
     };
     ModAPI.events.newEvent("update");
     ModAPI.util ||= {};
@@ -214,13 +207,17 @@
         if (ModAPI.required.has("network") && ModAPI.javaClient && ModAPI.javaClient.$thePlayer && ModAPI.javaClient.$thePlayer.$sendQueue) {
             ModAPI.network = new Proxy(ModAPI.javaClient.$thePlayer.$sendQueue, TeaVM_to_Recursive_BaseData_ProxyConf);
         }
-        ModAPI.events.callEvent("update");
+        try {
+            ModAPI.events.callEvent("update");
+        } catch (error) {
+            console.error(error);
+        }
     }
     const updateMethodName = ModAPI.util.getMethodFromPackage("net.minecraft.client.entity.EntityPlayerSP", "onUpdate");
     const originalUpdate = ModAPI.hooks.methods[updateMethodName];
     ModAPI.hooks.methods[updateMethodName] = function (...args) {
         ModAPI.onUpdate();
-        return originalUpdate.apply(this, ...args);
+        return originalUpdate.apply(this, args);
     };
 
     const initMethodName = ModAPI.util.getMethodFromPackage("net.minecraft.client.Minecraft", "startGame");

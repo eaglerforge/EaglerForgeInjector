@@ -3,13 +3,31 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EaglerForge Client Postprocessor</title>
+    <title>EaglerForge Injector</title>
+    <style>
+        * {
+            font-family: sans-serif;
+        }
+        button {
+            border: 2px solid black;
+            border-radius: 8px;
+            background-color: transparent;
+            padding: 8px 10px;
+        }
+        button:active {
+            border: 2px solid black;
+            border-radius: 8px;
+            background-color: rgba(0,0,0,0.2);
+            padding: 8px 10px;
+        }
+    </style>
 </head>
 <body>
-    <h1>EaglerForge Client Postprocessor</h1>
-    <h4>Adds hooking into any TeaVM function to any uploaded Eaglercraft client. For use with NoReflect (allows for interaction of methods and classes)</h4>
-    <input type="file" accept=".html,.js"><br>
-    <button id="giveme">Give me the better version</button>
+    <h1>EaglerForge Injector</h1>
+    <h4>Adds ModAPI with more functionality (adds hooking into functions, exposes all classes, etc) to unminified unobfuscated EaglercraftX and Eaglercraft builds.</h4>
+    <br>
+    <input type="file" accept=".html,.js"><br><br>
+    <button id="giveme">Make modded build</button>
     <script>
         (function(a,b){if("function"==typeof define&&define.amd)define([],b);else if("undefined"!=typeof exports)b();else{b(),a.FileSaver={exports:{}}.exports}})(this,function(){"use strict";function b(a,b){return"undefined"==typeof b?b={autoBom:!1}:"object"!=typeof b&&(console.warn("Deprecated: Expected third argument to be a object"),b={autoBom:!b}),b.autoBom&&/^\s*(?:text\/\S*|application\/xml|\S*\/\S*\+xml)\s*;.*charset\s*=\s*utf-8/i.test(a.type)?new Blob(["\uFEFF",a],{type:a.type}):a}function c(a,b,c){var d=new XMLHttpRequest;d.open("GET",a),d.responseType="blob",d.onload=function(){g(d.response,b,c)},d.onerror=function(){console.error("could not download file")},d.send()}function d(a){var b=new XMLHttpRequest;b.open("HEAD",a,!1);try{b.send()}catch(a){}return 200<=b.status&&299>=b.status}function e(a){try{a.dispatchEvent(new MouseEvent("click"))}catch(c){var b=document.createEvent("MouseEvents");b.initMouseEvent("click",!0,!0,window,0,0,0,80,20,!1,!1,!1,!1,0,null),a.dispatchEvent(b)}}var f="object"==typeof window&&window.window===window?window:"object"==typeof self&&self.self===self?self:"object"==typeof global&&global.global===global?global:void 0,a=/Macintosh/.test(navigator.userAgent)&&/AppleWebKit/.test(navigator.userAgent)&&!/Safari/.test(navigator.userAgent),g=f.saveAs||("object"!=typeof window||window!==f?function(){}:"download"in HTMLAnchorElement.prototype&&!a?function(b,g,h){var i=f.URL||f.webkitURL,j=document.createElement("a");g=g||b.name||"download",j.download=g,j.rel="noopener","string"==typeof b?(j.href=b,j.origin===location.origin?e(j):d(j.href)?c(b,g,h):e(j,j.target="_blank")):(j.href=i.createObjectURL(b),setTimeout(function(){i.revokeObjectURL(j.href)},4E4),setTimeout(function(){e(j)},0))}:"msSaveOrOpenBlob"in navigator?function(f,g,h){if(g=g||f.name||"download","string"!=typeof f)navigator.msSaveOrOpenBlob(b(f,h),g);else if(d(f))c(f,g,h);else{var i=document.createElement("a");i.href=f,i.target="_blank",setTimeout(function(){e(i)})}}:function(b,d,e,g){if(g=g||open("","_blank"),g&&(g.document.title=g.document.body.innerText="downloading..."),"string"==typeof b)return c(b,d,e);var h="application/octet-stream"===b.type,i=/constructor/i.test(f.HTMLElement)||f.safari,j=/CriOS\/[\d]+/.test(navigator.userAgent);if((j||h&&i||a)&&"undefined"!=typeof FileReader){var k=new FileReader;k.onloadend=function(){var a=k.result;a=j?a:a.replace(/^data:[^;]*;/,"data:attachment/file;"),g?g.location.href=a:location=a,g=null},k.readAsDataURL(b)}else{var l=f.URL||f.webkitURL,m=l.createObjectURL(b);g?g.location=m:location.href=m,g=null,setTimeout(function(){l.revokeObjectURL(m)},4E4)}});f.saveAs=g.saveAs=g,"undefined"!=typeof module&&(module.exports=g)});
     </script>
@@ -57,7 +75,7 @@ patchedFile = patchedFile.replace("\r", "").replace("var main;\n(function() {", 
                 const extractInstanceMethodRegex = /^[\t ]*function \S+?_\S+?_\S+?\(/gm; // /^[\t ]*function \S+?_\S+?_\S+?\(\$this/gm
                 const extractInstanceMethodFullNameRegex = /function (\S*?)\(/gm; // /function (\S*?)\(\$this/gm
                 patchedFile = patchedFile.replaceAll(extractInstanceMethodRegex, (match) => {
-                    if (match.includes("__init_") || match.includes("__clinit_") || match.includes("_$callClinit")) {
+                    if (match.includes("__init_") || match.includes("__clinit_") || match.includes("_$callClinit")  || match.match(/_\S+?\$\S+?_/gm)) {
                         return match;
                     }
                     var fullName = match.match(extractInstanceMethodFullNameRegex);
@@ -77,6 +95,9 @@ patchedFile = patchedFile.replace("\r", "").replace("var main;\n(function() {", 
             });
         });
     </script>
+
+
+
     <script>
         globalThis.modapi_postinit = `(() => {
     //EaglerForge post initialization code.
@@ -153,15 +174,13 @@ patchedFile = patchedFile.replace("\r", "").replace("var main;\n(function() {", 
                     }
                 }
             }
-            
+
             var outProp = "$" + prop;
-            return Reflect.get(target, outProp, receiver) || Reflect.get(target, prop, receiver);
+            console.log(outProp);
+            return Reflect.get(target, outProp, receiver);
         },
         set(object, prop, value) {
-            var outProp = prop;
-            if (outProp.startsWith("$")) {
-                outProp = outProp.replace("$", "");
-            }
+            var outProp = "$" + prop;
             object[outProp] = value;
             return true;
         },
@@ -176,19 +195,16 @@ patchedFile = patchedFile.replace("\r", "").replace("var main;\n(function() {", 
                     }
                 }
             }
-            
+
             var outProp = "$" + prop;
-            var outputValue = Reflect.get(target, outProp, receiver) || Reflect.get(target, prop, receiver);
+            var outputValue = Reflect.get(target, outProp, receiver);
             if (outputValue && typeof outputValue === "object") {
                 return new Proxy(outputValue, TeaVM_to_Recursive_BaseData_ProxyConf);
             }
             return outputValue;
         },
         set(object, prop, value) {
-            var outProp = prop;
-            if (outProp.startsWith("$")) {
-                outProp = outProp.replace("$", "");
-            }
+            var outProp = "$" + prop;
             object[outProp] = value;
             return true;
         },
@@ -265,8 +281,6 @@ patchedFile = patchedFile.replace("\r", "").replace("var main;\n(function() {", 
         ModAPI.events.listeners.event.forEach((func) => {
             func({ event: name, data: data });
         });
-
-        ModAPI.globals._initUpdate();
     };
     ModAPI.events.newEvent("update");
     ModAPI.util ||= {};
@@ -294,13 +308,17 @@ patchedFile = patchedFile.replace("\r", "").replace("var main;\n(function() {", 
         if (ModAPI.required.has("network") && ModAPI.javaClient && ModAPI.javaClient.$thePlayer && ModAPI.javaClient.$thePlayer.$sendQueue) {
             ModAPI.network = new Proxy(ModAPI.javaClient.$thePlayer.$sendQueue, TeaVM_to_Recursive_BaseData_ProxyConf);
         }
-        ModAPI.events.callEvent("update");
+        try {
+            ModAPI.events.callEvent("update");
+        } catch (error) {
+            console.error(error);
+        }
     }
     const updateMethodName = ModAPI.util.getMethodFromPackage("net.minecraft.client.entity.EntityPlayerSP", "onUpdate");
     const originalUpdate = ModAPI.hooks.methods[updateMethodName];
     ModAPI.hooks.methods[updateMethodName] = function (...args) {
         ModAPI.onUpdate();
-        return originalUpdate.apply(this, ...args);
+        return originalUpdate.apply(this, args);
     };
 
     const initMethodName = ModAPI.util.getMethodFromPackage("net.minecraft.client.Minecraft", "startGame");
