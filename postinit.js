@@ -75,8 +75,18 @@
             }
 
             var outProp = "$" + prop;
-            console.log(outProp);
-            return Reflect.get(target, outProp, receiver);
+            var outputValue = Reflect.get(target, outProp, receiver);
+            if (outputValue && typeof outputValue === "function") {
+                return function (...args) {
+                    return outputValue.apply(target, args);
+                }
+            }
+            if (outputValue && typeof outputValue === "function") {
+                return function (...args) {
+                    return outputValue.apply(target, args);
+                }
+            }
+            return outputValue;
         },
         set(object, prop, value) {
             var outProp = "$" + prop;
@@ -97,8 +107,13 @@
 
             var outProp = "$" + prop;
             var outputValue = Reflect.get(target, outProp, receiver);
-            if (outputValue && typeof outputValue === "object") {
+            if (outputValue && typeof outputValue === "object" && !Array.isArray(outputValue)) {
                 return new Proxy(outputValue, TeaVM_to_Recursive_BaseData_ProxyConf);
+            }
+            if (outputValue && typeof outputValue === "function") {
+                return function (...args) {
+                    return outputValue.apply(target, args);
+                }
             }
             return outputValue;
         },
@@ -213,6 +228,30 @@
             console.error(error);
         }
     }
+    
+    ModAPI.util.stringToUint16Array = function stringToUint16Array(str) {
+        const buffer = new ArrayBuffer(str.length * 2); // 2 bytes for each char
+        const uint16Array = new Uint16Array(buffer);
+        for (let i = 0; i < str.length; i++) {
+            uint16Array[i] = str.charCodeAt(i);
+        }
+        return uint16Array;
+    }   
+
+    var stringDefaultConstructor = ModAPI.hooks._classMap["java.lang.String"].constructors.filter(x => {return x.length === 0})[0];
+    ModAPI.util.string = ModAPI.util.str = function (string) {
+        var jclString = stringDefaultConstructor();
+        jclString.$characters.data = ModAPI.util.stringToUint16Array(string);
+        return jclString;
+    }
+
+    ModAPI.displayToChat = function (param) {
+        var v = typeof param === "object" ? param.msg : (param + "");
+        v ||= "";
+        var jclString = ModAPI.util.string(v);
+        ModAPI.hooks.methods["nmcg_GuiNewChat_printChatMessage"](ModAPI.javaClient.$ingameGUI.$persistantChatGUI, ModAPI.hooks._classMap["net.minecraft.util.ChatComponentText"].constructors[0](jclString));
+    }
+
     const updateMethodName = ModAPI.util.getMethodFromPackage("net.minecraft.client.entity.EntityPlayerSP", "onUpdate");
     const originalUpdate = ModAPI.hooks.methods[updateMethodName];
     ModAPI.hooks.methods[updateMethodName] = function (...args) {

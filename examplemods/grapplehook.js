@@ -9,7 +9,7 @@ var GrappleHookPlugin = {
 };
 PluginAPI.addEventListener("update", () => { //Every client tick
     if (!PluginAPI.player.fishEntity) { //If the fish hook does not exist.
-        if (GrappleHookPlugin.prev === "GROUND" && (!GrappleHookPlugin.crouchToCancel || !PluginAPI.player.isSneaking.apply(PluginAPI.javaClient.$thePlayer, []))) { //If the old state was ground
+        if (GrappleHookPlugin.prev === "GROUND" && (!GrappleHookPlugin.crouchToCancel || !PluginAPI.player.isSneaking())) { //If the old state was ground
             GrappleHookPlugin.prev = "NONE"; //Update the state
             var mx = GrappleHookPlugin.oldXYZ[0] - PluginAPI.player.posX; //Get delta X
             var my = GrappleHookPlugin.oldXYZ[1] - PluginAPI.player.posY; //Get delta Y
