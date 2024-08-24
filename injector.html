@@ -26,7 +26,7 @@
     <h1>EaglerForge Injector</h1>
     <h4>
       Adds ModAPI with more functionality (adds hooking into functions, exposes
-      all classes, etc) to unminified unobfuscated EaglercraftX and Eaglercraft
+      all classes, etc) to unminified unobfuscated EaglercraftX
       builds.
     </h4>
     <br />
@@ -203,6 +203,8 @@ ModAPI.hooks._rippedConstructors ||= {};
 ModAPI.hooks.methods ||= {};
 ModAPI.hooks._rippedMethodTypeMap ||= {};
 ModAPI.hooks._postInit ||= ()=>{};
+ModAPI.hooks._rippedStaticProperties ||= {};
+ModAPI.hooks._rippedStaticIndexer ||= {};
 `;
       document.querySelector("#giveme").addEventListener("click", () => {
         if (
@@ -245,7 +247,9 @@ var main;(function(){`
 
           patchedFile = patchedFile.replace(
             ` id="game_frame">`,
-            ` id="game_frame">\<script id="modapi_postinit"\>${globalThis.modapi_postinit}\<\/script\>`
+            ` id="game_frame">
+            \<script id="modapi_postinit"\>${globalThis.modapi_postinit}\<\/script\>
+            \<script id="modapi_postinit_data"\>globalThis.modapi_postinit = \`${globalThis.modapi_postinit}\`;\<\/script\>`
           );
 
           const extractConstructorRegex =
@@ -272,8 +276,7 @@ var main;(function(){`
               if (
                 match.includes("__init_") ||
                 match.includes("__clinit_") ||
-                match.includes("_$callClinit") ||
-                match.match(/_\S+?\$\S+?_/gm)
+                match.includes("_$callClinit")
               ) {
                 return match;
               }
@@ -281,9 +284,9 @@ var main;(function(){`
               fullName = fullName[0].replace("function ", "").replace("(", "");
               return (
                 `function ${fullName}(...args) {
-                        return ModAPI.hooks.methods[\`${fullName}\`].apply(this, args);
-                    }
-                    ModAPI.hooks._rippedMethodTypeMap[\`${fullName}\`] = \`${
+                      return ModAPI.hooks.methods[\`${fullName}\`].apply(this, args);
+                  }
+                  ModAPI.hooks._rippedMethodTypeMap[\`${fullName}\`] = \`${
                   match.includes("function " + fullName + "($this")
                     ? "instance" //Todo: fix static/instance detection
                     : "static"
@@ -294,6 +297,53 @@ var main;(function(){`
               return match;
             }
           );
+          var staticVariables = [...patchedFile.matchAll(/var \S+?_\S+?_\S+? = null;/gm)].flatMap(x => {return x[0]});
+          patchedFile = patchedFile.replaceAll(/var \S+?_\S+? = \$rt_classWithoutFields\(\);/gm, function (match) {
+            var prefix = match.replace(" = $rt_classWithoutFields();", "");
+            var entries = [];
+            staticVariables.forEach(entry => {
+              if (entry.startsWith(prefix)) {
+                var variableName = entry.replace("var ", "").replace(" = null;", "");
+                var segments = variableName.split("_");
+                segments.splice(0, 2);
+                var name = segments.join("_");
+                entries.push({
+                  "name": name,
+                  "variable": variableName,
+                });
+              }
+            });
+            var getComponents = "";
+            entries.forEach(entry => {
+              getComponents+= `
+              case \`${entry.name}\`:
+                  return ${entry.variable};
+                  break;`
+            });
+
+            var setComponents = "";
+              entries.forEach(entry => {
+                setComponents+= `
+                case \`${entry.name}\`:
+                    ${entry.variable} = c;
+                    break;`;
+            });
+            var proxy = `
+            ModAPI.hooks._rippedStaticIndexer[\`${prefix.replace("var ", "")}\`] = [${entries.flatMap((x)=>{return "\"" + x.name + "\""}).join(",")}];
+            ModAPI.hooks._rippedStaticProperties[\`${prefix.replace("var ", "")}\`] = new Proxy({}, {
+                get: function (a,b,c) {
+                    switch (b) {
+                        ${getComponents}
+                    }
+                },
+                set: function (a,b,c) {
+                    switch (b) {
+                        ${setComponents}
+                    }
+                }
+              });`;
+              return match + proxy;
+          });
           patchedFile = patchedFile.replaceAll(/main\(\);\s*?}/gm, (match) => {
             return match.replace("main();", "main();ModAPI.hooks._postInit();");
           });
@@ -306,10 +356,42 @@ var main;(function(){`
     <script>
       globalThis.modapi_postinit = `(() => {
     //EaglerForge post initialization code.
+    //This script cannot contain backticks, escape characters, or backslashes in order to inject into the dedicated server code.
     ModAPI.hooks._classMap = {};
     globalThis.PluginAPI ||= ModAPI;
     ModAPI.mcinstance ||= {};
     ModAPI.javaClient ||= {};
+    ModAPI.dedicatedServer ||= {};
+    ModAPI.dedicatedServer._data ||= [];
+    ModAPI.dedicatedServer.appendCode = function (code) {
+        ModAPI.dedicatedServer._data.push(code);
+    }
+    ModAPI.util ||= {};
+    ModAPI.util.getMethodFromPackage = function (classId, methodName) {
+        var name = "";
+        var classStuff = classId.split(".");
+        classStuff.forEach((component, i) => {
+            if (i === classStuff.length - 1) {
+                name += "_" + component;
+            } else {
+                name += component[0].toLowerCase();
+            }
+        });
+        name += "_" + methodName;
+        return name;
+    }
+    ModAPI.util.getCompiledNameFromPackage = function (classId) {
+        var name = "";
+        var classStuff = classId.split(".");
+        classStuff.forEach((component, i) => {
+            if (i === classStuff.length - 1) {
+                name += "_" + component;
+            } else {
+                name += component[0].toLowerCase();
+            }
+        });
+        return name;
+    }
     ModAPI.version = "v2.0";
     ModAPI.flavour = "injector";
     ModAPI.credits = ["ZXMushroom63", "radmanplays", "OtterCodes101", "TheIdiotPlays"];
@@ -318,11 +400,14 @@ var main;(function(){`
     ModAPI.hooks._rippedData.forEach(block => {
         block.forEach(item => {
             if (typeof item === "function") {
-                var compiledName = item.name;
                 if (!item.$meta || typeof item.$meta.name !== "string") {
                     return;
                 }
+
                 var classId = item.$meta.name;
+                var compiledName = ModAPI.util.getCompiledNameFromPackage(classId);
+                
+
                 if (!ModAPI.hooks._classMap[classId]) {
                     ModAPI.hooks._classMap[classId] = {
                         "name": classId.split(".")[classId.split(".").length - 1],
@@ -331,6 +416,8 @@ var main;(function(){`
                         "constructors": [],
                         "methods": {},
                         "staticMethods": {},
+                        "staticVariables": {},
+                        "staticVariableNames": [],
                         "class": item,
                         "compiledName": compiledName
                     }
@@ -338,6 +425,8 @@ var main;(function(){`
                 if (typeof item.$meta.superclass === "function" && item.$meta.superclass.$meta) {
                     ModAPI.hooks._classMap[classId].superclass = item.$meta.superclass.$meta.name;
                 }
+                ModAPI.hooks._classMap[classId].staticVariableNames = ModAPI.hooks._rippedStaticIndexer[compiledName];
+                ModAPI.hooks._classMap[classId].staticVariables = ModAPI.hooks._rippedStaticProperties[compiledName];
                 if (item["$$constructor$$"]) {
                     //Class does not have any hand written constructors
                     //Eg: class MyClass {}
@@ -443,6 +532,9 @@ var main;(function(){`
             return true;
         },
     };
+    ModAPI.util.TeaVM_to_BaseData_ProxyConf = TeaVM_to_BaseData_ProxyConf;
+    ModAPI.util.TeaVMArray_To_Recursive_BaseData_ProxyConf = TeaVMArray_To_Recursive_BaseData_ProxyConf;
+    ModAPI.util.TeaVM_to_Recursive_BaseData_ProxyConf = TeaVM_to_Recursive_BaseData_ProxyConf;
     ModAPI.required = new Set();
     ModAPI.events = {};
     ModAPI.events.types = ["event"];
@@ -517,21 +609,6 @@ var main;(function(){`
         });
     };
     ModAPI.events.newEvent("update");
-    ModAPI.util ||= {};
-    ModAPI.util.TeaVM_to_BaseData_ProxyConf = TeaVM_to_BaseData_ProxyConf;
-    ModAPI.util.getMethodFromPackage = function (classId, methodName) {
-        var name = "";
-        var classStuff = classId.split(".");
-        classStuff.forEach((component, i) => {
-            if (i === classStuff.length - 1) {
-                name += "_" + component;
-            } else {
-                name += component[0].toLowerCase();
-            }
-        });
-        name += "_" + methodName;
-        return name;
-    }
     ModAPI.require = function (module) {
         ModAPI.required.add(module);
     };
@@ -588,7 +665,22 @@ var main;(function(){`
         ModAPI.settings = new Proxy(ModAPI.mcinstance.$gameSettings, TeaVM_to_Recursive_BaseData_ProxyConf);
         return x;
     };
+
+    var integratedServerStartup = ModAPI.util.getMethodFromPackage("net.lax1dude.eaglercraft.v1_8.sp.internal.ClientPlatformSingleplayer", "loadIntegratedServerSourceInline");
+    //Integrated server setup has a randomised suffix on the end
+    integratedServerStartup = ModAPI.hooks._rippedMethodKeys.filter(key => {return key.startsWith(integratedServerStartup); })[0];
+    const integratedServerStartupMethod = ModAPI.hooks.methods[integratedServerStartup];
+    ModAPI.hooks.methods[integratedServerStartup] = function (worker, bootstrap) {
+        var x = integratedServerStartupMethod.apply(this, [worker, bootstrap + ";" + globalThis.modapi_postinit + ";" + ModAPI.dedicatedServer._data.join(";")]);
+        return x;
+    };
 })();`;
+    </script>
+
+
+
+    <script>
+      globalThis.modapi_guikit = ``;
     </script>
   </body>
 </html>

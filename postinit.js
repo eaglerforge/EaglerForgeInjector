@@ -1,9 +1,41 @@
 (() => {
     //EaglerForge post initialization code.
+    //This script cannot contain backticks, escape characters, or backslashes in order to inject into the dedicated server code.
     ModAPI.hooks._classMap = {};
     globalThis.PluginAPI ||= ModAPI;
     ModAPI.mcinstance ||= {};
     ModAPI.javaClient ||= {};
+    ModAPI.dedicatedServer ||= {};
+    ModAPI.dedicatedServer._data ||= [];
+    ModAPI.dedicatedServer.appendCode = function (code) {
+        ModAPI.dedicatedServer._data.push(code);
+    }
+    ModAPI.util ||= {};
+    ModAPI.util.getMethodFromPackage = function (classId, methodName) {
+        var name = "";
+        var classStuff = classId.split(".");
+        classStuff.forEach((component, i) => {
+            if (i === classStuff.length - 1) {
+                name += "_" + component;
+            } else {
+                name += component[0].toLowerCase();
+            }
+        });
+        name += "_" + methodName;
+        return name;
+    }
+    ModAPI.util.getCompiledNameFromPackage = function (classId) {
+        var name = "";
+        var classStuff = classId.split(".");
+        classStuff.forEach((component, i) => {
+            if (i === classStuff.length - 1) {
+                name += "_" + component;
+            } else {
+                name += component[0].toLowerCase();
+            }
+        });
+        return name;
+    }
     ModAPI.version = "v2.0";
     ModAPI.flavour = "injector";
     ModAPI.credits = ["ZXMushroom63", "radmanplays", "OtterCodes101", "TheIdiotPlays"];
@@ -12,11 +44,14 @@
     ModAPI.hooks._rippedData.forEach(block => {
         block.forEach(item => {
             if (typeof item === "function") {
-                var compiledName = item.name;
                 if (!item.$meta || typeof item.$meta.name !== "string") {
                     return;
                 }
+
                 var classId = item.$meta.name;
+                var compiledName = ModAPI.util.getCompiledNameFromPackage(classId);
+                
+
                 if (!ModAPI.hooks._classMap[classId]) {
                     ModAPI.hooks._classMap[classId] = {
                         "name": classId.split(".")[classId.split(".").length - 1],
@@ -25,6 +60,8 @@
                         "constructors": [],
                         "methods": {},
                         "staticMethods": {},
+                        "staticVariables": {},
+                        "staticVariableNames": [],
                         "class": item,
                         "compiledName": compiledName
                     }
@@ -32,6 +69,8 @@
                 if (typeof item.$meta.superclass === "function" && item.$meta.superclass.$meta) {
                     ModAPI.hooks._classMap[classId].superclass = item.$meta.superclass.$meta.name;
                 }
+                ModAPI.hooks._classMap[classId].staticVariableNames = ModAPI.hooks._rippedStaticIndexer[compiledName];
+                ModAPI.hooks._classMap[classId].staticVariables = ModAPI.hooks._rippedStaticProperties[compiledName];
                 if (item["$$constructor$$"]) {
                     //Class does not have any hand written constructors
                     //Eg: class MyClass {}
@@ -137,6 +176,9 @@
             return true;
         },
     };
+    ModAPI.util.TeaVM_to_BaseData_ProxyConf = TeaVM_to_BaseData_ProxyConf;
+    ModAPI.util.TeaVMArray_To_Recursive_BaseData_ProxyConf = TeaVMArray_To_Recursive_BaseData_ProxyConf;
+    ModAPI.util.TeaVM_to_Recursive_BaseData_ProxyConf = TeaVM_to_Recursive_BaseData_ProxyConf;
     ModAPI.required = new Set();
     ModAPI.events = {};
     ModAPI.events.types = ["event"];
@@ -211,21 +253,6 @@
         });
     };
     ModAPI.events.newEvent("update");
-    ModAPI.util ||= {};
-    ModAPI.util.TeaVM_to_BaseData_ProxyConf = TeaVM_to_BaseData_ProxyConf;
-    ModAPI.util.getMethodFromPackage = function (classId, methodName) {
-        var name = "";
-        var classStuff = classId.split(".");
-        classStuff.forEach((component, i) => {
-            if (i === classStuff.length - 1) {
-                name += "_" + component;
-            } else {
-                name += component[0].toLowerCase();
-            }
-        });
-        name += "_" + methodName;
-        return name;
-    }
     ModAPI.require = function (module) {
         ModAPI.required.add(module);
     };
@@ -280,6 +307,15 @@
         //args[0] means $this (ie: minecraft instance).
         ModAPI.mcinstance = ModAPI.javaClient = args[0];
         ModAPI.settings = new Proxy(ModAPI.mcinstance.$gameSettings, TeaVM_to_Recursive_BaseData_ProxyConf);
+        return x;
+    };
+
+    var integratedServerStartup = ModAPI.util.getMethodFromPackage("net.lax1dude.eaglercraft.v1_8.sp.internal.ClientPlatformSingleplayer", "loadIntegratedServerSourceInline");
+    //Integrated server setup has a randomised suffix on the end
+    integratedServerStartup = ModAPI.hooks._rippedMethodKeys.filter(key => {return key.startsWith(integratedServerStartup); })[0];
+    const integratedServerStartupMethod = ModAPI.hooks.methods[integratedServerStartup];
+    ModAPI.hooks.methods[integratedServerStartup] = function (worker, bootstrap) {
+        var x = integratedServerStartupMethod.apply(this, [worker, bootstrap + ";" + globalThis.modapi_postinit + ";" + ModAPI.dedicatedServer._data.join(";")]);
         return x;
     };
 })();
