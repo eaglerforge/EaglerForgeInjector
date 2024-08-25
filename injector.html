@@ -199,6 +199,7 @@
       var modapi_preinit = `globalThis.ModAPI ||= {};
 ModAPI.hooks ||= {};
 ModAPI.hooks._rippedData ||= [];
+ModAPI.hooks._teavmMethods ||= {};
 ModAPI.hooks._rippedConstructors ||= {};
 ModAPI.hooks.methods ||= {};
 ModAPI.hooks._rippedMethodTypeMap ||= {};
@@ -287,7 +288,7 @@ var main;(function(){`
                       return ModAPI.hooks.methods[\`${fullName}\`].apply(this, args);
                   }
                   ModAPI.hooks._rippedMethodTypeMap[\`${fullName}\`] = \`${
-                  match.includes("function " + fullName + "($this")
+                  match.includes("($this")
                     ? "instance" //Todo: fix static/instance detection
                     : "static"
                 }\`;
@@ -298,8 +299,9 @@ var main;(function(){`
             }
           );
           var staticVariables = [...patchedFile.matchAll(/var \S+?_\S+?_\S+? = null;/gm)].flatMap(x => {return x[0]});
-          patchedFile = patchedFile.replaceAll(/var \S+?_\S+? = \$rt_classWithoutFields\(\);/gm, function (match) {
-            var prefix = match.replace(" = $rt_classWithoutFields();", "");
+          //Todo: add support for static properties on classes with constructors like this: function nmcg_GuiMainMenu() {
+          patchedFile = patchedFile.replaceAll(/var \S+?_\S+? = \$rt_classWithoutFields\(\S*?\);/gm, function (match) {
+            var prefix = match.replaceAll(/ = \$rt_classWithoutFields\(\S*?\);/gm, "");
             var entries = [];
             staticVariables.forEach(entry => {
               if (entry.startsWith(prefix)) {
@@ -343,6 +345,12 @@ var main;(function(){`
                 }
               });`;
               return match + proxy;
+          });
+          patchedFile = patchedFile.replaceAll(/function \$rt_\S+?\(/gm, (match)=>{
+            var name = match.replace("function ", "");
+            name = name.substring(0, name.length - 1);
+            return `ModAPI.hooks._teavmMethods[\`${name}\`]=${name};
+            ` + match;
           });
           patchedFile = patchedFile.replaceAll(/main\(\);\s*?}/gm, (match) => {
             return match.replace("main();", "main();ModAPI.hooks._postInit();");
@@ -395,68 +403,71 @@ var main;(function(){`
     ModAPI.version = "v2.0";
     ModAPI.flavour = "injector";
     ModAPI.credits = ["ZXMushroom63", "radmanplays", "OtterCodes101", "TheIdiotPlays"];
-    ModAPI.hooks._rippedConstructorKeys = Object.keys(ModAPI.hooks._rippedConstructors);
-    ModAPI.hooks._rippedMethodKeys = Object.keys(ModAPI.hooks._rippedMethodTypeMap);
-    ModAPI.hooks._rippedData.forEach(block => {
-        block.forEach(item => {
-            if (typeof item === "function") {
-                if (!item.$meta || typeof item.$meta.name !== "string") {
-                    return;
-                }
-
-                var classId = item.$meta.name;
-                var compiledName = ModAPI.util.getCompiledNameFromPackage(classId);
-                
-
-                if (!ModAPI.hooks._classMap[classId]) {
-                    ModAPI.hooks._classMap[classId] = {
-                        "name": classId.split(".")[classId.split(".").length - 1],
-                        "id": classId,
-                        "binaryName": item.$meta.binaryName,
-                        "constructors": [],
-                        "methods": {},
-                        "staticMethods": {},
-                        "staticVariables": {},
-                        "staticVariableNames": [],
-                        "class": item,
-                        "compiledName": compiledName
+    ModAPI.hooks.regenerateClassMap = function () {
+        ModAPI.hooks._rippedConstructorKeys = Object.keys(ModAPI.hooks._rippedConstructors);
+        ModAPI.hooks._rippedMethodKeys = Object.keys(ModAPI.hooks._rippedMethodTypeMap);
+        ModAPI.hooks._rippedData.forEach(block => {
+            block.forEach(item => {
+                if (typeof item === "function") {
+                    if (!item.$meta || typeof item.$meta.name !== "string") {
+                        return;
                     }
-                }
-                if (typeof item.$meta.superclass === "function" && item.$meta.superclass.$meta) {
-                    ModAPI.hooks._classMap[classId].superclass = item.$meta.superclass.$meta.name;
-                }
-                ModAPI.hooks._classMap[classId].staticVariableNames = ModAPI.hooks._rippedStaticIndexer[compiledName];
-                ModAPI.hooks._classMap[classId].staticVariables = ModAPI.hooks._rippedStaticProperties[compiledName];
-                if (item["$$constructor$$"]) {
-                    //Class does not have any hand written constructors
-                    //Eg: class MyClass {}
-                    ModAPI.hooks._classMap[classId].constructors.push(item["$$constructor$$"]);
-                } else {
-                    //Class has hand written constructors, we need to search in the stash
-                    ModAPI.hooks._rippedConstructorKeys.forEach(constructor => {
-                        if (constructor.startsWith(compiledName + "__init_") && !constructor.includes("$lambda$")) {
-                            ModAPI.hooks._classMap[classId].constructors.push(ModAPI.hooks._rippedConstructors[constructor]);
+
+                    var classId = item.$meta.name;
+                    var compiledName = ModAPI.util.getCompiledNameFromPackage(classId);
+
+
+                    if (!ModAPI.hooks._classMap[classId]) {
+                        ModAPI.hooks._classMap[classId] = {
+                            "name": classId.split(".")[classId.split(".").length - 1],
+                            "id": classId,
+                            "binaryName": item.$meta.binaryName,
+                            "constructors": [],
+                            "methods": {},
+                            "staticMethods": {},
+                            "staticVariables": {},
+                            "staticVariableNames": [],
+                            "class": item,
+                            "compiledName": compiledName
+                        }
+                    }
+                    if (typeof item.$meta.superclass === "function" && item.$meta.superclass.$meta) {
+                        ModAPI.hooks._classMap[classId].superclass = item.$meta.superclass.$meta.name;
+                    }
+                    ModAPI.hooks._classMap[classId].staticVariableNames = ModAPI.hooks._rippedStaticIndexer[compiledName];
+                    ModAPI.hooks._classMap[classId].staticVariables = ModAPI.hooks._rippedStaticProperties[compiledName];
+                    if (item["$$constructor$$"]) {
+                        //Class does not have any hand written constructors
+                        //Eg: class MyClass {}
+                        ModAPI.hooks._classMap[classId].constructors.push(item["$$constructor$$"]);
+                    } else {
+                        //Class has hand written constructors, we need to search in the stash
+                        ModAPI.hooks._rippedConstructorKeys.forEach(constructor => {
+                            if (constructor.startsWith(compiledName + "__init_") && !constructor.includes("$lambda$")) {
+                                ModAPI.hooks._classMap[classId].constructors.push(ModAPI.hooks._rippedConstructors[constructor]);
+                            }
+                        });
+                    }
+                    ModAPI.hooks._rippedMethodKeys.forEach((method) => {
+                        if (method.startsWith(compiledName + "_") && !method.includes("$lambda$")) {
+                            var targetMethodMap = ModAPI.hooks._classMap[classId].methods;
+                            if (ModAPI.hooks._rippedMethodTypeMap[method] === "static") {
+                                targetMethodMap = ModAPI.hooks._classMap[classId].staticMethods;
+                            }
+                            targetMethodMap[method.replace(compiledName + "_", "")] = {
+                                method: ModAPI.hooks.methods[method],
+                                proxiedMethod: function (...args) {
+                                    return ModAPI.hooks.methods[method].apply(this, args);
+                                },
+                                methodName: method
+                            };
                         }
                     });
                 }
-                ModAPI.hooks._rippedMethodKeys.forEach((method) => {
-                    if (method.startsWith(compiledName + "_") && !method.includes("$lambda$")) {
-                        var targetMethodMap = ModAPI.hooks._classMap[classId].methods;
-                        if (ModAPI.hooks._rippedMethodTypeMap[method] === "static") {
-                            targetMethodMap = ModAPI.hooks._classMap[classId].staticMethods;
-                        }
-                        targetMethodMap[method] = {
-                            method: ModAPI.hooks.methods[method],
-                            proxiedMethod: function (...args) {
-                                return ModAPI.hooks.methods[method].apply(this, args);
-                            },
-                            methodName: method
-                        };
-                    }
-                });
-            }
+            });
         });
-    });
+    }
+    ModAPI.hooks.regenerateClassMap();
     var reloadDeprecationWarnings = 0;
     const TeaVM_to_BaseData_ProxyConf = {
         get(target, prop, receiver) {
@@ -496,7 +507,7 @@ var main;(function(){`
             return outputValue;
         },
         set(object, prop, value) {
-            object[prop]=value;
+            object[prop] = value;
             return true;
         }
     }
@@ -609,6 +620,7 @@ var main;(function(){`
         });
     };
     ModAPI.events.newEvent("update");
+    
     ModAPI.require = function (module) {
         ModAPI.required.add(module);
     };
@@ -625,7 +637,7 @@ var main;(function(){`
             console.error(error);
         }
     }
-    
+
     ModAPI.util.stringToUint16Array = function stringToUint16Array(str) {
         const buffer = new ArrayBuffer(str.length * 2); // 2 bytes for each char
         const uint16Array = new Uint16Array(buffer);
@@ -633,13 +645,26 @@ var main;(function(){`
             uint16Array[i] = str.charCodeAt(i);
         }
         return uint16Array;
-    }   
+    }
 
-    var stringDefaultConstructor = ModAPI.hooks._classMap["java.lang.String"].constructors.filter(x => {return x.length === 0})[0];
+    var stringDefaultConstructor = ModAPI.hooks._classMap["java.lang.String"].constructors.filter(x => { return x.length === 0 })[0];
     ModAPI.util.string = ModAPI.util.str = function (string) {
         var jclString = stringDefaultConstructor();
         jclString.$characters.data = ModAPI.util.stringToUint16Array(string);
         return jclString;
+    }
+
+    ModAPI.util.setStringContent = function (jclString) {
+        jclString.$characters.data = ModAPI.util.stringToUint16Array(string);
+    }
+
+    ModAPI.util.jclStrToJsStr = function (jclString) {
+        var uint16Array = jclString.$characters.data;
+        let str = '';
+        for (let i = 0; i < uint16Array.length; i++) {
+            str += String.fromCharCode(uint16Array[i]);
+        }
+        return str;
     }
 
     ModAPI.displayToChat = function (param) {
@@ -668,12 +693,27 @@ var main;(function(){`
 
     var integratedServerStartup = ModAPI.util.getMethodFromPackage("net.lax1dude.eaglercraft.v1_8.sp.internal.ClientPlatformSingleplayer", "loadIntegratedServerSourceInline");
     //Integrated server setup has a randomised suffix on the end
-    integratedServerStartup = ModAPI.hooks._rippedMethodKeys.filter(key => {return key.startsWith(integratedServerStartup); })[0];
+    integratedServerStartup = ModAPI.hooks._rippedMethodKeys.filter(key => { return key.startsWith(integratedServerStartup); })[0];
     const integratedServerStartupMethod = ModAPI.hooks.methods[integratedServerStartup];
     ModAPI.hooks.methods[integratedServerStartup] = function (worker, bootstrap) {
         var x = integratedServerStartupMethod.apply(this, [worker, bootstrap + ";" + globalThis.modapi_postinit + ";" + ModAPI.dedicatedServer._data.join(";")]);
         return x;
     };
+
+    ModAPI.events.newEvent("sendchatmessage");
+    const sendChatMessageMethodName = ModAPI.util.getMethodFromPackage("net.minecraft.client.entity.EntityPlayerSP", "sendChatMessage");
+    const sendChatMessage = ModAPI.hooks.methods[sendChatMessageMethodName];
+    ModAPI.hooks.methods[sendChatMessageMethodName] = function ($this, $message) {
+        var data = {
+            preventDefault: false,
+            message: ModAPI.util.jclStrToJsStr($message)
+        }
+        ModAPI.events.callEvent("sendchatmessage", data);
+        if (data.preventDefault) {
+            return;
+        }
+        return sendChatMessage.apply(this, [$this, ModAPI.util.str(data.message) || $message]);
+    }
 })();`;
     </script>
 
