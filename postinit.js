@@ -350,4 +350,26 @@
         }
         return sendChatMessage.apply(this, [$this, ModAPI.util.str(data.message) || $message]);
     }
+
+    ModAPI.events.newEvent("tick");
+    const serverTickMethodName = ModAPI.util.getMethodFromPackage("net.minecraft.server.MinecraftServer", "tick");
+    const serverTickMethod = ModAPI.hooks.methods[serverTickMethodName];
+    ModAPI.hooks.methods[serverTickMethodName] = function ($this) {
+        var data = { preventDefault: false }
+        ModAPI.events.callEvent("tick", data);
+        if (data.preventDefault) {
+            return;
+        }
+        return serverTickMethod.apply(this, [$this]);
+    }
+
+    ModAPI.events.newEvent("serverstart");
+    const serverStartMethodName = ModAPI.util.getMethodFromPackage("net.lax1dude.eaglercraft.v1_8.sp.server.EaglerMinecraftServer", "startServer");
+    const serverStartMethod = ModAPI.hooks.methods[serverStartMethodName];
+    ModAPI.hooks.methods[serverStartMethodName] = function ($this) {
+        var x = serverStartMethod.apply(this, [$this]);
+        ModAPI.server = ModAPI.serverInstance = new Proxy($this, ModAPI.util.TeaVM_to_Recursive_BaseData_ProxyConf);
+        ModAPI.events.callEvent("serverstart", {});
+        return x;
+    }
 })();
