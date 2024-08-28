@@ -116,6 +116,11 @@
     var reloadDeprecationWarnings = 0;
     const TeaVM_to_BaseData_ProxyConf = {
         get(target, prop, receiver) {
+            if (prop === "getRef") {
+                return function () {
+                    return target;
+                }
+            }
             if (prop === "reload") {
                 return function () {
                     if (reloadDeprecationWarnings < 10) {
@@ -126,6 +131,9 @@
             }
 
             var outProp = "$" + prop;
+            if (target["__modapi_noprefix__"]) {
+                outProp = prop;
+            }
             var outputValue = Reflect.get(target, outProp, receiver);
             if (outputValue && typeof outputValue === "object" && Array.isArray(outputValue.data) && typeof outputValue.type === "function") {
                 return outputValue.data;
@@ -139,6 +147,9 @@
         },
         set(object, prop, value) {
             var outProp = "$" + prop;
+            if (target["__modapi_noprefix__"]) {
+                outProp = prop;
+            }
             object[outProp] = value;
             return true;
         },
@@ -149,6 +160,11 @@
             if (outputValue && typeof outputValue === "object" && !Array.isArray(outputValue)) {
                 return new Proxy(outputValue, TeaVM_to_Recursive_BaseData_ProxyConf);
             }
+            if (prop === "getRef") {
+                return function () {
+                    return target;
+                }
+            }
             return outputValue;
         },
         set(object, prop, value) {
@@ -158,6 +174,11 @@
     }
     const TeaVM_to_Recursive_BaseData_ProxyConf = {
         get(target, prop, receiver) {
+            if (prop === "getRef") {
+                return function () {
+                    return target;
+                }
+            }
             if (prop === "reload") {
                 return function () {
                     if (reloadDeprecationWarnings < 10) {
@@ -168,6 +189,9 @@
             }
 
             var outProp = "$" + prop;
+            if (target["__modapi_noprefix__"]) {
+                outProp = prop;
+            }
             var outputValue = Reflect.get(target, outProp, receiver);
             if (outputValue && typeof outputValue === "object" && Array.isArray(outputValue.data) && typeof outputValue.type === "function") {
                 return new Proxy(outputValue.data, TeaVMArray_To_Recursive_BaseData_ProxyConf);
@@ -184,6 +208,9 @@
         },
         set(object, prop, value) {
             var outProp = "$" + prop;
+            if (target["__modapi_noprefix__"]) {
+                outProp = prop;
+            }
             object[outProp] = value;
             return true;
         },
