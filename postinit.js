@@ -5,10 +5,19 @@
     globalThis.PluginAPI ||= ModAPI;
     ModAPI.mcinstance ||= {};
     ModAPI.javaClient ||= {};
+    ModAPI.server = ModAPI.serverInstance = null;
     ModAPI.dedicatedServer ||= {};
     ModAPI.dedicatedServer._data ||= [];
+    ModAPI.dedicatedServer._wasUsed = false;
     ModAPI.dedicatedServer.appendCode = function (code) {
-        ModAPI.dedicatedServer._data.push(code);
+        if (ModAPI.dedicatedServer._wasUsed) {
+            return console.warn("The dedicated server has already launched, ModAPI.dedicatedServer.appendCode() is useless.");
+        }
+        if (typeof code === "function") {
+            ModAPI.dedicatedServer._data.push("(" + code.toString() + ")()");
+        } else if (typeof code === "string") {
+            ModAPI.dedicatedServer._data.push(code);
+        }
     }
     ModAPI.util ||= {};
     ModAPI.util.getMethodFromPackage = function (classId, methodName) {
@@ -283,25 +292,21 @@
         return uint16Array;
     }
 
-    var stringDefaultConstructor = ModAPI.hooks._classMap["java.lang.String"].constructors.filter(x => { return x.length === 0 })[0];
-    ModAPI.util.string = ModAPI.util.str = function (string) {
-        var jclString = stringDefaultConstructor();
-        jclString.$characters.data = ModAPI.util.stringToUint16Array(string);
-        return jclString;
+    //Overrides $rt_resuming, $rt_suspending, $rt_currentThread. Experimental, but should be used if call stack leaks occur as a result of running internal code.
+    ModAPI.freezeCallstack = function () {
+        ModAPI.hooks.freezeCallstack = true;
+    }
+    ModAPI.unfreezeCallstack = function () {
+        ModAPI.hooks.freezeCallstack = false;
     }
 
-    ModAPI.util.setStringContent = function (jclString) {
+    ModAPI.util.string = ModAPI.util.str = ModAPI.hooks._teavm.$rt_str;
+
+    ModAPI.util.setStringContent = function (jclString, string) {
         jclString.$characters.data = ModAPI.util.stringToUint16Array(string);
     }
 
-    ModAPI.util.jclStrToJsStr = function (jclString) {
-        var uint16Array = jclString.$characters.data;
-        let str = '';
-        for (let i = 0; i < uint16Array.length; i++) {
-            str += String.fromCharCode(uint16Array[i]);
-        }
-        return str;
-    }
+    ModAPI.util.jclStrToJsStr = ModAPI.util.unstr = ModAPI.util.unstring = ModAPI.util.ustr = ModAPI.hooks._teavm.$rt_ustr;
 
     ModAPI.displayToChat = function (param) {
         var v = typeof param === "object" ? param.msg : (param + "");
@@ -333,6 +338,8 @@
     const integratedServerStartupMethod = ModAPI.hooks.methods[integratedServerStartup];
     ModAPI.hooks.methods[integratedServerStartup] = function (worker, bootstrap) {
         var x = integratedServerStartupMethod.apply(this, [worker, bootstrap + ";" + globalThis.modapi_postinit + ";" + ModAPI.dedicatedServer._data.join(";")]);
+        ModAPI.dedicatedServer._data = [];
+        ModAPI.dedicatedServer._wasUsed = true;
         return x;
     };
 
@@ -348,7 +355,10 @@
         if (data.preventDefault) {
             return;
         }
-        return sendChatMessage.apply(this, [$this, ModAPI.util.str(data.message) || $message]);
+        if (typeof data.message === "string") {
+            ModAPI.util.setStringContent($message, data.message)
+        }
+        return sendChatMessage.apply(this, [$this, $message]);
     }
 
     ModAPI.events.newEvent("tick");
@@ -369,7 +379,18 @@
     ModAPI.hooks.methods[serverStartMethodName] = function ($this) {
         var x = serverStartMethod.apply(this, [$this]);
         ModAPI.server = ModAPI.serverInstance = new Proxy($this, ModAPI.util.TeaVM_to_Recursive_BaseData_ProxyConf);
+        ModAPI.rawServer = $this;
         ModAPI.events.callEvent("serverstart", {});
+        return x;
+    }
+
+    ModAPI.events.newEvent("serverstop");
+    const serverStopMethodName = ModAPI.util.getMethodFromPackage("net.minecraft.server.MinecraftServer", "stopServer");
+    const serverStopMethod = ModAPI.hooks.methods[serverStopMethodName];
+    ModAPI.hooks.methods[serverStopMethodName] = function ($this) {
+        var x = serverStopMethod.apply(this, [$this]);
+        ModAPI.server = ModAPI.serverInstance = null;
+        ModAPI.events.callEvent("serverstop", {});
         return x;
     }
 })();
