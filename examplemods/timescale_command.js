@@ -12,13 +12,13 @@
                 }
                 PluginAPI.javaClient.$timer.$timerSpeed = speed;
             }
-            PluginAPI.displayToChat("[Timescale] Set world timescale to " + speed + ".");
+            PluginAPI.displayToChat("[Timescale] Set world timescale to " + speed.toFixed(2) + ".");
         }
     });
     PluginAPI.dedicatedServer.appendCode(function () {
         globalThis.timeScale = 1n;
         globalThis.timeScaleDividing = false;
-        PluginAPI.addEventListener("handleslashcommand", (event) => {
+        PluginAPI.addEventListener("processcommand", (event) => {
             if (event.command.toLowerCase().startsWith("/timescale")) {
                 var speed = parseFloat(event.command.split(" ")[1]);
                 if (!speed) {
@@ -45,5 +45,4 @@
             }
         };
     });
-
 })();
