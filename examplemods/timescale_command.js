@@ -33,6 +33,10 @@
                         globalThis.timeScale = BigInt(Math.round(speed));
                     }
                 }
+                if (ModAPI.server) {
+                    console.log(ModAPI.server);
+                    ModAPI.server.currentTime = PluginAPI.hooks.methods.nms_MinecraftServer_getCurrentTimeMillis();
+                }
                 event.preventDefault = true;
             }
         });
