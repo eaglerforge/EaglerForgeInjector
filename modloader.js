@@ -5,29 +5,48 @@ function promisifyIDBRequest(request) {
     });
 }
 
+async function getDatabase() {
+    const dbRequest = indexedDB.open("EF_MODS");
+    const db = await promisifyIDBRequest(dbRequest);
+
+    if (!db.objectStoreNames.contains("filesystem")) {
+        db.close();
+        const version = db.version + 1;
+        const upgradeRequest = indexedDB.open("EF_MODS", version);
+        upgradeRequest.onupgradeneeded = (event) => {
+            const upgradedDb = event.target.result;
+            upgradedDb.createObjectStore("filesystem");
+        };
+        return promisifyIDBRequest(upgradeRequest);
+    }
+
+    return db;
+}
+
 async function getMods() {
-    const db = await promisifyIDBRequest(indexedDB.open("EF_MODS"));
-    const transaction = db.transaction(["filesystem"], "readwrite");
+    const db = await getDatabase();
+    const transaction = db.transaction(["filesystem"], "readonly");
     const objectStore = transaction.objectStore("filesystem");
-    const object = await promisifyIDBRequest(objectStore.get(["mods.txt"]));
+    const object = await promisifyIDBRequest(objectStore.get("mods.txt"));
     const decoder = new TextDecoder("utf-8");
-    return object ? decoder.decode(object.data).split("|") : [];
+    return object ? decoder.decode(object).split("|") : [];
 }
 
 async function saveMods(mods) {
-    const db = await promisifyIDBRequest(indexedDB.open("EF_MODS"));
+    const db = await getDatabase();
     const transaction = db.transaction(["filesystem"], "readwrite");
     const objectStore = transaction.objectStore("filesystem");
     const encoder = new TextEncoder();
     const modsData = encoder.encode(mods.join("|"));
     const modsBlob = new Blob([modsData], { type: "text/plain" });
-    await promisifyIDBRequest(objectStore.put({ data: modsBlob }, ["mods.txt"]));
+    await promisifyIDBRequest(objectStore.put(modsBlob, "mods.txt"));
 }
 
 async function addMod(mod) {
     const mods = await getMods();
     mods.push(mod);
     await saveMods(mods);
+    console.log("Mod added: " + mod);
 }
 
 async function removeMod(index) {
@@ -35,11 +54,15 @@ async function removeMod(index) {
     if (index >= 0 && index < mods.length) {
         const removedMod = mods.splice(index, 1);
         await saveMods(mods);
+        console.log("Mod removed: " + removedMod);
+    } else {
+        console.log("Invalid index");
     }
 }
 
 async function resetMods() {
     await saveMods([]);
+    console.log("Mods reset");
 }
 
 window.modLoader = async function modLoader(modsArr) {
