@@ -1,15 +1,6 @@
-(() => {
+globalThis.modapi_postinit = `(() => {
     //EaglerForge post initialization code.
     //This script cannot contain backticks, escape characters, or backslashes in order to inject into the dedicated server code.
-    var startedModLoader = false;
-
-    function startModLoader() {
-        if (!startedModLoader) {
-            startedModLoader = true;
-            modLoader([]);
-        }
-    }
-
     ModAPI.hooks._classMap = {};
     globalThis.PluginAPI ||= ModAPI;
     ModAPI.mcinstance ||= {};
@@ -303,7 +294,7 @@
         }
     };
     ModAPI.events.newEvent = function newEvent(name, side) {
-        console.log("[ModAPI] Registered " + side + " event: " + name);
+        console.log("[ModAPI] Registered "+side+" event: "+name);
         ModAPI.events.types.push(name);
     };
 
@@ -399,9 +390,6 @@
         //args[0] means $this (ie: minecraft instance).
         ModAPI.mcinstance = ModAPI.javaClient = args[0];
         ModAPI.settings = new Proxy(ModAPI.mcinstance.$gameSettings, TeaVM_to_Recursive_BaseData_ProxyConf);
-
-        startModLoader();
-
         return x;
     };
 
@@ -509,33 +497,4 @@
 
     ModAPI.items = new Proxy(ModAPI.hooks._classMap[ModAPI.util.getCompiledName("net.minecraft.init.Items")].staticVariables, StaticProps_ProxyConf);
     ModAPI.blocks = new Proxy(ModAPI.hooks._classMap[ModAPI.util.getCompiledName("net.minecraft.init.Blocks")].staticVariables, StaticProps_ProxyConf);
-
-
-    const originalOptionsInit = ModAPI.hooks.methods[ModAPI.util.getMethodFromPackage("net.minecraft.client.gui.GuiOptions", "initGui")];
-    ModAPI.hooks.methods[ModAPI.util.getMethodFromPackage("net.minecraft.client.gui.GuiOptions", "initGui")] = function (...args) {
-        var x = originalOptionsInit.apply(this, args);
-
-        //NOT A BUG DO NOT FIX
-        var msg = Math.random() < 0.05 ? "Plugins" : "Mods";
-
-        // Find the right constructor. (int id, int x, int y, int width, int height, String buttonText);
-        var btnConstructor = ModAPI.hooks._classMap['nmcg_GuiButton'].constructors.filter(c => {return c.length === 6})[0];
-        var btn = btnConstructor(9635329, 0, args[0].$height8 - 21, 100, 20, ModAPI.util.str(msg));
-        args[0].$buttonList.$add(btn);
-
-        return x;
-    }
-
-    const originalOptionsAction = ModAPI.hooks.methods[ModAPI.util.getMethodFromPackage("net.minecraft.client.gui.GuiOptions", "actionPerformed")];
-    ModAPI.hooks.methods[ModAPI.util.getMethodFromPackage("net.minecraft.client.gui.GuiOptions", "actionPerformed")] = function (...args) {
-        if (args[1] && args[1].$id12 === 9635329) {
-            if (typeof window.modapi_displayModGui === "function") {
-                window.modapi_displayModGui();
-            } else {
-                alert("[ModAPI] Mod Manager GUI does not exist!")
-            }
-        }
-        var x = originalOptionsAction.apply(this, args);
-        return x;
-    }
-})();
+})();`;

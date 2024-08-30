@@ -1,0 +1,1 @@
+globalThis.modapi_guikit = ``;
