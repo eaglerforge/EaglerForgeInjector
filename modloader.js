@@ -92,7 +92,7 @@ window.modLoader = async function modLoader(modsArr = []) {
         console.log("[EaglerML] Searching in iDB");
         try {
             var idbMods = await getMods();
-            modsArr.concat(idbMods
+            modsArr = modsArr.concat(idbMods
                 .filter(x => { return x && x.length > 0 })
                 .flatMap(x => { if (x.startsWith("web@")) { return x.replace("web@", "") } return x })
             );
@@ -133,7 +133,6 @@ window.modLoader = async function modLoader(modsArr = []) {
             console.log("[EaglerML] Loading " + currentMod + " via method B.");
             var script = document.createElement("script");
             script.src = currentMod;
-            script.setAttribute("data-mod", currentMod);
             script.setAttribute("data-isMod", true);
             script.onerror = () => {
                 console.log(
@@ -175,7 +174,6 @@ window.modLoader = async function modLoader(modsArr = []) {
                     methodB(currentMod);
                     return;
                 }
-                script.setAttribute("data-mod", currentMod);
                 script.setAttribute("data-isMod", true);
                 script.onerror = () => {
                     console.log(
