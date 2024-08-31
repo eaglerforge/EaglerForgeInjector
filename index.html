@@ -5,30 +5,54 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>EaglerForge Injector</title>
     <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css" rel="stylesheet">
     <style>
-      button {
-        border: 2px solid black;
-        border-radius: 8px;
-        background-color: transparent;
-        padding: 8px 10px;
-      }
-      button:active {
-        border: 2px solid black;
-        border-radius: 8px;
-        background-color: rgba(0, 0, 0, 0.2);
-        padding: 8px 10px;
-      }
+    body {
+        background-color: #2b2b2b;
+        color: #ffffff;
+    }
+    .container {
+        text-align: center;
+        margin-top: 50px;
+    }
+
+    .github-button-container {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+    }
+    
+    .github-button-container a.btn {
+        color: #ffffff;
+        border-color: #ffffff;
+    }
+    
+    .github-button-container a.btn:hover {
+        background-color: #ffffff;
+        color: #000000;
+    }
     </style>
   </head>
   <body>
+<div class="container">
     <h1>EaglerForge Injector</h1>
-    <h4>
+    <div class="github-button-container">
+      <a href="https://github.com/eaglerforge/EaglerForgeInjector" class="btn btn-default" target="_blank">
+        <i class="fab fa-github"></i> GitHub
+      </a>
+    </div>
+    <h6>
       Adds ModAPI with more functionality (adds hooking into functions, exposes
       all classes, etc) to unminified unobfuscated EaglercraftX builds.
-    </h4>
+    </h6>
     <br />
-    <input type="file" accept=".html,.js" /><br /><br />
-    <button id="giveme">Make modded build</button>
+    <div class="custom-file mb-3">
+    <input class="custom-file-input" type="file" id="htmlFile" accept=".html,.js" />
+    <label class="custom-file-label" for="htmlFile">Choose .js file...</label>
+<br /><br />
+    <button class="btn btn-primary" id="giveme">Make modded build</button>
+    </div>
+</div>
 
     <script src="filesaver.min.js"></script>
 
