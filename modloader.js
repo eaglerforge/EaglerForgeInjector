@@ -28,8 +28,7 @@ async function getMods() {
     const transaction = db.transaction(["filesystem"], "readonly");
     const objectStore = transaction.objectStore("filesystem");
     const object = await promisifyIDBRequest(objectStore.get("mods.txt"));
-    const decoder = new TextDecoder("utf-8");
-    return object ? decoder.decode(object).split("|") : [];
+    return object ? (await object.text()).split("|") : [];
 }
 
 async function saveMods(mods) {
@@ -46,17 +45,13 @@ async function addMod(mod) {
     const mods = await getMods();
     mods.push(mod);
     await saveMods(mods);
-    console.log("Mod added: " + mod);
 }
 
 async function removeMod(index) {
     const mods = await getMods();
     if (index >= 0 && index < mods.length) {
-        const removedMod = mods.splice(index, 1);
+        mods.splice(index, 1);
         await saveMods(mods);
-        console.log("Mod removed: " + removedMod);
-    } else {
-        console.log("Invalid index");
     }
 }
 
@@ -65,7 +60,7 @@ async function resetMods() {
     console.log("Mods reset");
 }
 
-window.modLoader = async function modLoader(modsArr) {
+window.modLoader = async function modLoader(modsArr = []) {
     if (!window.eaglerMLoaderMainRun) {
         var searchParams = new URLSearchParams(location.search);
         searchParams.getAll("mod").forEach((modToAdd) => {
@@ -94,52 +89,13 @@ window.modLoader = async function modLoader(modsArr) {
             });
         }
 
-        // Reverse engineer eaglercraftx virtual file system to gain external access to mod store WITHOUT messing with java teavm nonsense
-        var StoreId = "EF_MODS";
-        var decoder = new TextDecoder("utf-8");
         console.log("[EaglerML] Searching in iDB");
         try {
-            var database = await promisifyIDBRequest(indexedDB.open(StoreId));
-            var storeIsValid = !!database.objectStoreNames[0];
-            if (!storeIsValid) {
-                throw new Error("Invalid object store");
-            }
-            var key = database.objectStoreNames[0].length === 0 ? "filesystem" : database.objectStoreNames[0];
-            var transaction = database.transaction([key], "readwrite");
-            var objectStore = transaction.objectStore("filesystem");
-            var object = await promisifyIDBRequest(objectStore.get(["mods.txt"]));
-            if (!object) {
-                throw new Error("No mods.txt found");
-            }
-            var mods = decoder.decode(object.data);
-            if (mods.length === 0) {
-                throw new Error("No mods found");
-            }
-            var modsArr = mods.split("|");
-            for (var modFilePath of modsArr) {
-                if (modFilePath.length === 0) {
-                    continue;
-                }
-                var modUrl = null;
-                if (modFilePath.startsWith("web@")) {
-                    modUrl = modFilePath.replace("web@", "");
-                } else {
-                    var modFile = await promisifyIDBRequest(objectStore.get(["mods/" + modFilePath]));
-                    if (!modFile) {
-                        continue;
-                    }
-                    var modData = decoder.decode(modFile.data);
-                    var modBlob = new Blob([modData], {
-                        type: 'text/javascript'
-                    });
-                    modUrl = URL.createObjectURL(modBlob);
-                }
-                if (!modUrl) {
-                    continue;
-                }
-                modsArr.push(modUrl);
-                console.log("Loaded iDB mod: " + modFilePath);
-            }
+            var idbMods = await getMods();
+            modsArr.concat(idbMods
+                .filter(x => { return x && x.length > 0 })
+                .flatMap(x => { if (x.startsWith("web@")) { return x.replace("web@", "") } return x })
+            );
         } catch (error) {
             console.error(error);
         }

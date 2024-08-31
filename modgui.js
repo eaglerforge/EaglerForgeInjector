@@ -1,15 +1,15 @@
 // ModAPI GUI made by TheIdiotPlays
 // https://github.com/TheIdiotPlays
-(()=>{
-    var splashes = [
-         "Now with A.I.D.S (automatically injected dedicated server)",
-         "Only causes death 90% of the time!",
-         "HTML is better.", 
-         "https://github.com/EaglerForge",
-         "hey you should check out https://github.com/ZXMushroom63/scratch-gui",
-         "99% of people stop gambling before they win big."
-        ];
-    var gui = `<div id="modapi_gui_container">
+(() => {
+  var splashes = [
+    "Now with A.I.D.S (automatically injected dedicated server)",
+    "Only causes death 90% of the time!",
+    "HTML is better.",
+    "https://github.com/EaglerForge",
+    "hey you should check out https://github.com/ZXMushroom63/scratch-gui",
+    "99% of people stop gambling before they win big."
+  ];
+  var gui = `<div id="modapi_gui_container">
       <header>
         <h1 class="title">EaglerForge Mod Manager</h1>
         <h4>
@@ -158,38 +158,85 @@
         }
       </style>
     </div>`;
-    window.modapi_displayModGui = async function () {
-        if (!getMods) {
-            return;
-        }
-        if (document.querySelector("#modapi_gui_container")) {
-            document.querySelector("#modapi_gui_container").remove();
-        }
-        var element = document.createElement("div");
-        
-        element.innerHTML = gui.replace("{splash_msg}", splashes[Math.floor(Math.random() * splashes.length)]);
-
-        document.body.appendChild(element);
-
-        var modsList = await getMods();
-        var tbody = document.querySelector("#modapi_gui_container .modTable tbody");
-        tbody.innerHTML = "";
-        modsList.forEach((modtxt, i) => {
-            var tr = document.createElement("tr");
-            var mod = document.createElement("td");
-            mod.innerText = modtxt;
-            var spacer = document.createElement("td");
-            spacer.appendChild("nothing");
-            var controls = document.createElement("td");
-
-            var button = document.createElement("button");
-            button.classList.add("button");
-            controls.appendChild(button);
-            tr.appendChild(mod);
-            tr.appendChild(spacer);
-            tr.appendChild(button);
-            tbody.appendChild(tr);
-        });
-        
+  async function fileToDataURI(file) {
+    return new Promise((res, rej) => {
+      var fr = new FileReader();
+      fr.addEventListener("error", (e) => { rej(e); });
+      fr.addEventListener("load", (e) => { res(fr.result); });
+      fr.readAsDataURL(file);
+    });
+  }
+  window.modapi_displayModGui = async function () {
+    if (!getMods) {
+      return;
     }
+    if (document.querySelector("#modapi_gui_container")) {
+      document.querySelector("#modapi_gui_container").remove();
+    }
+    var element = document.createElement("div");
+
+    element.innerHTML = gui.replace("{splash_msg}", splashes[Math.floor(Math.random() * splashes.length)]);
+
+    document.body.appendChild(element);
+
+    var modsList = await getMods();
+    var tbody = document.querySelector("#modapi_gui_container .modTable tbody");
+    tbody.innerHTML = "";
+    modsList.forEach((modtxt, i) => {
+      if (!modtxt) { return }
+      var tr = document.createElement("tr");
+      var mod = document.createElement("td");
+      if (modtxt.length > 125) {
+        try {
+          mod.innerText = modtxt.match(/data:text\/\S+?;fs=\S+;/m)[0]
+        } catch (error) {
+          mod.innerText = "Unknown Mod.";
+        }
+      } else { mod.innerText = modtxt; }
+      var spacer = document.createElement("td");
+      spacer.classList.add("nothing");
+      var controls = document.createElement("td");
+
+      var button = document.createElement("button");
+      button.innerText = "Delete";
+      button.addEventListener("click", async () => {
+        await removeMod(i);
+        window.modapi_displayModGui();
+      });
+      button.classList.add("button");
+      controls.appendChild(button);
+      tr.appendChild(mod);
+      tr.appendChild(spacer);
+      tr.appendChild(button);
+      tbody.appendChild(tr);
+    });
+  }
+  window.modapi_clearmods = async () => {
+    await resetMods();
+    window.modapi_displayModGui();
+  }
+  window.modapi_addmod = async () => {
+    var mod = window.prompt("Paste in the URL of the mod you wish to add: ");
+    if (!mod || mod.length === 0) {
+      return;
+    }
+    await addMod("web@" + mod);
+    window.modapi_displayModGui();
+  }
+  window.modapi_uploadmod = async () => {
+    var f = document.createElement("input");
+    f.type = "file";
+    f.accept = "text/javascript";
+    f.multiple = true;
+    f.addEventListener("input", async () => {
+      if (f.files.length < 1) {
+        return;
+      }
+      for (let i = 0; i < f.files.length; i++) {
+        await addMod("web@" + (await fileToDataURI(f.files[i])).replaceAll(";base64", ";fs=" + f.files[i].name + ";base64"));
+      }
+      window.modapi_displayModGui();
+    });
+    f.click();
+  }
 })();
