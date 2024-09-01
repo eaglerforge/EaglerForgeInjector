@@ -398,6 +398,14 @@ globalThis.modapi_postinit = `(() => {
         ModAPI.hooks.methods["nmcg_GuiNewChat_printChatMessage"](ModAPI.javaClient.$ingameGUI.$persistantChatGUI, ModAPI.hooks._classMap[ModAPI.util.getCompiledName("net.minecraft.util.ChatComponentText")].constructors[0](jclString));
     }
 
+    ModAPI.clickMouse = function () {
+        ModAPI.hooks.methods["nmc_Minecraft_clickMouse"](ModAPI.javaClient);
+    }
+
+    ModAPI.rightClickMouse = function () {
+        ModAPI.hooks.methods["nmc_Minecraft_rightClickMouse"](ModAPI.javaClient);
+    }
+
     const updateMethodName = ModAPI.util.getMethodFromPackage("net.minecraft.client.entity.EntityPlayerSP", "onUpdate");
     const originalUpdate = ModAPI.hooks.methods[updateMethodName];
     ModAPI.hooks.methods[updateMethodName] = function (...args) {
