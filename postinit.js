@@ -14,6 +14,7 @@
     globalThis.PluginAPI ||= ModAPI;
     ModAPI.mcinstance ||= {};
     ModAPI.javaClient ||= {};
+    ModAPI.reflect ||= {};
     ModAPI.server = ModAPI.serverInstance = null;
     ModAPI.dedicatedServer ||= {};
     ModAPI.dedicatedServer._data ||= [];
@@ -107,6 +108,9 @@
                     "staticVariableNames": [],
                     "class": item || null,
                     "hasMeta": !!item,
+                    "instanceOf": function (object) {
+                        return ModAPI.hooks._teavm.$rt_isInstance(object, item || null);
+                    },
                     "compiledName": compiledName
                 }
             }
@@ -145,9 +149,18 @@
                 }
             });
         });
+        ModAPI.reflect.classes = Object.values(ModAPI.hooks._classMap);
         console.log("[ModAPI] Regenerated hook classmap.");
     }
     ModAPI.hooks.regenerateClassMap();
+    ModAPI.reflect.getClassById = function (classId) {
+        return ModAPI.hooks._classMap[ModAPI.util.getCompiledName(classId)];
+    }
+    ModAPI.reflect.getClassByName = function (className) {
+        var classKeys = Object.keys(ModAPI.hooks._classMap);
+        var key = classKeys.filter(k => {k.endsWith("_" + className)})[0];
+        return key ? ModAPI.hooks._classMap[key] : null;
+    }
     var reloadDeprecationWarnings = 0;
     const TeaVM_to_BaseData_ProxyConf = {
         get(target, prop, receiver) {
