@@ -405,6 +405,8 @@ globalThis.modapi_postinit = `(() => {
         return x;
     };
 
+    ModAPI.events.newEvent("load", "client");
+
     var integratedServerStartup = ModAPI.util.getMethodFromPackage("net.lax1dude.eaglercraft.v1_8.sp.internal.ClientPlatformSingleplayer", "loadIntegratedServerSourceInline");
     //Integrated server setup has a randomised suffix on the end
     integratedServerStartup = ModAPI.hooks._rippedMethodKeys.filter(key => { return key.startsWith(integratedServerStartup); })[0];

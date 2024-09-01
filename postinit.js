@@ -416,6 +416,8 @@
         return x;
     };
 
+    ModAPI.events.newEvent("load", "client");
+
     ModAPI.events.newEvent("sendchatmessage", "client");
     const sendChatMessageMethodName = ModAPI.util.getMethodFromPackage("net.minecraft.client.entity.EntityPlayerSP", "sendChatMessage");
     const sendChatMessage = ModAPI.hooks.methods[sendChatMessageMethodName];
