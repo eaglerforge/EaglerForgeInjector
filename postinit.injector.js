@@ -14,6 +14,7 @@ globalThis.modapi_postinit = `(() => {
     globalThis.PluginAPI ||= ModAPI;
     ModAPI.mcinstance ||= {};
     ModAPI.javaClient ||= {};
+    ModAPI.reflect ||= {};
     ModAPI.server = ModAPI.serverInstance = null;
     ModAPI.dedicatedServer ||= {};
     ModAPI.dedicatedServer._data ||= [];
@@ -107,6 +108,9 @@ globalThis.modapi_postinit = `(() => {
                     "staticVariableNames": [],
                     "class": item || null,
                     "hasMeta": !!item,
+                    "instanceOf": function (object) {
+                        return ModAPI.hooks._teavm.$rt_isInstance(object, item || null);
+                    },
                     "compiledName": compiledName
                 }
             }
@@ -145,9 +149,18 @@ globalThis.modapi_postinit = `(() => {
                 }
             });
         });
+        ModAPI.reflect.classes = Object.values(ModAPI.hooks._classMap);
         console.log("[ModAPI] Regenerated hook classmap.");
     }
     ModAPI.hooks.regenerateClassMap();
+    ModAPI.reflect.getClassById = function (classId) {
+        return ModAPI.hooks._classMap[ModAPI.util.getCompiledName(classId)];
+    }
+    ModAPI.reflect.getClassByName = function (className) {
+        var classKeys = Object.keys(ModAPI.hooks._classMap);
+        var key = classKeys.filter(k => {k.endsWith("_" + className)})[0];
+        return key ? ModAPI.hooks._classMap[key] : null;
+    }
     var reloadDeprecationWarnings = 0;
     const TeaVM_to_BaseData_ProxyConf = {
         get(target, prop, receiver) {
@@ -397,6 +410,7 @@ globalThis.modapi_postinit = `(() => {
     ModAPI.hooks.methods[initMethodName] = function (...args) {
         var x = originalInit.apply(this, args);
         //args[0] means $this (ie: minecraft instance).
+        ModAPI.mc = ModAPI.minecraft = new Proxy(args[0], TeaVM_to_Recursive_BaseData_ProxyConf);
         ModAPI.mcinstance = ModAPI.javaClient = args[0];
         ModAPI.settings = new Proxy(ModAPI.mcinstance.$gameSettings, TeaVM_to_Recursive_BaseData_ProxyConf);
 
@@ -404,8 +418,6 @@ globalThis.modapi_postinit = `(() => {
 
         return x;
     };
-
-    ModAPI.events.newEvent("load", "client");
 
     var integratedServerStartup = ModAPI.util.getMethodFromPackage("net.lax1dude.eaglercraft.v1_8.sp.internal.ClientPlatformSingleplayer", "loadIntegratedServerSourceInline");
     //Integrated server setup has a randomised suffix on the end
@@ -417,6 +429,8 @@ globalThis.modapi_postinit = `(() => {
         ModAPI.dedicatedServer._wasUsed = true;
         return x;
     };
+
+    ModAPI.events.newEvent("load", "client");
 
     ModAPI.events.newEvent("sendchatmessage", "client");
     const sendChatMessageMethodName = ModAPI.util.getMethodFromPackage("net.minecraft.client.entity.EntityPlayerSP", "sendChatMessage");
@@ -453,7 +467,7 @@ globalThis.modapi_postinit = `(() => {
     const serverStartMethod = ModAPI.hooks.methods[serverStartMethodName];
     ModAPI.hooks.methods[serverStartMethodName] = function ($this) {
         var x = serverStartMethod.apply(this, [$this]);
-        ModAPI.server = ModAPI.serverInstance = new Proxy($this, ModAPI.util.TeaVM_to_Recursive_BaseData_ProxyConf);
+        ModAPI.server = new Proxy($this, ModAPI.util.TeaVM_to_Recursive_BaseData_ProxyConf);
         ModAPI.rawServer = $this;
         ModAPI.events.callEvent("serverstart", {});
         return x;
@@ -511,6 +525,8 @@ globalThis.modapi_postinit = `(() => {
 
     ModAPI.items = new Proxy(ModAPI.hooks._classMap[ModAPI.util.getCompiledName("net.minecraft.init.Items")].staticVariables, StaticProps_ProxyConf);
     ModAPI.blocks = new Proxy(ModAPI.hooks._classMap[ModAPI.util.getCompiledName("net.minecraft.init.Blocks")].staticVariables, StaticProps_ProxyConf);
+    ModAPI.materials = new Proxy(ModAPI.hooks._classMap[ModAPI.util.getCompiledName("net.minecraft.block.material.Material")].staticVariables, StaticProps_ProxyConf);
+    ModAPI.enchantments = new Proxy(ModAPI.hooks._classMap[ModAPI.util.getCompiledName("net.minecraft.enchantment.Enchantment")].staticVariables, StaticProps_ProxyConf);
 
 
     const originalOptionsInit = ModAPI.hooks.methods[ModAPI.util.getMethodFromPackage("net.minecraft.client.gui.GuiOptions", "initGui")];

@@ -410,6 +410,7 @@
     ModAPI.hooks.methods[initMethodName] = function (...args) {
         var x = originalInit.apply(this, args);
         //args[0] means $this (ie: minecraft instance).
+        ModAPI.mc = ModAPI.minecraft = new Proxy(args[0], TeaVM_to_Recursive_BaseData_ProxyConf);
         ModAPI.mcinstance = ModAPI.javaClient = args[0];
         ModAPI.settings = new Proxy(ModAPI.mcinstance.$gameSettings, TeaVM_to_Recursive_BaseData_ProxyConf);
 
@@ -466,7 +467,7 @@
     const serverStartMethod = ModAPI.hooks.methods[serverStartMethodName];
     ModAPI.hooks.methods[serverStartMethodName] = function ($this) {
         var x = serverStartMethod.apply(this, [$this]);
-        ModAPI.server = ModAPI.serverInstance = new Proxy($this, ModAPI.util.TeaVM_to_Recursive_BaseData_ProxyConf);
+        ModAPI.server = new Proxy($this, ModAPI.util.TeaVM_to_Recursive_BaseData_ProxyConf);
         ModAPI.rawServer = $this;
         ModAPI.events.callEvent("serverstart", {});
         return x;
@@ -524,6 +525,8 @@
 
     ModAPI.items = new Proxy(ModAPI.hooks._classMap[ModAPI.util.getCompiledName("net.minecraft.init.Items")].staticVariables, StaticProps_ProxyConf);
     ModAPI.blocks = new Proxy(ModAPI.hooks._classMap[ModAPI.util.getCompiledName("net.minecraft.init.Blocks")].staticVariables, StaticProps_ProxyConf);
+    ModAPI.materials = new Proxy(ModAPI.hooks._classMap[ModAPI.util.getCompiledName("net.minecraft.block.material.Material")].staticVariables, StaticProps_ProxyConf);
+    ModAPI.enchantments = new Proxy(ModAPI.hooks._classMap[ModAPI.util.getCompiledName("net.minecraft.enchantment.Enchantment")].staticVariables, StaticProps_ProxyConf);
 
 
     const originalOptionsInit = ModAPI.hooks.methods[ModAPI.util.getMethodFromPackage("net.minecraft.client.gui.GuiOptions", "initGui")];

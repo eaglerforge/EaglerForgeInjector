@@ -1,0 +1,55 @@
+# EaglerForge ModAPI Documentation
+The EaglerForge ModAPI is housed in a global JavaScript object stored on `globalThis`, called `ModAPI` or `PluginAPI`. (both are identical)
+
+The global object has the following properties:
+ - `ModAPI.player: EntityPlayerSP`
+    - Only accessible after `ModAPI.require("player")` is called, this is the local player entity. It is regenerated every time the `update` event is called.
+ - `ModAPI.network: NetHandlerPlayClient`
+    - Only accessible after `ModAPI.require("network")` is called, this is the client's networking handler. It is regenerated every time the `update` event is called.
+ - `ModAPI.settings: GameSettings`
+    - This is the Minecraft client's settings. It is generated upon init.
+ - `ModAPI.items: Map<String, Item>`
+    - This is a key-value dictionary of all of the items in the game. It is generated upon init from the static variables of the `Items` class.
+    - For example, to access the item class for `acacia_door`, you can use `ModAPI.items["acacia_door"]`
+ - `ModAPI.blocks: Map<String, Block>`
+    - This is a key-value dictionary of all of the blocks in the game. It is generated upon init from the static variables of the `Blocks` class.
+    - For example, to access the block class for `bedrock`, you can use `ModAPI.blocks["bedrock"]`
+ - `ModAPI.materials: Map<String, Material>`
+    - This is a key-value dictionary of all of the blocks in the game. It is generated upon init from the static variables of the `Material` class.
+    - For example, to access the material class for `portal`, you can use `ModAPI.materials["portal"]`
+ - `ModAPI.enchantments: Map<String, Enchantment|Object>`
+    - This is a key-value dictionary of all of the enchantments in the game. It is generated upon init from the static variables of the `Enchantment` class.
+    - For example, to access the enchantment class for `knockback`, you can use `ModAPI.enchantments["knockback"]`
+    - As the enchantment class has other static variables, `Object.keys` will also return non-enchantment keys such as `enchantmentsBookList`.
+ - `ModAPI.minecraft: Minecraft`
+    - This is the minecraft instance for the client, generated upon init.
+    - It can also be accessed using `ModAPI.mc`
+ - `ModAPI.mcinstance: Raw<Minecraft>`
+    - This is the raw minecraft instance for the client, generated upon init.
+    - It can also be accessed using `ModAPI.javaClient`
+    - It can also be accessed using `ModAPI.minecraft.getRef()`
+ - `ModAPI.server: MinecraftServer`
+    - This is the dedicated minecraft server in the service worker, generated when the `serverstart`.
+    - It can only be accessed in the dedicated server's context. (See `ModAPI.dedicatedServer`)
+    - It can also be accessed using `ModAPI.serverInstance`
+ - `ModAPI.rawServer: MinecraftServer`
+    - This is the dedicated minecraft server in the service worker, generated when the `serverstart`.
+    - It can only be accessed in the dedicated server's context. (See `ModAPI.dedicatedServer`)
+    - It can also be accessed using `ModAPI.server.getRef()`
+ - `ModAPI.hooks`
+    - This is the internal hooking map for ModAPI and can be used to patch, intercept, or rewrite internal functions, and more.
+    - More: [HooksDocumentation](hooks.md)
+ - `ModAPI.util`
+    - This contains utilities for using `ModAPI.hooks`, `ModAPI.reflect`, and more.
+    - More: [UtilDocumentation](utils.md)
+ - `ModAPI.reflect`
+    - This is a wrapper around `ModAPI.hooks`, `ModAPI.hooks._teavm` and `ModAPI.hooks._classMap` that makes accessing and using internal java classes in mods much easier.
+    - More: [ReflectDocumentation](reflect.md)
+ - `ModAPI.dedicatedServer`
+    - This object is used to push code for use in the dedicated server.
+    - Once the dedicated server worker has started, it is unuseable.
+    - More: [DedicatedServerDocumentation](dedicatedserver.md)
+ - `ModAPI.version: String`
+    - The version of ModAPI.
+ - `ModAPI.flavour: String`
+    - The flavour of ModAPI. Hardcoded to be `"injector"`.
