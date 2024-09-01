@@ -31,6 +31,23 @@
         background-color: #ffffff;
         color: #000000;
     }
+    #info {
+      text-align: left;
+      min-width: 50vw;
+    }
+    details {
+      text-align: left;
+      padding: 6px;
+      padding-left: 8px;
+      border-radius: 1rem;
+      background-color: rgba(0,0,0,0.5);
+      margin-bottom: 1rem;
+    }
+    summary {
+      background-color: rgba(255,255,255,0.1);
+      padding: 4px;
+      border-radius: 0.6rem;
+    }
     </style>
   </head>
   <body>
@@ -51,6 +68,22 @@
     <label class="custom-file-label" for="htmlFile">Choose .html file...</label>
 <br /><br />
     <button class="btn btn-primary" id="giveme">Make modded build</button>
+    </div>
+
+    <br><br><br>
+    <span>Info:</span>
+    <div id="#info">
+      <details>
+        <summary>What .html file do I choose?</summary>
+        Once you have a local EaglercraftX workspace setup, in <code>build.gradle</code>, set the <code>obfuscate</code> property to <code>false</code>.
+        Then, run <code>CompileJS.bat</code> (or .sh if on a unix-based os), and then run <code>MakeOfflineDownload.bat</code>. The outputted offline download will have a much larger file size than other offline builds. This is the file you should select.
+        (it should have a naming convention similar to <code>EaglercraftX_1.8_Offline_en_US.html</code>)
+      </details>
+      <details>
+        <summary>How does this tool work?</summary>
+        The injector works by analysing your uploaded file for patterns that appear in TeaVM's compiled JavaScript code. Then, it will replace all functions with proxies to the original code, which it moves into 
+        <code>ModAPI.hooks.methods</code>. It does similar things with static properties and constructors, and then hooks into <code>$rt_metadata</code> to access auxilary information.
+      </details>
     </div>
 </div>
 
@@ -285,6 +318,5 @@ var main;(function(){`
     <script src="postinit.injector.js"></script>
     <script src="modloader.injector.js"></script>
     <script src="modgui.injector.js"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
   </body>
 </html>
