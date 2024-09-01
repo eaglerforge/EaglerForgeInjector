@@ -53,3 +53,19 @@ The global object has the following properties:
     - The version of ModAPI.
  - `ModAPI.flavour: String`
     - The flavour of ModAPI. Hardcoded to be `"injector"`.
+
+The ModAPI object has the following methods:
+ - `addEventListener(eventName: String, callback: Function) : void`
+    - More: [EventDocumentation](events.md)
+ - `require(componentName: String) : void`
+    - Import required modules, such as `player` and `network`.
+    - Usage: `ModAPI.require("module")`
+ - `displayToChat(message: String) : void`
+    - Displays client-side message to user's ingame chat gui.
+    - Usage: `ModAPI.displayToChat("Hello World.")`
+ - `clickMouse() : void`
+    - Triggers a left click ingame.
+    - Usage: `ModAPI.clickMouse()`
+ - `rightClickMouse() : void`
+    - Triggers a right click ingame.
+    - Usage: `ModAPI.rightClickMouse()`
