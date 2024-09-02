@@ -4,96 +4,173 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>EaglerForge Injector</title>
-    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css" rel="stylesheet">
+    <link
+      href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css"
+      rel="stylesheet"
+    />
     <style>
-    body {
+      body {
         background-color: #2b2b2b;
         color: #ffffff;
-    }
-    .container {
+      }
+      .container {
         text-align: center;
         margin-top: 50px;
-    }
+      }
 
-    .github-button-container {
+      .github-button-container {
         position: absolute;
         top: 10px;
         right: 10px;
-    }
-    
-    .github-button-container a.btn {
+      }
+
+      .github-button-container a.btn {
         color: #ffffff;
         border-color: #ffffff;
-    }
-    
-    .github-button-container a.btn:hover {
+      }
+
+      .github-button-container a.btn:hover {
         background-color: #ffffff;
         color: #000000;
-    }
-    #info {
-      text-align: left;
-      min-width: 50vw;
-    }
-    details {
-      text-align: left;
-      padding: 6px;
-      border-radius: 1rem;
-      background-color: rgba(0,0,0,0.5);
-      margin-bottom: 1rem;
-    }
-    summary {
-      background-color: rgba(255,255,255,0.1);
-      padding: 4px;
-      border-radius: 0.6rem;
-      padding-left: 8px;
-    }
+      }
+      #info {
+        text-align: left;
+        min-width: 50vw;
+      }
+      details {
+        text-align: left;
+        padding: 6px;
+        border-radius: 1rem;
+        background-color: rgba(0, 0, 0, 0.5);
+        margin-bottom: 1rem;
+      }
+      summary {
+        background-color: rgba(255, 255, 255, 0.1);
+        padding: 4px;
+        border-radius: 0.6rem;
+        padding-left: 8px;
+      }
     </style>
   </head>
   <body>
-<div class="container">
-    <h1>EaglerForge Injector</h1>
-    <div class="github-button-container">
-      <a href="https://github.com/eaglerforge/EaglerForgeInjector" class="btn btn-default" target="_blank">
-        <i class="fab fa-github"></i> GitHub
-      </a>
-    </div>
-    <h6>
-      Adds ModAPI with more functionality (adds hooking into functions, exposes
-      all classes, etc) to unminified unobfuscated EaglercraftX offline downloads (web support coming soon).
-    </h6>
-    <br />
-    <div class="custom-file mb-3">
-    <input class="custom-file-input" type="file" id="htmlFile" accept=".html,.js" />
-    <label class="custom-file-label" for="htmlFile">Choose .html file...</label>
-<br /><br />
-    <button class="btn btn-primary" id="giveme">Make modded build</button>
-    </div>
+    <div class="container">
+      <h1>EaglerForge Injector</h1>
+      <div class="github-button-container">
+        <a
+          href="https://github.com/eaglerforge/EaglerForgeInjector"
+          class="btn btn-default"
+          target="_blank"
+        >
+          <i class="fab fa-github"></i> GitHub
+        </a>
+      </div>
+      <h6>
+        Adds ModAPI with more functionality (adds hooking into functions,
+        exposes all classes, etc) to unminified unobfuscated EaglercraftX
+        offline downloads (web support coming soon).
+      </h6>
+      <br />
+      <div class="custom-file mb-3">
+        <input
+          class="custom-file-input"
+          type="file"
+          id="htmlFile"
+          accept=".html,.js"
+        />
+        <label class="custom-file-label" for="htmlFile"
+          >Choose .html file...</label
+        >
+        <br /><br />
+        <button class="btn btn-primary" id="giveme">Make modded build</button>
+      </div>
 
-    <br><br><br>
-    <span>Info:</span>
-    <div id="#info">
-      <details>
-        <summary>What .html file do I choose?</summary>
-        Once you have a local EaglercraftX workspace setup, in <code>build.gradle</code>, set the <code>obfuscate</code> property to <code>false</code>.
-        Then, run <code>CompileJS.bat</code> (or .sh if on a unix-based os), and then run <code>MakeOfflineDownload.bat</code>. The outputted offline download will have a much larger file size than other offline builds. This is the file you should select.
-        (it should have a naming convention similar to <code>EaglercraftX_1.8_Offline_en_US.html</code>)
-      </details>
-      <details>
-        <summary>How does this tool work?</summary>
-        The injector works by analysing your uploaded file for patterns that appear in TeaVM's compiled JavaScript code. Then, it will replace all functions with proxies to the original code, which it moves into 
-        <code>ModAPI.hooks.methods</code>. It does similar things with static properties and constructors, and then hooks into <code>$rt_metadata</code> to access auxilary information.
-      </details>
-      <details>
-        <summary>Where documentation???</summary>
-        <a href="https://eaglerforge.github.io/EaglerForgeInjector/docs">https://eaglerforge.github.io/EaglerForgeInjector/docs</a>
-      </details>
+      <br /><br /><br />
+      <span>Info:</span>
+      <div id="#info">
+        <details>
+          <summary>What .html file do I choose?</summary>
+          Once you have a local EaglercraftX workspace setup, in
+          <code>build.gradle</code>, set the <code>obfuscate</code> property to
+          <code>false</code>. Then, run <code>CompileJS.bat</code> (or .sh if on
+          a unix-based os), and then run <code>MakeOfflineDownload.bat</code>.
+          The outputted offline download will have a much larger file size than
+          other offline builds. This is the file you should select. (it should
+          have a naming convention similar to
+          <code>EaglercraftX_1.8_Offline_en_US.html</code>)
+        </details>
+        <details>
+          <summary>How does this tool work?</summary>
+          The injector works by analysing your uploaded file for patterns that
+          appear in TeaVM's compiled JavaScript code. Then, it will replace all
+          functions with proxies to the original code, which it moves into
+          <code>ModAPI.hooks.methods</code>. It does similar things with static
+          properties and constructors, and then hooks into
+          <code>$rt_metadata</code> to access auxilary information.
+        </details>
+        <details>
+          <summary>Where documentation???</summary>
+          <a href="https://eaglerforge.github.io/EaglerForgeInjector/docs"
+            >https://eaglerforge.github.io/EaglerForgeInjector/docs</a
+          >
+        </details>
+      </div>
     </div>
-</div>
 
     <script src="filesaver.min.js"></script>
 
     <script>
+      function entriesToStaticVariableProxy(entries, prefix) {
+        var getComponents = "";
+        entries.forEach((entry) => {
+          getComponents += `
+              case \`${entry.name}\`:
+                  return ${entry.variable};
+                  break;`;
+        });
+
+        var setComponents = "";
+        entries.forEach((entry) => {
+          setComponents += `
+                case \`${entry.name}\`:
+                    ${entry.variable} = c;
+                    break;`;
+        });
+        var proxy = `
+            ModAPI.hooks._rippedStaticIndexer[\`${prefix.replace(
+              "var ",
+              ""
+            )}\`] = [${entries
+          .flatMap((x) => {
+            return '"' + x.name + '"';
+          })
+          .join(",")}];
+            ModAPI.hooks._rippedStaticProperties[\`${prefix.replace(
+              "var ",
+              ""
+            )}\`] = new Proxy({${
+          entries
+            .flatMap((x) => {
+              return '"' + x.name + '"';
+            })
+            .join(":null,") + (entries.length > 0 ? ":null" : "")
+        }}, {
+                get: function (a,b,c) {
+                    switch (b) {
+                        ${getComponents}
+                    }
+                },
+                set: function (a,b,c) {
+                    switch (b) {
+                        ${setComponents}
+                    }
+                }
+              });`;
+        return proxy;
+      }
       var modapi_preinit = `globalThis.ModAPI ||= {};
 ModAPI.hooks ||= {};
 ModAPI.hooks.freezeCallstack = false;
@@ -227,7 +304,6 @@ var main;(function(){`
           ].flatMap((x) => {
             return x[0];
           });
-          //Todo: add support for static properties on classes with constructors like this: function nmcg_GuiMainMenu() {
           patchedFile = patchedFile.replaceAll(
             /var \S+?_\S+? = \$rt_classWithoutFields\(\S*?\);/gm,
             function (match) {
@@ -250,54 +326,43 @@ var main;(function(){`
                   });
                 }
               });
-              var getComponents = "";
-              entries.forEach((entry) => {
-                getComponents += `
-              case \`${entry.name}\`:
-                  return ${entry.variable};
-                  break;`;
-              });
 
-              var setComponents = "";
-              entries.forEach((entry) => {
-                setComponents += `
-                case \`${entry.name}\`:
-                    ${entry.variable} = c;
-                    break;`;
-              });
-              var proxy = `
-            ModAPI.hooks._rippedStaticIndexer[\`${prefix.replace(
-              "var ",
-              ""
-            )}\`] = [${entries
-                .flatMap((x) => {
-                  return '"' + x.name + '"';
-                })
-                .join(",")}];
-            ModAPI.hooks._rippedStaticProperties[\`${prefix.replace(
-              "var ",
-              ""
-            )}\`] = new Proxy({${
-                entries
-                  .flatMap((x) => {
-                    return '"' + x.name + '"';
-                  })
-                  .join(":null,") + (entries.length > 0 ? ":null" : "")
-              }}, {
-                get: function (a,b,c) {
-                    switch (b) {
-                        ${getComponents}
-                    }
-                },
-                set: function (a,b,c) {
-                    switch (b) {
-                        ${setComponents}
-                    }
-                }
-              });`;
+              var proxy = entriesToStaticVariableProxy(entries, prefix);
+
               return match + proxy;
             }
           );
+          //Edge cases. sigh
+          //Done: add support for static properties on classes with constructors like this: function nmcg_GuiMainMenu() {
+          patchedFile = patchedFile.replaceAll(
+            /function [a-z]+?_([a-zA-Z\$]+?)\(\) \{/gm,
+            (match) => {
+              var prefix = "var " + match.replace("function ", "").replace("() {", "");
+              var entries = [];
+
+              staticVariables.forEach((entry) => {
+                if (entry.startsWith(prefix)) {
+                  var variableName = entry
+                    .replace("var ", "")
+                    .replace(" = null;", "");
+                  var segments = variableName.split("_");
+                  segments.splice(0, 2);
+                  var name = segments.join("_");
+                  entries.push({
+                    name: name,
+                    variable: variableName,
+                  });
+                }
+              });
+
+              console.log(prefix);
+
+              var proxy = entriesToStaticVariableProxy(entries, prefix);
+
+              return proxy + "\n" + match;
+            }
+          );
+
           patchedFile = patchedFile.replaceAll(
             /function \$rt_\S+?\(/gm,
             (match) => {
