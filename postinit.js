@@ -247,7 +247,14 @@
             }
             if (outputValue && typeof outputValue === "function") {
                 return function (...args) {
-                    return outputValue.apply(target, args);
+                    var xOut = outputValue.apply(target, args);
+                    if (xOut && typeof xOut === "object" && Array.isArray(xOut.data) && typeof outputValue.type === "function") {
+                        return new Proxy(xOut.data, TeaVMArray_To_Recursive_BaseData_ProxyConf);
+                    }
+                    if (xOut && typeof xOut === "object" && !Array.isArray(xOut)) {
+                        return new Proxy(xOut, TeaVM_to_Recursive_BaseData_ProxyConf);
+                    }
+                    return xOut;
                 }
             }
             return outputValue;
@@ -365,6 +372,9 @@
         }
         if (ModAPI.required.has("network") && ModAPI.javaClient && ModAPI.javaClient.$thePlayer && ModAPI.javaClient.$thePlayer.$sendQueue) {
             ModAPI.network = new Proxy(ModAPI.javaClient.$thePlayer.$sendQueue, TeaVM_to_Recursive_BaseData_ProxyConf);
+        }
+        if (ModAPI.required.has("world") && ModAPI.javaClient && ModAPI.javaClient.$theWorld) {
+            ModAPI.world = new Proxy(ModAPI.javaClient.$theWorld, TeaVM_to_Recursive_BaseData_ProxyConf);
         }
         try {
             ModAPI.events.callEvent("update");

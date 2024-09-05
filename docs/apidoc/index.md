@@ -4,6 +4,8 @@ The EaglerForge ModAPI is housed in a global JavaScript object stored on `global
 The global object has the following properties:
  - `ModAPI.player: EntityPlayerSP`
     - Only accessible after `ModAPI.require("player")` is called, this is the local player entity. It is regenerated every time the `update` event is called.
+- `ModAPI.world: WorldClient`
+    - Only accessible after `ModAPI.require("world")` is called, this is the client-side world. It is regenerated every time the `update` event is called.
  - `ModAPI.network: NetHandlerPlayClient`
     - Only accessible after `ModAPI.require("network")` is called, this is the client's networking handler. It is regenerated every time the `update` event is called.
  - `ModAPI.settings: GameSettings`
@@ -69,3 +71,51 @@ The ModAPI object has the following methods:
  - `rightClickMouse() : void`
     - Triggers a right click ingame.
     - Usage: `ModAPI.rightClickMouse()`
+
+
+## Handling strings, numbers and booleans to and from java.
+Java strings and JavaScript strings are not the same. Calling a method like this: `ModAPI.player.sendChatMessage("hello world")`, will not work, as you are running a Java method with a JavaScript string. To convert a JS string to a Java string, use `ModAPI.util.str(yourString)`. For example, the correct version of the above example is `ModAPI.player.sendChatMessage(ModAPI.util.str("hello world"))`. This problem is automatically mitigated on a few functions, namely `ModAPI.displayToChat()`.
+
+
+---
+Java numbers and JavaScript numbers are stored the same way, with no problems with having to cast, like with strings. This is why you can simply do something like `ModAPI.player.motionY = 99999`, without having to do any conversion.
+
+
+---
+Booleans in Java are stored as a number, where `1` means `true` and `0` means `false`. There are no functions for converting inbetween these, because it is very easy to do so (unlike strings). To convert a javascript boolean into a java boolean simply multiply you boolean by 1.
+
+Eg:
+```javascript
+var myBool = true;
+console.log(myBool * 1);
+// logs '1'
+
+var myBool = false;
+console.log(myBool * 1);
+// logs '0'
+```
+
+Better yet, if you need to use booleans very often, just store them as numbers directly in javascript. JavaScript if statements already recognise `0` as false, so something like:
+```javascript
+var condition = 0;
+if (condition) {
+   console.log("yes");
+} else {
+   console.log("no");
+}
+// outputs 'no'
+```
+will work out of the box.
+
+## Accessing raw data
+In ModAPI's architecture, when you request an object like `ModAPI.player`, instead of giving you `ModAPI.mcinstance.$thePlayer`, it will return a `TeaVM_to_Recursive_BaseData_ProxyConf` proxy. These automatically remove the `$` prefixes, make instance methods run with the actaul object, and a variety other features.
+
+However, when calling methods via `ModAPI.hooks`, `ModAPI.reflect`, or even just running a method that takes in object arguments on something like `ModAPI.player`, passing in these ModAPI proxies will cause an error.
+
+To pass in raw java data simply call `getRef()` on the proxym which will return the raw, unmodified version of it.
+
+For example, take the method `setRenderViewEntity()` on `ModAPI.mcinstance`. Instead of passing an entity from `ModAPI.world.loadedEntityList.get(index)` directly, you need to use `ModAPI.world.loadedEntityList.get(index).getRef()`. Demo code:
+```javascript
+var entityIndex = 1; //Index of the entity to look for. 0 means first, which is usually the player, so 1 is usually a natural entity.
+ModAPI.mc.setRenderViewEntity(ModAPI.world.loadedEntityList.get(entityIndex).getRef());
+```
