@@ -35,7 +35,7 @@ The global object has the following properties:
     - It can only be accessed in the dedicated server's context. (See `ModAPI.dedicatedServer`)
     - It can also be accessed using `ModAPI.serverInstance`
  - `ModAPI.rawServer: MinecraftServer`
-    - This is the dedicated minecraft server in the service worker, generated when the `serverstart`.
+    - This is the dedicated minecraft server in the service worker, generated when the `serverstart` event is fired.
     - It can only be accessed in the dedicated server's context. (See `ModAPI.dedicatedServer`)
     - It can also be accessed using `ModAPI.server.getRef()`
  - `ModAPI.hooks`
