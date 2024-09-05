@@ -54,6 +54,9 @@
         border-radius: 0.6rem;
         padding-left: 8px;
       }
+      h6 {
+        font-weight: normal;
+      }
     </style>
   </head>
   <body>
@@ -123,6 +126,11 @@
     <script src="filesaver.min.js"></script>
 
     <script>
+      document.querySelector("#htmlFile").addEventListener("input", (e)=>{
+        if (e.target.files[0]) {
+          document.querySelector(".custom-file-label").innerText = e.target.files[0].name;
+        }
+      });
       function entriesToStaticVariableProxy(entries, prefix) {
         var getComponents = "";
         entries.forEach((entry) => {
@@ -354,8 +362,6 @@ var main;(function(){`
                   });
                 }
               });
-
-              console.log(prefix);
 
               var proxy = entriesToStaticVariableProxy(entries, prefix);
 
