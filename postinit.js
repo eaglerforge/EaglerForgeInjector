@@ -141,10 +141,8 @@
                     }
                     targetMethodMap[method.replace(compiledName + "_", "")] = {
                         method: ModAPI.hooks.methods[method],
-                        proxiedMethod: function (...args) {
-                            return ModAPI.hooks.methods[method].apply(this, args);
-                        },
-                        methodName: method
+                        methodName: method,
+                        methodNameShort: method.replace(compiledName + "_", "")
                     };
 
                     //Prototype Injection, allows for far easier access to methods
@@ -165,7 +163,7 @@
     }
     ModAPI.reflect.getClassByName = function (className) {
         var classKeys = Object.keys(ModAPI.hooks._classMap);
-        var key = classKeys.filter(k => {k.endsWith("_" + className)})[0];
+        var key = classKeys.filter(k => {return ModAPI.hooks._classMap[k].name === className})[0];
         return key ? ModAPI.hooks._classMap[key] : null;
     }
     var reloadDeprecationWarnings = 0;
