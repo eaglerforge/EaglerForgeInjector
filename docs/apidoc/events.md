@@ -67,3 +67,28 @@ Can only be used in the context of the dedicated server. More: [DedicatedServerD
             - String representing the command.
         - `preventDefault: Boolean`
             - Boolean representing whether or not to cancel processing the command. Default is `false`.
+
+### Events Global, adding new events
+The events global, `ModAPI.events`, allows you to register new event types and call them.
+
+#### ModAPI.events.newEvent(eventName: String)
+You can register new events using ModAPI, as long as the event name starts with `custom:`. For example, if I want to add a new event that can be used by other mods, I can use `ModAPI.events.newEvent("custom:myevent")`.
+
+
+#### ModAPI.events.callEvent(eventName: String, data: Object)
+You can then call events via `ModAPI.events.callEvent`. For example, to trigger `custom:myevent` with a secret code value, I can run `ModAPI.events.callEvent("custom:myevent", {secretCode: "1234"});`.
+
+Here is an example on using this:
+```javascript
+// Mod #1, registers event handler for custom event
+ModAPI.addEventListener("custom:myevent", (e)=>{
+    alert(e.secretCode);
+});
+```
+```javascript
+// Mod #2, registers and calls custom event
+ModAPI.events.newEvent("custom:myevent");
+ModAPI.events.callEvent("custom:myevent", {
+    secretCode: "1234"
+});
+```

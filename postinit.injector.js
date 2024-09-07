@@ -293,7 +293,7 @@ globalThis.modapi_postinit = `(() => {
         if (!callback || typeof callback !== "function") {
             throw new Error("[ModAPI] Invalid callback!");
         }
-        if (ModAPI.events.types.includes(name)) {
+        if (ModAPI.events.types.includes(name) || name.startsWith("custom:")) {
             if (!Array.isArray(ModAPI.events.listeners[name])) {
                 ModAPI.events.listeners[name] = [];
             }

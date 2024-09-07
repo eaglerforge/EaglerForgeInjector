@@ -112,7 +112,7 @@ In ModAPI's architecture, when you request an object like `ModAPI.player`, inste
 
 However, when calling methods via `ModAPI.hooks`, `ModAPI.reflect`, or even just running a method that takes in object arguments on something like `ModAPI.player`, passing in these ModAPI proxies will cause an error.
 
-To pass in raw java data simply call `getRef()` on the proxym which will return the raw, unmodified version of it.
+To pass in raw java data simply call `getRef()` on the proxy which will return the raw, unmodified version of it.
 
 For example, take the method `setRenderViewEntity()` on `ModAPI.mcinstance`. Instead of passing an entity from `ModAPI.world.loadedEntityList.get(index)` directly, you need to use `ModAPI.world.loadedEntityList.get(index).getRef()`. Demo code:
 ```javascript
