@@ -51,6 +51,9 @@ The global object has the following properties:
     - This object is used to push code for use in the dedicated server.
     - Once the dedicated server worker has started, it is unuseable.
     - More: [DedicatedServerDocumentation](dedicatedserver.md)
+- `ModAPI.meta`
+    - This object is used to register metadata for mods such as their title, credits, icon and description.
+    - More: [MetaDocumentation](meta.md)
  - `ModAPI.version: String`
     - The version of ModAPI.
  - `ModAPI.flavour: String`
