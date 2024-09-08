@@ -33,7 +33,7 @@
         if (!document.currentScript.hasAttribute("data-hash")) {
             return console.log("[ModAPIMeta] Script does not have a hashcode.");
         }
-        ModAPI.meta._titleMap[document.currentScript.getAttribute("data-hash")] = limitSize(title, 14);
+        ModAPI.meta._titleMap[document.currentScript.getAttribute("data-hash")] = limitSize(title, 16);
     }
     ModAPI.meta.icon = function (iconSrc) {
         if (!document.currentScript || document.currentScript.getAttribute("data-isMod") !== "true") {
@@ -51,7 +51,7 @@
         if (!document.currentScript.hasAttribute("data-hash")) {
             return console.log("[ModAPIMeta] Script does not have a hashcode.");
         }
-        ModAPI.meta._developerMap[document.currentScript.getAttribute("data-hash")] = limitSize(cd, 16);
+        ModAPI.meta._developerMap[document.currentScript.getAttribute("data-hash")] = limitSize(cd, 24);
     }
     ModAPI.meta.description = function (desc) {
         if (!document.currentScript || document.currentScript.getAttribute("data-isMod") !== "true") {
