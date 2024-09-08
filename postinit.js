@@ -27,7 +27,7 @@
         }
     }
     ModAPI.meta.title = function (title) {
-        if (document.currentScript.getAttribute("data-isMod") !== "true") {
+        if (!document.currentScript || document.currentScript.getAttribute("data-isMod") !== "true") {
             return console.log("[ModAPIMeta] Cannot set meta for non-mod script.");
         }
         if (!document.currentScript.hasAttribute("data-hash")) {
@@ -36,7 +36,7 @@
         ModAPI.meta._titleMap[document.currentScript.getAttribute("data-hash")] = limitSize(title, 14);
     }
     ModAPI.meta.icon = function (iconSrc) {
-        if (document.currentScript.getAttribute("data-isMod") !== "true") {
+        if (!document.currentScript || document.currentScript.getAttribute("data-isMod") !== "true") {
             return console.log("[ModAPIMeta] Cannot set meta for non-mod script.");
         }
         if (!document.currentScript.hasAttribute("data-hash")) {
@@ -45,7 +45,7 @@
         ModAPI.meta._iconMap[document.currentScript.getAttribute("data-hash")] = iconSrc;
     }
     ModAPI.meta.credits = function (cd) {
-        if (document.currentScript.getAttribute("data-isMod") !== "true") {
+        if (!document.currentScript || document.currentScript.getAttribute("data-isMod") !== "true") {
             return console.log("[ModAPIMeta] Cannot set meta for non-mod script.");
         }
         if (!document.currentScript.hasAttribute("data-hash")) {
@@ -54,7 +54,7 @@
         ModAPI.meta._developerMap[document.currentScript.getAttribute("data-hash")] = limitSize(cd, 16);
     }
     ModAPI.meta.description = function (desc) {
-        if (document.currentScript.getAttribute("data-isMod") !== "true") {
+        if (!document.currentScript || document.currentScript.getAttribute("data-isMod") !== "true") {
             return console.log("[ModAPIMeta] Cannot set meta for non-mod script.");
         }
         if (!document.currentScript.hasAttribute("data-hash")) {
