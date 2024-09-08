@@ -72,7 +72,7 @@ Can only be used in the context of the dedicated server. More: [DedicatedServerD
 The events global, `ModAPI.events`, allows you to register new event types and call them.
 
 #### ModAPI.events.newEvent(eventName: String)
-You can register new events using ModAPI, as long as the event name starts with `custom:`. For example, if I want to add a new event that can be used by other mods, I can use `ModAPI.events.newEvent("custom:myevent")`.
+You can register new events using ModAPI, as long as the event name starts with `custom:` (`lib:` is only useful for library loading). For example, if I want to add a new event that can be used by other mods, I can use `ModAPI.events.newEvent("custom:myevent")`.
 
 
 #### ModAPI.events.callEvent(eventName: String, data: Object)
@@ -90,5 +90,18 @@ ModAPI.addEventListener("custom:myevent", (e)=>{
 ModAPI.events.newEvent("custom:myevent");
 ModAPI.events.callEvent("custom:myevent", {
     secretCode: "1234"
+});
+```
+
+#### Using library load events
+```javascript
+// Mod #2, registers and calls lib event
+ModAPI.events.newEvent("lib:mylibrary:loaded");
+ModAPI.events.callEvent("lib:mylibrary:loaded", {});
+```
+```javascript
+// Mod #1, registers event handler for lib event
+ModAPI.addEventListener("lib:mylibrary:loaded", (e)=>{
+    //Lib events function differently to normal events, as when they are called once, any new event listener with automatically fire upon being registered.
 });
 ```

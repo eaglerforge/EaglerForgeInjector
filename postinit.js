@@ -288,12 +288,25 @@
     ModAPI.required = new Set();
     ModAPI.events = {};
     ModAPI.events.types = ["event"];
+    ModAPI.events.lib_map = {};
     ModAPI.events.listeners = { "event": [] };
     ModAPI.addEventListener = function addEventListener(name, callback) {
+        if (name.startsWith("lib:")) {
+            if (ModAPI.events.lib_map[name]) {
+                callback({});
+            } else {
+                if (!Array.isArray(ModAPI.events.listeners[name])) {
+                    ModAPI.events.listeners[name] = [];
+                }
+                ModAPI.events.listeners[name].push(callback);
+            }
+            console.log("[ModAPI] Added new library listener.");
+            return;
+        }
         if (!callback || typeof callback !== "function") {
             throw new Error("[ModAPI] Invalid callback!");
         }
-        if (ModAPI.events.types.includes(name) || name.startsWith("custom:")) {
+        if (ModAPI.events.types.includes(name) || name.startsWith("custom:") || name.startsWith("lib:")) {
             if (!Array.isArray(ModAPI.events.listeners[name])) {
                 ModAPI.events.listeners[name] = [];
             }
@@ -354,12 +367,19 @@
             console.error("Please report this bug to the repo.");
             return;
         }
-        ModAPI.events.listeners[name].forEach((func) => {
-            func(data);
-        });
-        ModAPI.events.listeners.event.forEach((func) => {
-            func({ event: name, data: data });
-        });
+        if (name.startsWith("lib:")) {
+            ModAPI.events.listeners[name].forEach((func) => {
+                func({});
+            });
+            ModAPI.events.lib_map[name] = true;
+        } else {
+            ModAPI.events.listeners[name].forEach((func) => {
+                func(data);
+            });
+            ModAPI.events.listeners.event.forEach((func) => {
+                func({ event: name, data: data });
+            });
+        }
     };
     ModAPI.events.newEvent("update", "client");
 
@@ -415,6 +435,10 @@
         ModAPI.hooks.methods["nmcg_GuiNewChat_printChatMessage"](ModAPI.javaClient.$ingameGUI.$persistantChatGUI, ModAPI.hooks._classMap[ModAPI.util.getCompiledName("net.minecraft.util.ChatComponentText")].constructors[0](jclString));
     }
 
+    ModAPI.util.makeArray = function makeArray(arrayClass, arrayContents = []) {
+        return ModAPI.hooks._teavm.$rt_createArrayFromData(arrayClass, arrayContents);
+    }
+
     ModAPI.clickMouse = function () {
         ModAPI.hooks.methods["nmc_Minecraft_clickMouse"](ModAPI.javaClient);
     }
@@ -444,7 +468,7 @@
         return x;
     };
 
-    var integratedServerStartup = ModAPI.util.getMethodFromPackage("net.lax1dude.eaglercraft.v1_8.sp.internal.ClientPlatformSingleplayer", "createBlobObj");
+    var integratedServerStartup = ModAPI.util.getMethodFromPackage("net.lax1dude.eaglercraft.v1_8.sp.internal.ClientPlatformSingleplayer", "loadIntegratedServerSourceInline");
     //Integrated server setup has a randomised suffix on the end
     integratedServerStartup = ModAPI.hooks._rippedMethodKeys.filter(key => { return key.startsWith(integratedServerStartup); })[0];
     const integratedServerStartupMethod = ModAPI.hooks.methods[integratedServerStartup];
