@@ -14,6 +14,54 @@ globalThis.modapi_postinit = `(() => {
     globalThis.PluginAPI ||= ModAPI;
     ModAPI.mcinstance ||= {};
     ModAPI.javaClient ||= {};
+    ModAPI.meta = {};
+    ModAPI.meta._titleMap = {};
+    ModAPI.meta._descriptionMap = {};
+    ModAPI.meta._developerMap = {};
+    ModAPI.meta._iconMap = {};
+    function limitSize(x, n) {
+        if (x.length > n) {
+            return x.substring(0, n) + "…";
+        } else {
+            return x;
+        }
+    }
+    ModAPI.meta.title = function (title) {
+        if (document.currentScript.getAttribute("data-isMod") !== "true") {
+            return console.log("[ModAPIMeta] Cannot set meta for non-mod script.");
+        }
+        if (!document.currentScript.hasAttribute("data-hash")) {
+            return console.log("[ModAPIMeta] Script does not have a hashcode.");
+        }
+        ModAPI.meta._titleMap[document.currentScript.getAttribute("data-hash")] = limitSize(title, 14);
+    }
+    ModAPI.meta.icon = function (iconSrc) {
+        if (document.currentScript.getAttribute("data-isMod") !== "true") {
+            return console.log("[ModAPIMeta] Cannot set meta for non-mod script.");
+        }
+        if (!document.currentScript.hasAttribute("data-hash")) {
+            return console.log("[ModAPIMeta] Script does not have a hashcode.");
+        }
+        ModAPI.meta._iconMap[document.currentScript.getAttribute("data-hash")] = iconSrc;
+    }
+    ModAPI.meta.credits = function (cd) {
+        if (document.currentScript.getAttribute("data-isMod") !== "true") {
+            return console.log("[ModAPIMeta] Cannot set meta for non-mod script.");
+        }
+        if (!document.currentScript.hasAttribute("data-hash")) {
+            return console.log("[ModAPIMeta] Script does not have a hashcode.");
+        }
+        ModAPI.meta._developerMap[document.currentScript.getAttribute("data-hash")] = limitSize(cd, 16);
+    }
+    ModAPI.meta.description = function (desc) {
+        if (document.currentScript.getAttribute("data-isMod") !== "true") {
+            return console.log("[ModAPIMeta] Cannot set meta for non-mod script.");
+        }
+        if (!document.currentScript.hasAttribute("data-hash")) {
+            return console.log("[ModAPIMeta] Script does not have a hashcode.");
+        }
+        ModAPI.meta._descriptionMap[document.currentScript.getAttribute("data-hash")] = limitSize(desc, 64);
+    }
     ModAPI.reflect ||= {};
     ModAPI.server = ModAPI.serverInstance = null;
     ModAPI.dedicatedServer ||= {};
@@ -438,6 +486,16 @@ globalThis.modapi_postinit = `(() => {
     ModAPI.util.makeArray = function makeArray(arrayClass, arrayContents = []) {
         return ModAPI.hooks._teavm.$rt_createArrayFromData(arrayClass, arrayContents);
     }
+
+    ModAPI.util.hashCode = function hashCode(string){
+        var hash = 0;
+        for (var i = 0; i < string.length; i++) {
+            var code = string.charCodeAt(i);
+            hash = ((hash<<5)-hash)+code;
+            hash = hash & hash;
+        }
+        return Math.floor(Math.abs(hash)) + "";
+    };
 
     ModAPI.clickMouse = function () {
         ModAPI.hooks.methods["nmc_Minecraft_clickMouse"](ModAPI.javaClient);

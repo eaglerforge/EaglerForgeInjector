@@ -184,21 +184,57 @@ globalThis.modapi_guikit = `// ModAPI GUI made by TheIdiotPlays
     tbody.innerHTML = "";
     modsList.forEach((modtxt, i) => {
       if (!modtxt) { return }
+      var hash = ModAPI.util.hashCode(modtxt);
       var tr = document.createElement("tr");
       var mod = document.createElement("td");
-      if (modtxt.length > 125) {
-        try {
-          mod.innerText = modtxt.match(/data:text\\/\\S+?;fs=\\S+;/m)[0]
-        } catch (error) {
-          mod.innerText = "Unknown Mod.";
+
+      if (ModAPI.meta._titleMap[hash]) {
+        //Mod has metadata
+        if (ModAPI.meta._iconMap[hash]) {
+          var img = document.createElement("img");
+          img.style.width = "48px";
+          img.style.height = "48px";
+          img.style.imageRendering = "pixelated";
+          img.src = ModAPI.meta._iconMap[hash];
+          mod.appendChild(img);
         }
-      } else { mod.innerText = modtxt; }
+        var h4 = document.createElement("h4");
+        h4.style.margin = 0;
+        h4.style.padding = 0;
+        h4.innerText = ModAPI.meta._titleMap[hash];
+        mod.appendChild(h4);
+        if (ModAPI.meta._developerMap[hash]) {
+          var h6 = document.createElement("h6");
+          h6.style.margin = 0;
+          h6.style.padding = 0;
+          h6.innerText = ModAPI.meta._developerMap[hash];
+          mod.appendChild(h6);
+        }
+        if (ModAPI.meta._descriptionMap[hash]) {
+          var span = document.createElement("span");
+          span.style.fontSize = "0.65rem";
+          span.innerText = ModAPI.meta._descriptionMap[hash];
+          mod.appendChild(span);
+        }
+      } else {
+        //Mod does not have metadata
+        if (modtxt.length > 125) {
+          try {
+            mod.innerText = modtxt.match(/data:text\\/\\S+?;fs=\\S+;/m)[0]
+          } catch (error) {
+            mod.innerText = "Unknown Mod.";
+          }
+        } else { mod.innerText = modtxt; }
+      }
+
       var spacer = document.createElement("td");
       spacer.classList.add("nothing");
       var controls = document.createElement("td");
 
       var button = document.createElement("button");
       button.innerText = "Delete";
+      button.style.height = "3rem";
+      button.style.marginTop = "calc(50% - 1.5rem)";
       button.addEventListener("click", async () => {
         await removeMod(i);
         window.modapi_displayModGui();

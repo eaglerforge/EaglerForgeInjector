@@ -132,8 +132,9 @@ window.modLoader = async function modLoader(modsArr = []) {
         try {
             console.log("[EaglerML] Loading " + currentMod + " via method B.");
             var script = document.createElement("script");
+            script.setAttribute("data-hash", ModAPI.util.hashCode("web@"+currentMod));
             script.src = currentMod;
-            script.setAttribute("data-isMod", true);
+            script.setAttribute("data-isMod", "true");
             script.onerror = () => {
                 console.log(
                     "[EaglerML] Failed to load " + currentMod + " via method B!"
@@ -167,6 +168,7 @@ window.modLoader = async function modLoader(modsArr = []) {
             req.onload = function xhrLoadHandler() {
                 console.log("[EaglerML] Loading " + currentMod + " via method A.");
                 var script = document.createElement("script");
+                script.setAttribute("data-hash", ModAPI.util.hashCode("web@"+currentMod));
                 try {
                     script.src =
                         "data:text/javascript," + encodeURIComponent(req.responseText);
@@ -174,7 +176,7 @@ window.modLoader = async function modLoader(modsArr = []) {
                     methodB(currentMod);
                     return;
                 }
-                script.setAttribute("data-isMod", true);
+                script.setAttribute("data-isMod", "true");
                 script.onerror = () => {
                     console.log(
                         "[EaglerML] Failed to load " + currentMod + " via method A!"
