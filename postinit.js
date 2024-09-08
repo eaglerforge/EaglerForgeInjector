@@ -621,7 +621,7 @@
         }
         ModAPI.events.callEvent("processcommand", data);
         if (data.preventDefault) {
-            return;
+            return 0;
         }
         if (typeof data.command === "string") {
             ModAPI.util.setStringContent($rawCommand, data.command)
