@@ -19,6 +19,7 @@
     ModAPI.meta._descriptionMap = {};
     ModAPI.meta._developerMap = {};
     ModAPI.meta._iconMap = {};
+    ModAPI.meta._versionMap = {};
     function limitSize(x, n) {
         if (x.length > n) {
             return x.substring(0, n) + "…";
@@ -51,7 +52,7 @@
         if (!document.currentScript.hasAttribute("data-hash")) {
             return console.log("[ModAPIMeta] Script does not have a hashcode.");
         }
-        ModAPI.meta._developerMap[document.currentScript.getAttribute("data-hash")] = limitSize(cd, 24);
+        ModAPI.meta._developerMap[document.currentScript.getAttribute("data-hash")] = limitSize(cd, 36);
     }
     ModAPI.meta.description = function (desc) {
         if (!document.currentScript || document.currentScript.getAttribute("data-isMod") !== "true") {
@@ -60,7 +61,16 @@
         if (!document.currentScript.hasAttribute("data-hash")) {
             return console.log("[ModAPIMeta] Script does not have a hashcode.");
         }
-        ModAPI.meta._descriptionMap[document.currentScript.getAttribute("data-hash")] = limitSize(desc, 64);
+        ModAPI.meta._descriptionMap[document.currentScript.getAttribute("data-hash")] = limitSize(desc, 160);
+    }
+    ModAPI.meta.version = function (ver) {
+        if (!document.currentScript || document.currentScript.getAttribute("data-isMod") !== "true") {
+            return console.log("[ModAPIMeta] Cannot set meta for non-mod script.");
+        }
+        if (!document.currentScript.hasAttribute("data-hash")) {
+            return console.log("[ModAPIMeta] Script does not have a hashcode.");
+        }
+        ModAPI.meta._versionMap[document.currentScript.getAttribute("data-hash")] = limitSize(ver, 6);
     }
     ModAPI.reflect ||= {};
     ModAPI.server = ModAPI.serverInstance = null;

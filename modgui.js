@@ -201,7 +201,7 @@
         var h4 = document.createElement("h4");
         h4.style.margin = 0;
         h4.style.padding = 0;
-        h4.innerText = ModAPI.meta._titleMap[hash];
+        h4.innerText = ModAPI.meta._titleMap[hash] + (ModAPI.meta._versionMap[hash] ? " " + ModAPI.meta._versionMap[hash] : "");
         mod.appendChild(h4);
         if (ModAPI.meta._developerMap[hash]) {
           var h6 = document.createElement("h6");
