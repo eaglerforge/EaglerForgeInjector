@@ -8,7 +8,7 @@
                 ) {
                     event.sender.addChatMessage(ModAPI.reflect.getClassById("net.minecraft.util.ChatComponentText").constructors[0](ModAPI.util.str(message.toUpperCase())));
                 }
-                event.preventDefault = true;
+                event.preventDefault = false;
             }
         });
     });
