@@ -1,9 +1,9 @@
 //WIP Blocklook plugin
 //If someone can fix the crash, thank you and also i'll add you to credits.
-ModAPI.meta.title("BlockLook");
-ModAPI.meta.credits("Made with ❤️ by ZXMushroom63");
-ModAPI.meta.icon("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAPlJREFUOE+Fk7EVwjAMRM8TQJEmS0DBBtAwBEtQwBBkCBqGoIEhsgFNGrKDeOdEjuw4Rk1eLN33WbIdAEEmROJl51yuDFyVtFgrVVTKZwEqfAnQAjiPm+dcRQAVfkchnRCg33sCYn0ABLsd0NeTiACFfAC8DSQLoFS6AUDQFQCFDBX7GhHMAPIE3HFqNkGHOhZWAvSuAFC/jlvbkIv/q9AUADdz4Ad8g3xwHHvtBBPNwhEUMHYuAuwArJgoAU5mZm3iIAAAuO2CAwLM4GcOyKeLHIC5cBc2A2gGWA8reiOjMdqGLz2cv1c5GdzkKHmZWhccpEJr0xbn6n64M6oBwREDxAAAAABJRU5ErkJggg==");
-ModAPI.meta.description("EaglerForge port of the bukkit BlockLook plugin by GeorgeNotFound. Use /blocklook in a single-player world to toggle the plugin.");
+// ModAPI.meta.title("BlockLook");
+// ModAPI.meta.credits("Made with ❤️ by ZXMushroom63");
+// ModAPI.meta.icon("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAPlJREFUOE+Fk7EVwjAMRM8TQJEmS0DBBtAwBEtQwBBkCBqGoIEhsgFNGrKDeOdEjuw4Rk1eLN33WbIdAEEmROJl51yuDFyVtFgrVVTKZwEqfAnQAjiPm+dcRQAVfkchnRCg33sCYn0ABLsd0NeTiACFfAC8DSQLoFS6AUDQFQCFDBX7GhHMAPIE3HFqNkGHOhZWAvSuAFC/jlvbkIv/q9AUADdz4Ad8g3xwHHvtBBPNwhEUMHYuAuwArJgoAU5mZm3iIAAAuO2CAwLM4GcOyKeLHIC5cBc2A2gGWA8reiOjMdqGLz2cv1c5GdzkKHmZWhccpEJr0xbn6n64M6oBwREDxAAAAABJRU5ErkJggg==");
+// ModAPI.meta.description("EaglerForge port of the bukkit BlockLook plugin by GeorgeNotFound. Use /blocklook in a single-player world to toggle the plugin.");
 ModAPI.dedicatedServer.appendCode(function () {
     var worldMethodMap = ModAPI.reflect.getClassById("net.minecraft.world.World").methods;
     var rayTraceMethod = worldMethodMap[Object.keys(worldMethodMap).filter(key => {
@@ -62,10 +62,16 @@ ModAPI.dedicatedServer.appendCode(function () {
             console.log("trace complete.");
             if (hitResult) {
                 console.log("Attempting to set world state.");
-                var blockPos = blockPosConstructor(hitResult.$hitVec.$xCoord, hitResult.$hitVec.$yCoord, hitResult.$hitVec.$zCoord);
+                var blockPos = blockPosConstructor(Math.round(hitResult.$hitVec.$xCoord), Math.round(hitResult.$hitVec.$yCoord), Math.round(hitResult.$hitVec.$zCoord));
                 var blockType = blockTypesList[Math.floor(Math.random() * blockTypesList.length)];
-                blockType = ModAPI.blocks[blockType];
-                pair.world.setBlockState(blockPos, blockStateConstructor(blockType.getRef(), ModAPI.util.makeArray(iproperty, [])), 0);
+                blockType = ModAPI.blocks["dirt"]; //blockType
+                var block = blockStateConstructor(blockType.getRef(), ModAPI.util.makeArray(iproperty, []));
+                console.log(blockPos);
+                console.log(block);
+                ModAPI.freezeCallstack();
+                pair.world.setBlockState(blockPos, block, 0);
+                ModAPI.unfreezeCallstack();
+                console.log("Set world state.");
             }
             console.log("sub complete");
         });

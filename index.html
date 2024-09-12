@@ -249,7 +249,7 @@ var main;(function(){`
             `return $rt_currentNativeThread;`,
             (match) => {
               return (
-                `if(ModAPI.hooks.freezeCallstack){return {push: (a)=>{}, pop: ()=>{console.warn("Frozen stack was popped, context is now unstable.")}}};` +
+                `if(ModAPI.hooks.freezeCallstack){return {isResuming: ()=>{false}, isSuspending: ()=>{false}, push: (a)=>{}, pop: ()=>{console.warn("Frozen stack was popped, context is now unstable.")}}};` +
                 match
               );
             }

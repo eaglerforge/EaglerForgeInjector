@@ -65,6 +65,8 @@ Can only be used in the context of the dedicated server. More: [DedicatedServerD
     - Passes an object with properties:
         - `command: String`
             - String representing the command.
+        - `sender: ICommandSender`
+            - Object that sent the command
         - `preventDefault: Boolean`
             - Boolean representing whether or not to cancel processing the command. Default is `false`.
 
