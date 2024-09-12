@@ -31,8 +31,8 @@ ModAPI.addEventListener("lib:libcustomitems:loaded", () => {
 (() => {
     PluginAPI.dedicatedServer.appendCode(function () {
         PluginAPI.addEventListener("processcommand", (event) => {
+            if (!ModAPI.reflect.getClassById("net.minecraft.entity.player.EntityPlayerMP").instanceOf(event.sender.getRef())) {return}
             if (event.command.toLowerCase().startsWith("//wand")) {
-                if (ModAPI.reflect.getClassById("net.minecraft.entity.player.EntityPlayerMP").instanceOf(event.sender.getRef())) {
                     // Create a new ItemStack for the custom item
                     const ItemStackClass = ModAPI.reflect.getClassById("net.minecraft.item.ItemStack");
                     const itemStack = ItemStackClass.constructors[4](
@@ -63,7 +63,6 @@ ModAPI.addEventListener("lib:libcustomitems:loaded", () => {
                     player.addChatMessage(ChatComponentTextClass.constructors[0](ModAPI.util.str(prefix + "A wand has been added to your inventory.")));
                     
                     event.preventDefault = true;
-                }
             }
         });
     });
