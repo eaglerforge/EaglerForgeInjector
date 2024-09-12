@@ -85,5 +85,7 @@
     LibCustomItems.registerItem = function register(data) {
         LCI_registerItem(data);
     }
-    ModAPI.events.callEvent("lib:libcustomitems:loaded", {});
+    ModAPI.addEventListener("load", () => {
+        ModAPI.events.callEvent("lib:libcustomitems:loaded", {});
+    });
 })();
