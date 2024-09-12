@@ -6,6 +6,8 @@
     ModAPI.meta.description("Library to make adding basic custom items easier.");
     ModAPI.events.newEvent("lib:libcustomitems:loaded");
     function libServerside() {
+        var packetblockchange = ModAPI.reflect.getClassByName("S23PacketBlockChange").constructors.find(x => {return x.length === 2});
+        var sendPacket = ModAPI.reflect.getClassByName("NetHandlerPlayServer").methods.sendPacket.method;
         globalThis.LCI_REGISTRY ||= [];
         globalThis.LCI_RMBEVENTS ||= {};
         globalThis.LCI_LMBEVENTS ||= {};
@@ -45,7 +47,6 @@
         var digName = ModAPI.util.getMethodFromPackage("net.minecraft.network.NetHandlerPlayServer", "processPlayerDigging");
         var oldDig = ModAPI.hooks.methods[digName];
         ModAPI.hooks.methods[digName] = function ($this, packet) {
-            console.log(packet);
             if ($this?.$playerEntity?.$inventory && $this.$playerEntity.$inventory.$getCurrentItem()) {
                 var item = $this.$playerEntity.$inventory.$getCurrentItem();
                 if (item.$stackTagCompound && item.$stackTagCompound.$hasKey(ModAPI.util.str("display"), 10)) {
@@ -59,7 +60,11 @@
                             }
                             var statusTag = Object.keys(packet.$status).find(x => { return x.startsWith("$name") });
                             var positionTag = Object.keys(packet).filter(x => { return x.startsWith("$position") })[0];
-                            if (ModAPI.util.unstr(packet.$status[statusTag]) !== "START_DESTROY_BLOCK") {
+                            var stat = ModAPI.util.unstr(packet.$status[statusTag]);
+                            if (stat !== "START_DESTROY_BLOCK") {
+                                if (stat === "STOP_DESTROY_BLOCK") {
+                                    sendPacket($this, packetblockchange($this.$serverController.$worldServerForDimension($this.$playerEntity.$dimension), packet[positionTag]));
+                                }
                                 return 0;
                             }
 
