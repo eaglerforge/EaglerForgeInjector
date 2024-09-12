@@ -43,11 +43,17 @@ ModAPI.dedicatedServer.appendCode(function () {
             event.preventDefault = true;
         }
     });
+    var t = 0;
     ModAPI.addEventListener("tick", () => {
+        t++;
+        if (t > 2) {
+            t = 0;
+        } else {
+            return;
+        }
         if (!active) {
             return;
         }
-        active = false; //Don't run every tick, for debugging purposes.
         var playerEntities = getPlayerEntitiesAndTheirWorld();
         playerEntities.forEach(pair => {
             var start = pair.player.getPositionEyes(1).getRef();
@@ -58,12 +64,14 @@ ModAPI.dedicatedServer.appendCode(function () {
             lookVector.addVector(start.$xCoord, start.$yCoord, start.$zCoord);
             var hitResult = rayTraceMethod(pair.world.getRef(), start, lookVector.getRef(), 0);
             if (hitResult) {
-                var blockPos = blockPosConstructor(Math.round(hitResult.$hitVec.$xCoord), Math.round(hitResult.$hitVec.$yCoord), Math.round(hitResult.$hitVec.$zCoord));
+                var blockPos = blockPosConstructor(parseInt(hitResult.$hitVec.$xCoord), parseInt(hitResult.$hitVec.$yCoord), parseInt(hitResult.$hitVec.$zCoord));
                 var blockType = blockTypesList[Math.floor(Math.random() * blockTypesList.length)];
                 blockType = ModAPI.blocks[blockType];
-                console.log(blockType);
+                if (!blockType.fullBlock) {
+                    return;
+                }
+                console.log(ModAPI.util.unstr(blockType.unlocalizedName.getRef()));
                 var block = blockType.getDefaultState().getRef();
-                console.log(block, blockPos);
                 pair.world.setBlockState(blockPos, block, 3);
             }
         });

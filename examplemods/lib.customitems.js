@@ -7,7 +7,8 @@
     ModAPI.events.newEvent("lib:libcustomitems:loaded");
     function libServerside() {
         globalThis.LCI_REGISTRY ||= [];
-        globalThis.LCI_ACTIONREGISTRY ||= {};
+        globalThis.LCI_RMBEVENTS ||= {};
+        globalThis.LCI_LMBEVENTS ||= {};
         var useName = ModAPI.util.getMethodFromPackage("net.minecraft.network.NetHandlerPlayServer", "processPlayerBlockPlacement");
         var oldUse = ModAPI.hooks.methods[useName];
         ModAPI.hooks.methods[useName] = function ($this, packet) {
@@ -18,16 +19,22 @@
                     if (displayTag.$hasKey(ModAPI.util.str("Lore"), 9)) {
                         var loreTag = displayTag.$getTag(ModAPI.util.str("Lore"));
                         if (loreTag.$tagCount() > 0 && globalThis.LCI_REGISTRY.includes(ModAPI.util.ustr(loreTag.$getStringTagAt(0)))) {
-                            var cid = loreTag.$getStringTagAt(0);
+                            var cid = ModAPI.util.ustr(loreTag.$getStringTagAt(0));
+                            if (!globalThis.LCI_RMBEVENTS[cid]) {
+                                return oldUse.apply(this, [$this, packet]);
+                            }
                             var positionTag = Object.keys(packet).filter(x => { return x.startsWith("$position") })[0];
                             if (packet[positionTag].$x === -1 && packet[positionTag].$y === -1 && packet[positionTag].$z === -1) {
                                 return 0;
                             }
-                            globalThis.LCI_ACTIONREGISTRY[cid].call(globalThis,
+                            var r = globalThis.LCI_RMBEVENTS[cid].call(globalThis,
                                 new Proxy($this.$playerEntity, ModAPI.util.TeaVM_to_Recursive_BaseData_ProxyConf),
                                 new Proxy($this.$serverController.$worldServerForDimension($this.$playerEntity.$dimension), ModAPI.util.TeaVM_to_Recursive_BaseData_ProxyConf),
                                 new Proxy(item, ModAPI.util.TeaVM_to_Recursive_BaseData_ProxyConf),
                                 new Proxy(packet[positionTag], ModAPI.util.TeaVM_to_Recursive_BaseData_ProxyConf));
+                            if (!r) {
+                                return oldUse.apply(this, [$this, packet]);
+                            }
                             return 0;
                         }
                     }
@@ -35,12 +42,54 @@
             }
             return oldUse.apply(this, [$this, packet]);
         }
+        var digName = ModAPI.util.getMethodFromPackage("net.minecraft.network.NetHandlerPlayServer", "processPlayerDigging");
+        var oldDig = ModAPI.hooks.methods[digName];
+        ModAPI.hooks.methods[digName] = function ($this, packet) {
+            console.log(packet);
+            if ($this?.$playerEntity?.$inventory && $this.$playerEntity.$inventory.$getCurrentItem()) {
+                var item = $this.$playerEntity.$inventory.$getCurrentItem();
+                if (item.$stackTagCompound && item.$stackTagCompound.$hasKey(ModAPI.util.str("display"), 10)) {
+                    var displayTag = item.$stackTagCompound.$getCompoundTag(ModAPI.util.str("display"));
+                    if (displayTag.$hasKey(ModAPI.util.str("Lore"), 9)) {
+                        var loreTag = displayTag.$getTag(ModAPI.util.str("Lore"));
+                        if (loreTag.$tagCount() > 0 && globalThis.LCI_REGISTRY.includes(ModAPI.util.ustr(loreTag.$getStringTagAt(0)))) {
+                            var cid = ModAPI.util.ustr(loreTag.$getStringTagAt(0));
+                            if (!globalThis.LCI_LMBEVENTS[cid]) {
+                                return oldDig.apply(this, [$this, packet]);
+                            }
+                            var statusTag = Object.keys(packet.$status).find(x => { return x.startsWith("$name") });
+                            var positionTag = Object.keys(packet).filter(x => { return x.startsWith("$position") })[0];
+                            if (ModAPI.util.unstr(packet.$status[statusTag]) !== "START_DESTROY_BLOCK") {
+                                return 0;
+                            }
+
+                            var r = globalThis.LCI_LMBEVENTS[cid].call(globalThis,
+                                new Proxy($this.$playerEntity, ModAPI.util.TeaVM_to_Recursive_BaseData_ProxyConf),
+                                new Proxy($this.$serverController.$worldServerForDimension($this.$playerEntity.$dimension), ModAPI.util.TeaVM_to_Recursive_BaseData_ProxyConf),
+                                new Proxy(item, ModAPI.util.TeaVM_to_Recursive_BaseData_ProxyConf),
+                                new Proxy(packet[positionTag], ModAPI.util.TeaVM_to_Recursive_BaseData_ProxyConf));
+                            if (!r) {
+                                return oldDig.apply(this, [$this, packet]);
+                            }
+                            return 0;
+                        }
+                    }
+                }
+            }
+            return oldDig.apply(this, [$this, packet]);
+        }
     }
     function LCI_registerItem(data) {
         globalThis.LCI_REGISTRY ||= [];
-        globalThis.LCI_ACTIONREGISTRY ||= {};
+        globalThis.LCI_RMBEVENTS ||= {};
+        globalThis.LCI_LMBEVENTS ||= {};
         globalThis.LCI_REGISTRY.push(data.tag);
-        globalThis.LCI_ACTIONREGISTRY[data.tag] = new Function("user", "world", "itemstack", "blockpos", data.onRightClickGround);
+        if (data.onRightClickGround) {
+            globalThis.LCI_RMBEVENTS[data.tag] = new Function("user", "world", "itemstack", "blockpos", data.onRightClickGround);
+        }
+        if (data.onLeftClickGround) {
+            globalThis.LCI_LMBEVENTS[data.tag] = new Function("user", "world", "itemstack", "blockpos", data.onLeftClickGround);
+        }
         var ObjectClass = ModAPI.reflect.getClassById("java.lang.Object").class;
         function ToChar(char) {
             return ModAPI.reflect.getClassById("java.lang.Character").staticMethods.valueOf.method(char[0].charCodeAt(0));
