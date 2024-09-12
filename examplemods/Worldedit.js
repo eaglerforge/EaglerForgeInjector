@@ -22,7 +22,7 @@ ModAPI.addEventListener("lib:libcustomitems:loaded", () => {
     PluginAPI.dedicatedServer.appendCode(function () {
         PluginAPI.addEventListener("processcommand", (event) => {
             if (event.command.toLowerCase().startsWith("//wand")) {
-                event.sender.sendChatMessage(ModAPI.util.str("/give @p wooden_axe 1 0 {display:{Name:"Wand",Lore:["worledit:wand"]}}"))
+                event.sender.sendChatMessage(ModAPI.util.str(`/give @p wooden_axe 1 0 {display:{Name:"Wand",Lore:["worledit:wand"]}}`))
                 event.sender.addChatMessage(ModAPI.reflect.getClassById("net.minecraft.util.ChatComponentText").constructors[0](ModAPI.util.str(prefix + "a wand has been added to your inventory")));
                 event.preventDefault = true;
             }
