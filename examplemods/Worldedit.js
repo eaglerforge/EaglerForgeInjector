@@ -28,7 +28,7 @@ ModAPI.addEventListener("lib:libcustomitems:loaded", () => {
 
         // Send chat message to player
         user.addChatMessage(ModAPI.reflect.getClassById("net.minecraft.util.ChatComponentText").constructors[0](ModAPI.util.str(
-            ModAPI.util.str(prefix + "Pos #2 selected at: " + pos.$x + ", " + pos.$y + ", " + pos.$z)
+            ModAPI.util.str(prefix + "Pos #2 selected at: " + pos.$x + ", " + pos.$y + ", " + pos.$z))
         ));
         return true;
         `,
@@ -43,7 +43,7 @@ ModAPI.addEventListener("lib:libcustomitems:loaded", () => {
 
         // Send chat message to player
         user.addChatMessage(ModAPI.reflect.getClassById("net.minecraft.util.ChatComponentText").constructors[0](ModAPI.util.str(
-            ModAPI.util.str(prefix + "Pos #1 selected at: " + pos.$x + ", " + pos.$y + ", " + pos.$z)
+            ModAPI.util.str(prefix + "Pos #1 selected at: " + pos.$x + ", " + pos.$y + ", " + pos.$z))
         ));
         return true;
         `
