@@ -61,6 +61,9 @@ ModAPI.dedicatedServer.appendCode(function () {
                 var blockPos = blockPosConstructor(Math.round(hitResult.$hitVec.$xCoord), Math.round(hitResult.$hitVec.$yCoord), Math.round(hitResult.$hitVec.$zCoord));
                 var blockType = blockTypesList[Math.floor(Math.random() * blockTypesList.length)];
                 blockType = ModAPI.blocks[blockType];
+                console.log(blockType);
+                var block = blockType.getDefaultState().getRef();
+                console.log(block, blockPos);
                 pair.world.setBlockState(blockPos, block, 3);
             }
         });

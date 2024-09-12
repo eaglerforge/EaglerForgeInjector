@@ -221,7 +221,7 @@
     }
     ModAPI.reflect.getClassByName = function (className) {
         var classKeys = Object.keys(ModAPI.hooks._classMap);
-        var key = classKeys.filter(k => {return ModAPI.hooks._classMap[k].name === className})[0];
+        var key = classKeys.filter(k => { return ModAPI.hooks._classMap[k].name === className })[0];
         return key ? ModAPI.hooks._classMap[key] : null;
     }
     var reloadDeprecationWarnings = 0;
@@ -364,7 +364,7 @@
         if (!callback || typeof callback !== "function") {
             throw new Error("[ModAPI] Invalid callback!");
         }
-        if (ModAPI.events.types.includes(name) || name.startsWith("custom:") || name.startsWith("lib:")) {
+        if (ModAPI.events.types.includes(name) || name.startsWith("custom:")) {
             if (!Array.isArray(ModAPI.events.listeners[name])) {
                 ModAPI.events.listeners[name] = [];
             }
@@ -406,6 +406,15 @@
     };
 
     ModAPI.events.callEvent = function callEvent(name, data) {
+        if (ModAPI.events.types.includes(name) && name.startsWith("lib:")) {
+            if (Array.isArray(ModAPI.events.listeners[name])) {
+                ModAPI.events.listeners[name].forEach((func) => {
+                    func({});
+                });
+            }
+            ModAPI.events.lib_map[name] = true;
+            return;
+        }
         if (
             !ModAPI.events.types.includes(name) ||
             !Array.isArray(ModAPI.events.listeners[name])
@@ -425,19 +434,12 @@
             console.error("Please report this bug to the repo.");
             return;
         }
-        if (name.startsWith("lib:")) {
-            ModAPI.events.listeners[name].forEach((func) => {
-                func({});
-            });
-            ModAPI.events.lib_map[name] = true;
-        } else {
-            ModAPI.events.listeners[name].forEach((func) => {
-                func(data);
-            });
-            ModAPI.events.listeners.event.forEach((func) => {
-                func({ event: name, data: data });
-            });
-        }
+        ModAPI.events.listeners[name].forEach((func) => {
+            func(data);
+        });
+        ModAPI.events.listeners.event.forEach((func) => {
+            func({ event: name, data: data });
+        });
     };
     ModAPI.events.newEvent("update", "client");
 
@@ -497,11 +499,11 @@
         return ModAPI.hooks._teavm.$rt_createArrayFromData(arrayClass, arrayContents);
     }
 
-    ModAPI.util.hashCode = function hashCode(string){
+    ModAPI.util.hashCode = function hashCode(string) {
         var hash = 0;
         for (var i = 0; i < string.length; i++) {
             var code = string.charCodeAt(i);
-            hash = ((hash<<5)-hash)+code;
+            hash = ((hash << 5) - hash) + code;
             hash = hash & hash;
         }
         return Math.floor(Math.abs(hash)) + "";
@@ -654,7 +656,7 @@
         var msg = Math.random() < 0.05 ? "Plugins" : "Mods";
 
         // Find the right constructor. (int id, int x, int y, int width, int height, String buttonText);
-        var btnConstructor = ModAPI.hooks._classMap['nmcg_GuiButton'].constructors.filter(c => {return c.length === 6})[0];
+        var btnConstructor = ModAPI.hooks._classMap['nmcg_GuiButton'].constructors.filter(c => { return c.length === 6 })[0];
         var btn = btnConstructor(9635329, 0, args[0].$height8 - 21, 100, 20, ModAPI.util.str(msg));
         args[0].$buttonList.$add(btn);
 
