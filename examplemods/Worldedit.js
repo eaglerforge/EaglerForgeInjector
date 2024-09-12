@@ -21,7 +21,7 @@ ModAPI.addEventListener("lib:libcustomitems:loaded", () => {
         onRightClickGround: `/*/user, world, itemstack, blockpos/*/
         const prefix = "§7[§4worldedit§7] ";
         const pos = blockpos;
-        const positions = globalThis.playerPositions[player.getName()] ||= {};
+        const positions = globalThis.playerPositions[user.getName()] ||= {};
         
         // Save position #2
         positions.pos2 = pos;
@@ -34,9 +34,8 @@ ModAPI.addEventListener("lib:libcustomitems:loaded", () => {
         `,
         onLeftClickGround: `/*/user, world, itemstack, blockpos/*/
         const prefix = "§7[§4worldedit§7] ";
-        const player = user;
         const pos = blockpos;
-        const positions = globalThis.playerPositions[player.getName()] ||= {};
+        const positions = globalThis.playerPositions[user.getName()] ||= {};
         
         // Save position #1
         positions.pos1 = pos;
@@ -88,6 +87,7 @@ ModAPI.addEventListener("lib:libcustomitems:loaded", () => {
                 event.preventDefault = true;
             }
             if (event.command.toLowerCase().startsWith("//set")) {
+                const player = event.sender;
                 // Parse command parameters
                 const params = event.command.substring("//set ".length);
                 if (!params) {
@@ -97,16 +97,15 @@ ModAPI.addEventListener("lib:libcustomitems:loaded", () => {
                 }
     
                 const blockType = params;
-                const player = event.sender;
                 const positions = globalThis.playerPositions[player.getName()];
     
                 // Validate block type and positions
-                const block = ModAPI.blocks[blockType];
-                if (!block) {
+                if (typeof ModAPI.blocks[blockType] !== 'undefined') {
                     player.addChatMessage(ChatComponentTextClass.constructors[0](ModAPI.util.str(prefix + "§cInvalid block type.")));
                     event.preventDefault = true;
                     return;
                 }
+                const block = ModAPI.blocks[blockType];
     
                 if (!positions || !positions.pos1 || !positions.pos2) {
                     player.addChatMessage(ChatComponentTextClass.constructors[0](ModAPI.util.str(prefix + "§cPositions not set. Use left and right click to set positions.")));
