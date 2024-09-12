@@ -61,11 +61,18 @@
                             var statusTag = Object.keys(packet.$status).find(x => { return x.startsWith("$name") });
                             var positionTag = Object.keys(packet).filter(x => { return x.startsWith("$position") })[0];
                             var stat = ModAPI.util.unstr(packet.$status[statusTag]);
-                            if (stat !== "START_DESTROY_BLOCK") {
-                                if (stat === "STOP_DESTROY_BLOCK") {
+                            if ($this.$playerEntity.$capabilities.$isCreativeMode){
+                                if (stat === "START_DESTROY_BLOCK") {
                                     sendPacket($this, packetblockchange($this.$serverController.$worldServerForDimension($this.$playerEntity.$dimension), packet[positionTag]));
+                                    return 0;
                                 }
-                                return 0;
+                            } else {
+                                if (stat !== "START_DESTROY_BLOCK") {
+                                    if (stat === "STOP_DESTROY_BLOCK") {
+                                        sendPacket($this, packetblockchange($this.$serverController.$worldServerForDimension($this.$playerEntity.$dimension), packet[positionTag]));
+                                    }
+                                    return 0;
+                                }
                             }
 
                             var r = globalThis.LCI_LMBEVENTS[cid].call(globalThis,
