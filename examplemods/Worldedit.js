@@ -7,6 +7,17 @@ ModAPI.addEventListener("lib:libcustomitems:loaded", () => {
         base: "wooden_axe",
         name: "Wand",
         qty: 1,
+        recipe: [
+            "   ",
+            " # ",
+            "   "
+        ],
+        recipeLegend: {
+            "#": {
+                "type": "item",
+                "id": "wooden_axe"
+            }
+        },
         onRightClickGround: `/*/user, world, itemstack, blockpos/*/
         itemstack.stackSize -= 1;
         if (itemstack.stackSize < 1) {
