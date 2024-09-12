@@ -1,0 +1,5 @@
+*/*/ ZXMushroom63's rather large to do list */*/
+
+Add makeItemStack to LCI [Todo]
+Fix blocklook.js [In progress]
+Fix setblocktest.js [In progress]

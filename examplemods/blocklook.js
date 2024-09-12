@@ -10,9 +10,7 @@ ModAPI.dedicatedServer.appendCode(function () {
         return key.startsWith("rayTraceBlocks") && worldMethodMap[key].method.length === 4;
     })].method;
     var blockPosConstructor = ModAPI.reflect.getClassById("net.minecraft.util.BlockPos").constructors.find((x) => { return x.length === 3 });
-    var blockStateConstructor = ModAPI.reflect.getClassByName("BlockState").constructors[0];
     var blockTypesList = Object.keys(ModAPI.blocks);
-    var iproperty = ModAPI.reflect.getClassById("net.minecraft.block.property.IProperty").class;
     function getPlayerEntitiesAndTheirWorld() {
         var out = [];
         ModAPI.server.worldServers.forEach(x => {
@@ -59,21 +57,12 @@ ModAPI.dedicatedServer.appendCode(function () {
             lookVector.zCoord *= 50;
             lookVector.addVector(start.$xCoord, start.$yCoord, start.$zCoord);
             var hitResult = rayTraceMethod(pair.world.getRef(), start, lookVector.getRef(), 0);
-            console.log("trace complete.");
             if (hitResult) {
-                console.log("Attempting to set world state.");
                 var blockPos = blockPosConstructor(Math.round(hitResult.$hitVec.$xCoord), Math.round(hitResult.$hitVec.$yCoord), Math.round(hitResult.$hitVec.$zCoord));
                 var blockType = blockTypesList[Math.floor(Math.random() * blockTypesList.length)];
-                blockType = ModAPI.blocks["dirt"]; //blockType
-                var block = blockStateConstructor(blockType.getRef(), ModAPI.util.makeArray(iproperty, []));
-                console.log(blockPos);
-                console.log(block);
-                ModAPI.freezeCallstack();
-                pair.world.setBlockState(blockPos, block, 0);
-                ModAPI.unfreezeCallstack();
-                console.log("Set world state.");
+                blockType = ModAPI.blocks[blockType];
+                pair.world.setBlockState(blockPos, block, 3);
             }
-            console.log("sub complete");
         });
     });
 });
