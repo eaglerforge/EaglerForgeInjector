@@ -1,9 +1,8 @@
 //WIP Blocklook plugin
-//If someone can fix the crash, thank you and also i'll add you to credits.
-// ModAPI.meta.title("BlockLook");
-// ModAPI.meta.credits("Made with ❤️ by ZXMushroom63");
-// ModAPI.meta.icon("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAPlJREFUOE+Fk7EVwjAMRM8TQJEmS0DBBtAwBEtQwBBkCBqGoIEhsgFNGrKDeOdEjuw4Rk1eLN33WbIdAEEmROJl51yuDFyVtFgrVVTKZwEqfAnQAjiPm+dcRQAVfkchnRCg33sCYn0ABLsd0NeTiACFfAC8DSQLoFS6AUDQFQCFDBX7GhHMAPIE3HFqNkGHOhZWAvSuAFC/jlvbkIv/q9AUADdz4Ad8g3xwHHvtBBPNwhEUMHYuAuwArJgoAU5mZm3iIAAAuO2CAwLM4GcOyKeLHIC5cBc2A2gGWA8reiOjMdqGLz2cv1c5GdzkKHmZWhccpEJr0xbn6n64M6oBwREDxAAAAABJRU5ErkJggg==");
-// ModAPI.meta.description("EaglerForge port of the bukkit BlockLook plugin by GeorgeNotFound. Use /blocklook in a single-player world to toggle the plugin.");
+ModAPI.meta.title("BlockLook");
+ModAPI.meta.credits("Made with ❤️ by ZXMushroom63");
+ModAPI.meta.icon("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAPlJREFUOE+Fk7EVwjAMRM8TQJEmS0DBBtAwBEtQwBBkCBqGoIEhsgFNGrKDeOdEjuw4Rk1eLN33WbIdAEEmROJl51yuDFyVtFgrVVTKZwEqfAnQAjiPm+dcRQAVfkchnRCg33sCYn0ABLsd0NeTiACFfAC8DSQLoFS6AUDQFQCFDBX7GhHMAPIE3HFqNkGHOhZWAvSuAFC/jlvbkIv/q9AUADdz4Ad8g3xwHHvtBBPNwhEUMHYuAuwArJgoAU5mZm3iIAAAuO2CAwLM4GcOyKeLHIC5cBc2A2gGWA8reiOjMdqGLz2cv1c5GdzkKHmZWhccpEJr0xbn6n64M6oBwREDxAAAAABJRU5ErkJggg==");
+ModAPI.meta.description("EaglerForge port of the bukkit BlockLook plugin by GeorgeNotFound. Use /blocklook in a single-player world to toggle the plugin.");
 ModAPI.dedicatedServer.appendCode(function () {
     var worldMethodMap = ModAPI.reflect.getClassById("net.minecraft.world.World").methods;
     var rayTraceMethod = worldMethodMap[Object.keys(worldMethodMap).filter(key => {
@@ -57,7 +56,7 @@ ModAPI.dedicatedServer.appendCode(function () {
         var playerEntities = getPlayerEntitiesAndTheirWorld();
         playerEntities.forEach(pair => {
             var start = pair.player.getPositionEyes(1).getRef();
-            var lookVector = pair.player.getLook(1);
+            var lookVector = pair.player.getLookVec();
             lookVector.xCoord *= 50;
             lookVector.yCoord *= 50;
             lookVector.zCoord *= 50;
