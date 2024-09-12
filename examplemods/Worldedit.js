@@ -1,5 +1,7 @@
-//WIP worldedit by radmanplays
-
+ModAPI.meta.title("Worldedit");
+ModAPI.meta.credits("By radmanplays");
+ModAPI.meta.icon("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAcUlEQVR42mNgoAcw1xT4D8Jka25LVQNjkg2Bac4OlP9fGqFImgHImmHY00z0f4af3H+SDADZDNIc6SwJpjXkuP+THHggm5ENIckrMGeDbIZ5hWgDQJo709XhziYpOpFtJjnuKdaM7OwhYjMIkG0zpQAAtFpjWIvu2dwAAAAASUVORK5CYII=");
+ModAPI.meta.description("World eaglercraft mod.");
 ModAPI.addEventListener("lib:libcustomitems:loaded", () => {
     console.log("Registered worldedit custom items.");
     LibCustomItems.registerItem({
