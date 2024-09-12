@@ -20,7 +20,6 @@ ModAPI.addEventListener("lib:libcustomitems:loaded", () => {
         },
         onRightClickGround: `/*/user, world, itemstack, blockpos/*/
         const prefix = "§7[§4worldedit§7] ";
-        const player = user;
         const pos = blockpos;
         const positions = globalThis.playerPositions[player.getName()] ||= {};
         
@@ -28,7 +27,7 @@ ModAPI.addEventListener("lib:libcustomitems:loaded", () => {
         positions.pos2 = pos;
 
         // Send chat message to player
-        player.addChatMessage(ModAPI.reflect.getClassById("net.minecraft.util.ChatComponentText").constructors[0](
+        user.addChatMessage(ModAPI.reflect.getClassById("net.minecraft.util.ChatComponentText").constructors[0](ModAPI.util.str(
             ModAPI.util.str(prefix + "Pos #2 selected at: " + pos.$x + ", " + pos.$y + ", " + pos.$z)
         ));
         return true;
@@ -43,7 +42,7 @@ ModAPI.addEventListener("lib:libcustomitems:loaded", () => {
         positions.pos1 = pos;
 
         // Send chat message to player
-        player.addChatMessage(ModAPI.reflect.getClassById("net.minecraft.util.ChatComponentText").constructors[0](
+        user.addChatMessage(ModAPI.reflect.getClassById("net.minecraft.util.ChatComponentText").constructors[0](ModAPI.util.str(
             ModAPI.util.str(prefix + "Pos #1 selected at: " + pos.$x + ", " + pos.$y + ", " + pos.$z)
         ));
         return true;
@@ -90,27 +89,27 @@ ModAPI.addEventListener("lib:libcustomitems:loaded", () => {
             }
             if (event.command.toLowerCase().startsWith("//set")) {
                 // Parse command parameters
-                const params = event.command.split(" ");
-                if (params.length !== 2) {
-                    event.sender.addChatMessage(prefix + "§cUsage: //set <block_type>");
+                const params = event.command.substring("//set ".length);
+                if (!params) {
+                    player.addChatMessage(ChatComponentTextClass.constructors[0](ModAPI.util.str(prefix + "§cUsage: //set <block_type>")));
                     event.preventDefault = true;
                     return;
                 }
     
-                const blockType = params[1];
+                const blockType = params;
                 const player = event.sender;
                 const positions = globalThis.playerPositions[player.getName()];
     
                 // Validate block type and positions
                 const block = ModAPI.blocks[blockType];
                 if (!block) {
-                    player.addChatMessage(prefix + "§cInvalid block type.");
+                    player.addChatMessage(ChatComponentTextClass.constructors[0](ModAPI.util.str(prefix + "§cInvalid block type.")));
                     event.preventDefault = true;
                     return;
                 }
     
                 if (!positions || !positions.pos1 || !positions.pos2) {
-                    player.addChatMessage(prefix + "§cPositions not set. Use left and right click to set positions.");
+                    player.addChatMessage(ChatComponentTextClass.constructors[0](ModAPI.util.str(prefix + "§cPositions not set. Use left and right click to set positions.")));
                     event.preventDefault = true;
                     return;
                 }
@@ -137,7 +136,7 @@ ModAPI.addEventListener("lib:libcustomitems:loaded", () => {
                 }
     
                 // Notify the sender
-                player.addChatMessage(prefix + "§aBlocks set successfully.");
+                player.addChatMessage(ChatComponentTextClass.constructors[0](ModAPI.util.str(prefix + "§aBlocks set successfully.")));
     
                 event.preventDefault = true;
         }
