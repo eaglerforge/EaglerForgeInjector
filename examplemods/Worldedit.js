@@ -24,7 +24,7 @@ ModAPI.addEventListener("lib:libcustomitems:loaded", () => {
         globalThis.pos2x = blockpos.x
         globalThis.pos2y = blockpos.y
         globalThis.pos2z = blockpos.z
-        console.log("rightclick: " blockpos.x + ", " + blockpos.y + ", " + blockpos.z)
+        console.log("rightclick: " + blockpos.x + ", " + blockpos.y + ", " + blockpos.z)
         // Send chat message to player
         user.addChatMessage(ModAPI.reflect.getClassById("net.minecraft.util.ChatComponentText").constructors[0](ModAPI.util.str(prefix + "Pos #2 set to: " + blockpos.x + ", " + blockpos.y + ", " + blockpos.z)))
         return true;
@@ -36,7 +36,7 @@ ModAPI.addEventListener("lib:libcustomitems:loaded", () => {
         globalThis.posy = blockpos.y
         globalThis.posz = blockpos.z
         
-        console.log("leftclick: " blockpos.x + ", " + blockpos.y + ", " + blockpos.z)
+        console.log("leftclick: " + blockpos.x + ", " + blockpos.y + ", " + blockpos.z)
         // Send chat message to player
         user.addChatMessage(ModAPI.reflect.getClassById("net.minecraft.util.ChatComponentText").constructors[0](ModAPI.util.str(prefix + "Pos #1 set to: " + blockpos.x + ", " + blockpos.y + ", " + blockpos.z)))
         return true;
