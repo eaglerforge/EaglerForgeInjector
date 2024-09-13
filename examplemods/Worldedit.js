@@ -133,7 +133,7 @@ ModAPI.addEventListener("lib:libcustomitems:loaded", () => {
         }
         if (event.command.toLowerCase().startsWith("//walls")) {
                 const args = event.command.substring("//walls ".length);
-                var username = (event.sender.getName());
+                var username = ModAPI.util.str(event.sender.getName());
 
                 if (args) {
                     const blockTypeName = args;
