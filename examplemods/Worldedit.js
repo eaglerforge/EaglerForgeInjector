@@ -20,10 +20,15 @@ ModAPI.addEventListener("lib:libcustomitems:loaded", () => {
         },
         onRightClickGround: `/*/user, world, itemstack, blockpos/*/
         const prefix = "§7[§4worldedit§7] ";
+        var username = ModAPI.util.str(user.getName());
 
-        globalThis.pos2x = blockpos.x
-        globalThis.pos2y = blockpos.y
-        globalThis.pos2z = blockpos.z
+        globalThis.pos2x = {}
+        globalThis.pos2y = {}
+        globalThis.pos2z = {}
+
+        globalThis.pos2x[username] = blockpos.x
+        globalThis.pos2y[username] = blockpos.y
+        globalThis.pos2z[username] = blockpos.z
         console.log("rightclick: " + blockpos.x + ", " + blockpos.y + ", " + blockpos.z)
         // Send chat message to player
         user.addChatMessage(ModAPI.reflect.getClassById("net.minecraft.util.ChatComponentText").constructors[0](ModAPI.util.str(prefix + "Pos #2 set to: " + blockpos.x + ", " + blockpos.y + ", " + blockpos.z)))
@@ -31,12 +36,16 @@ ModAPI.addEventListener("lib:libcustomitems:loaded", () => {
         `,
         onLeftClickGround: `/*/user, world, itemstack, blockpos/*/
         const prefix = "§7[§4worldedit§7] ";
+        var username = ModAPI.util.str(user.getName());
 
-        globalThis.posx = blockpos.x
-        globalThis.posy = blockpos.y
-        globalThis.posz = blockpos.z
+        globalThis.posx = {}
+        globalThis.posy = {}
+        globalThis.posz = {}
+
+        globalThis.posx[username] = blockpos.x
+        globalThis.posy[username] = blockpos.y
+        globalThis.posz[username] = blockpos.z
         
-        console.log("leftclick: " + blockpos.x + ", " + blockpos.y + ", " + blockpos.z)
         // Send chat message to player
         user.addChatMessage(ModAPI.reflect.getClassById("net.minecraft.util.ChatComponentText").constructors[0](ModAPI.util.str(prefix + "Pos #1 set to: " + blockpos.x + ", " + blockpos.y + ", " + blockpos.z)))
         return true;
@@ -84,11 +93,12 @@ ModAPI.addEventListener("lib:libcustomitems:loaded", () => {
             var blockPosConstructor = ModAPI.reflect.getClassById("net.minecraft.util.BlockPos").constructors.find((x) => { return x.length === 3 });
             if (event.command.toLowerCase().startsWith("//set")) {
                 const args = event.command.substring("//set ".length);
+                var username = ModAPI.util.str(event.sender.getName());
         
                 if (args) {
                     const blockTypeName = args
-                    const x1 = globalThis.posx, y1 = globalThis.posy, z1 = globalThis.posz;
-                    const x2 = globalThis.pos2x, y2 = globalThis.pos2y, z2 = globalThis.pos2z;
+                    const x1 = globalThis.posx[username], y1 = globalThis.posy[username], z1 = globalThis.posz[username];
+                    const x2 = globalThis.pos2x[username], y2 = globalThis.pos2y[username], z2 = globalThis.pos2z[username];
         
                     // Validate block and get block type
                     const blockType = ModAPI.blocks[blockTypeName];
@@ -115,12 +125,54 @@ ModAPI.addEventListener("lib:libcustomitems:loaded", () => {
                     }
         
                     // Notify the player that the blocks have been set
-                    event.sender.addChatMessage(ModAPI.reflect.getClassById("net.minecraft.util.ChatComponentText").constructors[0](ModAPI.util.str(prefix + `Set blocks from (${x1}, ${y1}, ${z1}) to (${x2}, ${y2}, ${z2}) to ${blockTypeName}`)));
+                    event.sender.addChatMessage(ModAPI.reflect.getClassById("net.minecraft.util.ChatComponentText").constructors[0](ModAPI.util.str(prefix + `Set blocks to ${blockTypeName}`)));
                 } else{
                     event.sender.addChatMessage(ModAPI.reflect.getClassById("net.minecraft.util.ChatComponentText").constructors[0](ModAPI.util.str(prefix + `Arguments not found!`)));
                 }
                 event.preventDefault = true;
         }
+        if (event.command.toLowerCase().startsWith("//walls")) {
+                const args = event.command.substring("//walls ".length);
+                var username = ModAPI.util.str(event.sender.getName());
+
+                if (args) {
+                    const blockTypeName = args;
+                    const x1 = globalThis.posx[username], y1 = globalThis.posy[username], z1 = globalThis.posz[username];
+                    const x2 = globalThis.pos2x[username], y2 = globalThis.pos2y[username], z2 = globalThis.pos2z[username];
+
+                    // Validate block and get block type
+                    const blockType = ModAPI.blocks[blockTypeName];
+                    if (!blockType) {
+                        event.sender.addChatMessage(ModAPI.reflect.getClassById("net.minecraft.util.ChatComponentText").constructors[0](ModAPI.util.str(prefix + `Invalid block: ${blockTypeName}`)));
+                        event.preventDefault = true;
+                        return;
+                    }
+                    const block = blockType.getDefaultState().getRef();
+
+                    // Get min and max coordinates for the region
+                    const xMin = Math.min(x1, x2), xMax = Math.max(x1, x2);
+                    const yMin = Math.min(y1, y2), yMax = Math.max(y1, y2);
+                    const zMin = Math.min(z1, z2), zMax = Math.max(z1, z2);
+
+                    // Loop through the region and set the walls (exclude interior blocks)
+                    for (let x = xMin; x <= xMax; x++) {
+                        for (let y = yMin; y <= yMax; y++) {
+                            for (let z = zMin; z <= zMax; z++) {
+                                if (x === xMin || x === xMax || z === zMin || z === zMax) {
+                                    const blockPos = blockPosConstructor(x, y, z);
+                                    event.sender.getServerForPlayer().setBlockState(blockPos, block, 3);
+                                }
+                            }
+                        }
+                    }
+
+                    // Notify the player that the walls have been set
+                    event.sender.addChatMessage(ModAPI.reflect.getClassById("net.minecraft.util.ChatComponentText").constructors[0](ModAPI.util.str(prefix + `Walls set to ${blockTypeName}`)));
+                } else {
+                    event.sender.addChatMessage(ModAPI.reflect.getClassById("net.minecraft.util.ChatComponentText").constructors[0](ModAPI.util.str(prefix + `Arguments not found!`)));
+                }
+                event.preventDefault = true;
+            }
         });
     });
 })();
