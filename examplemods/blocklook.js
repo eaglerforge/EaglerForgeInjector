@@ -1,4 +1,6 @@
 //WIP Blocklook plugin
+//Causes call stack implosions occasionally, not sure why.
+//Use with caution
 ModAPI.meta.title("BlockLook");
 ModAPI.meta.credits("Made with ❤️ by ZXMushroom63");
 ModAPI.meta.icon("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAPlJREFUOE+Fk7EVwjAMRM8TQJEmS0DBBtAwBEtQwBBkCBqGoIEhsgFNGrKDeOdEjuw4Rk1eLN33WbIdAEEmROJl51yuDFyVtFgrVVTKZwEqfAnQAjiPm+dcRQAVfkchnRCg33sCYn0ABLsd0NeTiACFfAC8DSQLoFS6AUDQFQCFDBX7GhHMAPIE3HFqNkGHOhZWAvSuAFC/jlvbkIv/q9AUADdz4Ad8g3xwHHvtBBPNwhEUMHYuAuwArJgoAU5mZm3iIAAAuO2CAwLM4GcOyKeLHIC5cBc2A2gGWA8reiOjMdqGLz2cv1c5GdzkKHmZWhccpEJr0xbn6n64M6oBwREDxAAAAABJRU5ErkJggg==");
@@ -87,7 +89,7 @@ ModAPI.dedicatedServer.appendCode(function () {
                 if (!blockType.fullBlock || blockType.needsRandomTick) {
                     return;
                 }
-                console.log("[BlockLook] " + ModAPI.util.unstr(blockType.unlocalizedName.getRef()));
+                //console.log("[BlockLook] " + ModAPI.util.unstr(blockType.unlocalizedName.getRef()));
                 var block = blockType.getDefaultState();
                 pair.world.setBlockState(blockPos, block.getRef(), 2);
             }
