@@ -12,3 +12,6 @@ Incorrectly patching methods with ModAPI.hooks (such as returning `false` instea
 
 Update 13/09/2024:
 Any form of incorrect data type, even passing the wrong values, can cause this sort of hang. I encountered this when trying to set a block in the world to any form of wood or leaf block, without adding iproperties to the tree type.
+
+Update 13/09/2024:
+Calling methods while the TeaVM thread is in a critical transition state (see `ModAPI.util.isCritical()`) will shift the call stack, cause methods to access the incorrect values at runtime, and also cause the stack to implode. Gotta love TeaVM.

@@ -8,8 +8,16 @@ ModAPI.dedicatedServer.appendCode(function () {
     var rayTraceMethod = worldMethodMap[Object.keys(worldMethodMap).filter(key => {
         return key.startsWith("rayTraceBlocks") && worldMethodMap[key].method.length === 4;
     })].method;
-    var blockPosConstructor = ModAPI.reflect.getClassById("net.minecraft.util.BlockPos").constructors.find((x) => { return x.length === 3 });
-    var blockTypesList = Object.keys(ModAPI.blocks);
+    var blockTypesList = [];
+    ModAPI.addEventListener("serverstart", () => {
+        blockTypesList = Object.keys(ModAPI.blocks).filter(key => {
+            var blockType = ModAPI.blocks[key];
+            if (!blockType) {
+                return false;
+            }
+            return blockType.fullBlock && !blockType.needsRandomTick;
+        });
+    });
     function getPlayerEntitiesAndTheirWorld() {
         var out = [];
         ModAPI.server.worldServers.forEach(x => {
@@ -31,11 +39,12 @@ ModAPI.dedicatedServer.appendCode(function () {
     ModAPI.addEventListener("processcommand", (event) => {
         if (event.command.toLowerCase().startsWith("/blocklook")) {
             active = !active;
+            console.log(blockTypesList);
             var playerEntities = getPlayerEntitiesAndTheirWorld();
             playerEntities.forEach(pair => {
                 pair.player.addChatMessage(
                     ModAPI.reflect.getClassById("net.minecraft.util.ChatComponentText").constructors[0](ModAPI.util.str(
-                        "[BlockLook] Toggled to " + (active ? "on" : off)
+                        "[BlockLook] Toggled to " + (active ? "on" : "off")
                     ))
                 )
             });
@@ -45,12 +54,15 @@ ModAPI.dedicatedServer.appendCode(function () {
     var t = 0;
     ModAPI.addEventListener("tick", () => {
         t++;
-        if (t > 20) {
+        if (t > 5) {
             t = 0;
         } else {
             return;
         }
         if (!active) {
+            return;
+        }
+        if (blockTypesList.length < 1) {
             return;
         }
         var playerEntities = getPlayerEntitiesAndTheirWorld();
@@ -63,21 +75,22 @@ ModAPI.dedicatedServer.appendCode(function () {
             lookVector.addVector(start.$xCoord, start.$yCoord, start.$zCoord);
             var hitResult = rayTraceMethod(pair.world.getRef(), start, lookVector.getRef(), 0);
             if (hitResult) {
-                console.log(hitResult);
+                if (ModAPI.util.unstr(hitResult.$typeOfHit.$name5) !== "BLOCK") {
+                    return console.log("Non block collision detected.")
+                }
                 var blockPos = hitResult.$blockPos;
                 if (!pair.world.isBlockLoaded(blockPos)) {
-                    console.log("[BlockLook] Block is not loaded!");
+                    return console.log("[BlockLook] Block is not loaded!");
                 }
                 var blockType = blockTypesList[Math.floor(Math.random() * blockTypesList.length)];
                 blockType = ModAPI.blocks[blockType];
-                if (!blockType.fullBlock) {
+                if (!blockType.fullBlock || blockType.needsRandomTick) {
                     return;
                 }
                 console.log("[BlockLook] " + ModAPI.util.unstr(blockType.unlocalizedName.getRef()));
                 var block = blockType.getDefaultState();
                 pair.world.setBlockState(blockPos, block.getRef(), 2);
-                pair.world.notifyNeighborsRespectDebug(blockPos, block.getRef());
             }
         });
-    });
+    })
 });

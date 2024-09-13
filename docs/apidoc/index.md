@@ -4,7 +4,7 @@ The EaglerForge ModAPI is housed in a global JavaScript object stored on `global
 The global object has the following properties:
  - `ModAPI.player: EntityPlayerSP`
     - Only accessible after `ModAPI.require("player")` is called, this is the local player entity. It is regenerated every time the `update` event is called.
-- `ModAPI.world: WorldClient`
+ - `ModAPI.world: WorldClient`
     - Only accessible after `ModAPI.require("world")` is called, this is the client-side world. It is regenerated every time the `update` event is called.
  - `ModAPI.network: NetHandlerPlayClient`
     - Only accessible after `ModAPI.require("network")` is called, this is the client's networking handler. It is regenerated every time the `update` event is called.

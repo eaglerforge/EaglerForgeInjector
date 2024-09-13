@@ -24,11 +24,16 @@ Methods:
   - Alias: `ModAPI.util.ustr()`
   - Alias: `ModAPI.util.unstring()`
   - Alias: `ModAPI.util.jclStrToJsStr()`
-- `ModAPI.util.getMethodFromPackage(classId: String, methodName: String)`
+- `ModAPI.util.getMethodFromPackage(classId: String, methodName: String) : String`
   - Takes a class id (eg: `net.minecraft.client.Minecraft`) and a method name (eg: `middleClickMouse`) and returns its key in `ModAPI.hooks.methods`.
 - `ModAPI.util.stringToUint16Array(string: String) : Uint16Array`
   - Encodes a string into a uint16array.
 - `ModAPI.util.setStringContent(jclString: java.lang.String, contents: String) : void`
   - Writes a new javascript string into the contents of a java string.
-- `ModAPI.util.getMethodFromPackage(classId: String, methodName: String)`
+- `ModAPI.util.getMethodFromPackage(classId: String, methodName: String) : String`
   - Takes a class id (eg: `net.minecraft.client.Minecraft`) and a method name (eg: `middleClickMouse`) and returns its key in `ModAPI.hooks.methods`.
+- `ModAPI.util.hashCode(string: String) : String`
+  - Returns the hash of a string.
+- `ModAPI.util.isCritical() : boolean`
+  - Checks wether the thread is in a critical state.
+  - When patching methods, it is good practice to allow the method to resume as usual if this is `true`, to avoid stack implosions. (yes, those are real)

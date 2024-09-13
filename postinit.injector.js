@@ -509,6 +509,12 @@ globalThis.modapi_postinit = `(() => {
         return Math.floor(Math.abs(hash)) + "";
     };
 
+    //Check whether the thread is in a critical transition state (resuming or suspending)
+    //Calling functions in a critical state will cause stack implosions.
+    ModAPI.util.isCritical = function isCritical() {
+        return ModAPI.hooks._teavm.$rt_suspending() || ModAPI.hooks._teavm.$rt_resuming();
+    }
+
     ModAPI.clickMouse = function () {
         ModAPI.hooks.methods["nmc_Minecraft_clickMouse"](ModAPI.javaClient);
     }
@@ -573,6 +579,9 @@ globalThis.modapi_postinit = `(() => {
     const serverTickMethodName = ModAPI.util.getMethodFromPackage("net.minecraft.server.MinecraftServer", "tick");
     const serverTickMethod = ModAPI.hooks.methods[serverTickMethodName];
     ModAPI.hooks.methods[serverTickMethodName] = function ($this) {
+        if (ModAPI.util.isCritical()) {
+            return serverTickMethod.apply(this, [$this]);
+        }
         var data = { preventDefault: false }
         ModAPI.events.callEvent("tick", data);
         if (data.preventDefault) {
