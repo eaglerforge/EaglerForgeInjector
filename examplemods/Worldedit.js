@@ -131,6 +131,48 @@ ModAPI.addEventListener("lib:libcustomitems:loaded", () => {
                 }
                 event.preventDefault = true;
         }
+        if (event.command.toLowerCase().startsWith("//walls")) {
+                const args = event.command.substring("//walls ".length);
+                var username = event.sender.getName();
+
+                if (args) {
+                    const blockTypeName = args;
+                    const x1 = globalThis.posx[username], y1 = globalThis.posy[username], z1 = globalThis.posz[username];
+                    const x2 = globalThis.pos2x[username], y2 = globalThis.pos2y[username], z2 = globalThis.pos2z[username];
+
+                    // Validate block and get block type
+                    const blockType = ModAPI.blocks[blockTypeName];
+                    if (!blockType) {
+                        event.sender.addChatMessage(ModAPI.reflect.getClassById("net.minecraft.util.ChatComponentText").constructors[0](ModAPI.util.str(prefix + `Invalid block: ${blockTypeName}`)));
+                        event.preventDefault = true;
+                        return;
+                    }
+                    const block = blockType.getDefaultState().getRef();
+
+                    // Get min and max coordinates for the region
+                    const xMin = Math.min(x1, x2), xMax = Math.max(x1, x2);
+                    const yMin = Math.min(y1, y2), yMax = Math.max(y1, y2);
+                    const zMin = Math.min(z1, z2), zMax = Math.max(z1, z2);
+
+                    // Loop through the region and set the walls (exclude interior blocks)
+                    for (let x = xMin; x <= xMax; x++) {
+                        for (let y = yMin; y <= yMax; y++) {
+                            for (let z = zMin; z <= zMax; z++) {
+                                if (x === xMin || x === xMax || z === zMin || z === zMax) {
+                                    const blockPos = blockPosConstructor(x, y, z);
+                                    event.sender.getServerForPlayer().setBlockState(blockPos, block, 3);
+                                }
+                            }
+                        }
+                    }
+
+                    // Notify the player that the walls have been set
+                    event.sender.addChatMessage(ModAPI.reflect.getClassById("net.minecraft.util.ChatComponentText").constructors[0](ModAPI.util.str(prefix + `Walls set to ${blockTypeName}`)));
+                } else {
+                    event.sender.addChatMessage(ModAPI.reflect.getClassById("net.minecraft.util.ChatComponentText").constructors[0](ModAPI.util.str(prefix + `Arguments not found!`)));
+                }
+                event.preventDefault = true;
+            }
         });
     });
 })();
