@@ -20,7 +20,7 @@ ModAPI.addEventListener("lib:libcustomitems:loaded", () => {
         },
         onRightClickGround: `/*/user, world, itemstack, blockpos/*/
         const prefix = "§7[§4worldedit§7] ";
-        var username = user.getName();
+        var username = ModAPI.util.str(user.getName());
 
         globalThis.pos2x = {}
         globalThis.pos2y = {}
@@ -36,7 +36,7 @@ ModAPI.addEventListener("lib:libcustomitems:loaded", () => {
         `,
         onLeftClickGround: `/*/user, world, itemstack, blockpos/*/
         const prefix = "§7[§4worldedit§7] ";
-        var username = user.getName();
+        var username = ModAPI.util.str(user.getName());
 
         globalThis.posx = {}
         globalThis.posy = {}
@@ -93,7 +93,7 @@ ModAPI.addEventListener("lib:libcustomitems:loaded", () => {
             var blockPosConstructor = ModAPI.reflect.getClassById("net.minecraft.util.BlockPos").constructors.find((x) => { return x.length === 3 });
             if (event.command.toLowerCase().startsWith("//set")) {
                 const args = event.command.substring("//set ".length);
-                var username = event.sender.getName();
+                var username = ModAPI.util.str(event.sender.getName());
         
                 if (args) {
                     const blockTypeName = args
@@ -133,7 +133,7 @@ ModAPI.addEventListener("lib:libcustomitems:loaded", () => {
         }
         if (event.command.toLowerCase().startsWith("//walls")) {
                 const args = event.command.substring("//walls ".length);
-                var username = event.sender.getName();
+                var username = (event.sender.getName());
 
                 if (args) {
                     const blockTypeName = args;
