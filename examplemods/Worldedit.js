@@ -27,7 +27,6 @@ ModAPI.addEventListener("lib:libcustomitems:loaded", () => {
 
         // Send chat message to player
         user.addChatMessage(ModAPI.reflect.getClassById("net.minecraft.util.ChatComponentText").constructors[0](ModAPI.util.str(prefix + "Pos #2 set to: " + blockpos.x + ", " + blockpos.y + ", " + blockpos.z)))
-        ));
         return true;
         `,
         onLeftClickGround: `/*/user, world, itemstack, blockpos/*/
@@ -40,7 +39,6 @@ ModAPI.addEventListener("lib:libcustomitems:loaded", () => {
 
         // Send chat message to player
         user.addChatMessage(ModAPI.reflect.getClassById("net.minecraft.util.ChatComponentText").constructors[0](ModAPI.util.str(prefix + "Pos #1 set to: " + blockpos.x + ", " + blockpos.y + ", " + blockpos.z)))
-        ));
         return true;
         `
     });
