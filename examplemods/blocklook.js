@@ -45,7 +45,7 @@ ModAPI.dedicatedServer.appendCode(function () {
     var t = 0;
     ModAPI.addEventListener("tick", () => {
         t++;
-        if (t > 2) {
+        if (t > 20) {
             t = 0;
         } else {
             return;
@@ -63,15 +63,20 @@ ModAPI.dedicatedServer.appendCode(function () {
             lookVector.addVector(start.$xCoord, start.$yCoord, start.$zCoord);
             var hitResult = rayTraceMethod(pair.world.getRef(), start, lookVector.getRef(), 0);
             if (hitResult) {
-                var blockPos = blockPosConstructor(parseInt(hitResult.$hitVec.$xCoord), parseInt(hitResult.$hitVec.$yCoord), parseInt(hitResult.$hitVec.$zCoord));
+                console.log(hitResult);
+                var blockPos = hitResult.$blockPos;
+                if (!pair.world.isBlockLoaded(blockPos)) {
+                    console.log("[BlockLook] Block is not loaded!");
+                }
                 var blockType = blockTypesList[Math.floor(Math.random() * blockTypesList.length)];
                 blockType = ModAPI.blocks[blockType];
                 if (!blockType.fullBlock) {
                     return;
                 }
-                console.log(ModAPI.util.unstr(blockType.unlocalizedName.getRef()));
-                var block = blockType.getDefaultState().getRef();
-                pair.world.setBlockState(blockPos, block, 3);
+                console.log("[BlockLook] " + ModAPI.util.unstr(blockType.unlocalizedName.getRef()));
+                var block = blockType.getDefaultState();
+                pair.world.setBlockState(blockPos, block.getRef(), 2);
+                pair.world.notifyNeighborsRespectDebug(blockPos, block.getRef());
             }
         });
     });
