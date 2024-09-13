@@ -63,7 +63,6 @@
                             var stat = ModAPI.util.unstr(packet.$status[statusTag]);
                                 if (stat === "START_DESTROY_BLOCK") {
                                     sendPacket($this, packetblockchange($this.$serverController.$worldServerForDimension($this.$playerEntity.$dimension), packet[positionTag]));
-                                    return 0;
                                 }
                                 if (stat !== "START_DESTROY_BLOCK") {
                                     if (stat === "STOP_DESTROY_BLOCK") {

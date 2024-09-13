@@ -20,30 +20,25 @@ ModAPI.addEventListener("lib:libcustomitems:loaded", () => {
         },
         onRightClickGround: `/*/user, world, itemstack, blockpos/*/
         const prefix = "§7[§4worldedit§7] ";
-        const pos = blockpos;
-        const positions = globalThis.playerPositions[user.getName()] ||= {};
-        
-        // Save position #2
-        positions.pos2 = pos;
 
+        globalThis.pos2x = blockpos.x
+        globalThis.pos2y = blockpos.y
+        globalThis.pos2z = blockpos.z
+        console.log("rightclick: " + blockpos.x + ", " + blockpos.y + ", " + blockpos.z)
         // Send chat message to player
-        user.addChatMessage(ModAPI.reflect.getClassById("net.minecraft.util.ChatComponentText").constructors[0](ModAPI.util.str(
-            ModAPI.util.str(prefix + "Pos #2 selected at: " + pos.$x + ", " + pos.$y + ", " + pos.$z))
-        ));
+        user.addChatMessage(ModAPI.reflect.getClassById("net.minecraft.util.ChatComponentText").constructors[0](ModAPI.util.str(prefix + "Pos #2 set to: " + blockpos.x + ", " + blockpos.y + ", " + blockpos.z)))
         return true;
         `,
         onLeftClickGround: `/*/user, world, itemstack, blockpos/*/
         const prefix = "§7[§4worldedit§7] ";
-        const pos = blockpos;
-        const positions = globalThis.playerPositions[user.getName()] ||= {};
-        
-        // Save position #1
-        positions.pos1 = pos;
 
+        globalThis.posx = blockpos.x
+        globalThis.posy = blockpos.y
+        globalThis.posz = blockpos.z
+        
+        console.log("leftclick: " + blockpos.x + ", " + blockpos.y + ", " + blockpos.z)
         // Send chat message to player
-        user.addChatMessage(ModAPI.reflect.getClassById("net.minecraft.util.ChatComponentText").constructors[0](ModAPI.util.str(
-            ModAPI.util.str(prefix + "Pos #1 selected at: " + pos.$x + ", " + pos.$y + ", " + pos.$z))
-        ));
+        user.addChatMessage(ModAPI.reflect.getClassById("net.minecraft.util.ChatComponentText").constructors[0](ModAPI.util.str(prefix + "Pos #1 set to: " + blockpos.x + ", " + blockpos.y + ", " + blockpos.z)))
         return true;
         `
     });
@@ -86,57 +81,44 @@ ModAPI.addEventListener("lib:libcustomitems:loaded", () => {
                 
                 event.preventDefault = true;
             }
+            var blockPosConstructor = ModAPI.reflect.getClassById("net.minecraft.util.BlockPos").constructors.find((x) => { return x.length === 3 });
             if (event.command.toLowerCase().startsWith("//set")) {
-                const player = event.sender;
-                // Parse command parameters
-                const params = event.command.substring("//set ".length);
-                if (!params) {
-                    player.addChatMessage(ChatComponentTextClass.constructors[0](ModAPI.util.str(prefix + "§cUsage: //set <block_type>")));
-                    event.preventDefault = true;
-                    return;
-                }
-    
-                const blockType = params;
-                const positions = globalThis.playerPositions[player.getName()];
-    
-                // Validate block type and positions
-                if (typeof ModAPI.blocks[blockType] !== 'undefined') {
-                    player.addChatMessage(ChatComponentTextClass.constructors[0](ModAPI.util.str(prefix + "§cInvalid block type.")));
-                    event.preventDefault = true;
-                    return;
-                }
-                const block = ModAPI.blocks[blockType];
-    
-                if (!positions || !positions.pos1 || !positions.pos2) {
-                    player.addChatMessage(ChatComponentTextClass.constructors[0](ModAPI.util.str(prefix + "§cPositions not set. Use left and right click to set positions.")));
-                    event.preventDefault = true;
-                    return;
-                }
-    
-                const blockState = block.getDefaultState().getRef();
-                const world = player.getServerForPlayer().getWorld();
-    
-                // Get coordinates
-                const x1 = Math.min(positions.pos1.$x, positions.pos2.$x);
-                const y1 = Math.min(positions.pos1.$y, positions.pos2.$y);
-                const z1 = Math.min(positions.pos1.$z, positions.pos2.$z);
-                const x2 = Math.max(positions.pos1.$x, positions.pos2.$x);
-                const y2 = Math.max(positions.pos1.$y, positions.pos2.$y);
-                const z2 = Math.max(positions.pos1.$z, positions.pos2.$z);
-    
-                // Set blocks in the specified area
-                for (let x = x1; x <= x2; x++) {
-                    for (let y = y1; y <= y2; y++) {
-                        for (let z = z1; z <= z2; z++) {
-                            const blockPos = ModAPI.reflect.getClassById("net.minecraft.util.BlockPos").constructors[0](x, y, z);
-                            world.setBlockState(blockPos, blockState, 3);
+                const args = event.command.substring("//set ".length);
+        
+                if (args) {
+                    const blockTypeName = args
+                    const x1 = globalThis.posx, y1 = globalThis.posy, z1 = globalThis.posz;
+                    const x2 = globalThis.pos2x, y2 = globalThis.pos2y, z2 = globalThis.pos2z;
+        
+                    // Validate block and get block type
+                    const blockType = ModAPI.blocks[blockTypeName];
+                    if (!blockType) {
+                        event.sender.addChatMessage(ModAPI.reflect.getClassById("net.minecraft.util.ChatComponentText").constructors[0](ModAPI.util.str(prefix + `Invalid block: ${blockTypeName}`)));
+                        event.preventDefault = true;
+                        return;
+                    }
+                    const block = blockType.getDefaultState().getRef();
+        
+                    // Get min and max coordinates for the fill region
+                    const xMin = Math.min(x1, x2), xMax = Math.max(x1, x2);
+                    const yMin = Math.min(y1, y2), yMax = Math.max(y1, y2);
+                    const zMin = Math.min(z1, z2), zMax = Math.max(z1, z2);
+        
+                    // Loop through the region and set the blocks
+                    for (let x = xMin; x <= xMax; x++) {
+                        for (let y = yMin; y <= yMax; y++) {
+                            for (let z = zMin; z <= zMax; z++) {
+                                const blockPos = blockPosConstructor(x, y, z);
+                                event.sender.getServerForPlayer().setBlockState(blockPos, block, 3);
+                            }
                         }
                     }
+        
+                    // Notify the player that the blocks have been set
+                    event.sender.addChatMessage(ModAPI.reflect.getClassById("net.minecraft.util.ChatComponentText").constructors[0](ModAPI.util.str(prefix + `Set blocks from (${x1}, ${y1}, ${z1}) to (${x2}, ${y2}, ${z2}) to ${blockTypeName}`)));
+                } else{
+                    event.sender.addChatMessage(ModAPI.reflect.getClassById("net.minecraft.util.ChatComponentText").constructors[0](ModAPI.util.str(prefix + `Arguments not found!`)));
                 }
-    
-                // Notify the sender
-                player.addChatMessage(ChatComponentTextClass.constructors[0](ModAPI.util.str(prefix + "§aBlocks set successfully.")));
-    
                 event.preventDefault = true;
         }
         });
