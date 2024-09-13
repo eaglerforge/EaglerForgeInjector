@@ -530,7 +530,7 @@
         var x = originalInit.apply(this, args);
         //args[0] means $this (ie: minecraft instance).
         ModAPI.mc = ModAPI.minecraft = new Proxy(args[0], TeaVM_to_Recursive_BaseData_ProxyConf);
-        ModAPI.mcinstance = ModAPI.javaClient = args[0];
+        globalThis.Minecraft = ModAPI.mcinstance = ModAPI.javaClient = args[0];
         ModAPI.settings = new Proxy(ModAPI.mcinstance.$gameSettings, TeaVM_to_Recursive_BaseData_ProxyConf);
 
         startModLoader();
