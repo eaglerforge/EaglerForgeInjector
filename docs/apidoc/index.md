@@ -30,6 +30,8 @@ The global object has the following properties:
     - This is the raw minecraft instance for the client, generated upon init.
     - It can also be accessed using `ModAPI.javaClient`
     - It can also be accessed using `ModAPI.minecraft.getRef()`
+    - It can also be accessed using `Minecraft`
+      - Only here for compatibility
  - `ModAPI.server: MinecraftServer`
     - This is the dedicated minecraft server in the service worker, generated when the `serverstart`.
     - It can only be accessed in the dedicated server's context. (See `ModAPI.dedicatedServer`)
