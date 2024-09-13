@@ -125,7 +125,7 @@ ModAPI.addEventListener("lib:libcustomitems:loaded", () => {
                     }
         
                     // Notify the player that the blocks have been set
-                    event.sender.addChatMessage(ModAPI.reflect.getClassById("net.minecraft.util.ChatComponentText").constructors[0](ModAPI.util.str(prefix + `Set blocks from (${x1}, ${y1}, ${z1}) to (${x2}, ${y2}, ${z2}) to ${blockTypeName}`)));
+                    event.sender.addChatMessage(ModAPI.reflect.getClassById("net.minecraft.util.ChatComponentText").constructors[0](ModAPI.util.str(prefix + `Set blocks to ${blockTypeName}`)));
                 } else{
                     event.sender.addChatMessage(ModAPI.reflect.getClassById("net.minecraft.util.ChatComponentText").constructors[0](ModAPI.util.str(prefix + `Arguments not found!`)));
                 }
