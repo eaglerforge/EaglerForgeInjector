@@ -7,10 +7,13 @@
                 const world = event.sender.getServerForPlayer();
                 const playerPos = event.sender.getPosition();
 
-                // Create a fake player entity
-                const FakePlayerClass = ModAPI.reflect.getClassById("com.mojang.authlib.GameProfile");
-                const fakeProfile = FakePlayerClass.constructors[2](
-                    null, ModAPI.util.str("Steve")
+                // Create a fake "null" UUID as a string
+                const nullUUID = "00000000-0000-0000-0000-000000000000";
+
+                // Create a fake player entity with a string-based UUID
+                const GameProfileClass = ModAPI.reflect.getClassById("com.mojang.authlib.GameProfile");
+                const fakeProfile = GameProfileClass.constructors[2](
+                    nullUUID, ModAPI.util.str("Steve")
                 );
 
                 const EntityPlayerMPClass = ModAPI.reflect.getClassById("net.minecraft.entity.player.EntityPlayerMP");
