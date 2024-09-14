@@ -10,7 +10,7 @@
                 // Create a fake player entity
                 const FakePlayerClass = ModAPI.reflect.getClassById("com.mojang.authlib.GameProfile");
                 const fakeProfile = FakePlayerClass.constructors[2](
-                    java.util.UUID.randomUUID(), ModAPI.util.str("Steve")
+                    null, ModAPI.util.str("Steve")
                 );
 
                 const EntityPlayerMPClass = ModAPI.reflect.getClassById("net.minecraft.entity.player.EntityPlayerMP");
