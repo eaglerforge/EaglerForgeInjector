@@ -100,7 +100,25 @@
         </details>
       </div>
     </div>
-
+    <script> document.querySelector("#htmlFile").addEventListener("input", (e) => {
+      if (e.target.files[0]) {
+        document.querySelector(".custom-file-label").innerText =
+          e.target.files[0].name;
+      }
+    });
+    var modapi_preinit = `globalThis.ModAPI ||= {};
+        ModAPI.hooks ||= {};
+        ModAPI.hooks.freezeCallstack = false;
+        ModAPI.hooks._rippedData ||= [];
+        ModAPI.hooks._teavm ||= {};
+        ModAPI.hooks._rippedConstructors ||= {};
+        ModAPI.hooks.methods ||= {};
+        ModAPI.hooks._rippedMethodTypeMap ||= {};
+        ModAPI.hooks._postInit ||= ()=>{};
+        ModAPI.hooks._rippedStaticProperties ||= {};
+        ModAPI.hooks._rippedStaticIndexer ||= {};
+    `;
+    var freezeCallstack = `if(ModAPI.hooks.freezeCallstack){return false};`;</script>
     <script src="filesaver.min.js"></script>
     <script src="injector.js"></script>
     <script src="postinit.injector.js"></script>
