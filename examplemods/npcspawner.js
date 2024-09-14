@@ -4,7 +4,7 @@
             if (!ModAPI.reflect.getClassById("net.minecraft.entity.player.EntityPlayerMP").instanceOf(event.sender.getRef())) { return }
 
             if (event.command.toLowerCase().startsWith("/spawnnpc")) {
-                const world = event.sender.getServerForPlayer();
+                const world = event.sender.getEntityWorld();
                 const playerPos = event.sender.getPosition();
 
 
