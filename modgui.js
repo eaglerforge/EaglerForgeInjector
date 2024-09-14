@@ -7,7 +7,8 @@
     "HTML is better.",
     "https://github.com/EaglerForge",
     "hey you should check out https://github.com/ZXMushroom63/scratch-gui",
-    "99% of people stop gambling before they win big."
+    "99% of people stop gambling before they win big.",
+    "Now with free estradiol!"
   ];
   var gui = `<div id="modapi_gui_container">
       <header>
