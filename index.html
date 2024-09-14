@@ -12,54 +12,18 @@
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css"
       rel="stylesheet"
     />
-    <style>
-      body {
-        background-color: #2b2b2b;
-        color: #ffffff;
-      }
-      .container {
-        text-align: center;
-        margin-top: 50px;
-      }
-
-      .github-button-container {
-        position: absolute;
-        top: 10px;
-        right: 10px;
-      }
-
-      .github-button-container a.btn {
-        color: #ffffff;
-        border-color: #ffffff;
-      }
-
-      .github-button-container a.btn:hover {
-        background-color: #ffffff;
-        color: #000000;
-      }
-      #info {
-        text-align: left;
-        min-width: 50vw;
-      }
-      details {
-        text-align: left;
-        padding: 6px;
-        border-radius: 1rem;
-        background-color: rgba(0, 0, 0, 0.5);
-        margin-bottom: 1rem;
-      }
-      summary {
-        background-color: rgba(255, 255, 255, 0.1);
-        padding: 4px;
-        border-radius: 0.6rem;
-        padding-left: 8px;
-      }
-      h6 {
-        font-weight: normal;
-      }
-    </style>
+    <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
+    <div class="top-bar">
+      <div class="brand">EaglerForge Injector</div>
+      <nav>
+        <a href="https://eaglerforge.github.io/" target="_blank">EaglerForge</a>
+        <a href="https://eaglerrinth.github.io">EaglerRinth</a>
+        <a href="#">EaglerForge Injector</a>
+      </nav>
+    </div>
+    
     <div class="container">
       <h1>EaglerForge Injector</h1>
       <div class="github-button-container">
@@ -96,7 +60,7 @@
 
       <br /><br /><br />
       <span>Info:</span>
-      <div id="#info">
+      <div id="info">
         <details>
           <summary>
             Where can I download an unobfuscated unsigned Eaglercraft build?
@@ -138,31 +102,7 @@
     </div>
 
     <script src="filesaver.min.js"></script>
-
-    <script>
-      document.querySelector("#htmlFile").addEventListener("input", (e) => {
-        if (e.target.files[0]) {
-          document.querySelector(".custom-file-label").innerText =
-            e.target.files[0].name;
-        }
-      });
-      var modapi_preinit = `globalThis.ModAPI ||= {};
-          ModAPI.hooks ||= {};
-          ModAPI.hooks.freezeCallstack = false;
-          ModAPI.hooks._rippedData ||= [];
-          ModAPI.hooks._teavm ||= {};
-          ModAPI.hooks._rippedConstructors ||= {};
-          ModAPI.hooks.methods ||= {};
-          ModAPI.hooks._rippedMethodTypeMap ||= {};
-          ModAPI.hooks._postInit ||= ()=>{};
-          ModAPI.hooks._rippedStaticProperties ||= {};
-          ModAPI.hooks._rippedStaticIndexer ||= {};
-      `;
-      var freezeCallstack = `if(ModAPI.hooks.freezeCallstack){return false};`;
-    </script>
     <script src="injector.js"></script>
-
-    <!-- Code assets -->
     <script src="postinit.injector.js"></script>
     <script src="modloader.injector.js"></script>
     <script src="modgui.injector.js"></script>
