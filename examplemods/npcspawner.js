@@ -3,7 +3,7 @@
         PluginAPI.addEventListener("processcommand", (event) => {
             if (!ModAPI.reflect.getClassById("net.minecraft.entity.player.EntityPlayerMP").instanceOf(event.sender.getRef())) { return; }
 
-            if (event.command.toLowerCase().startsWith("//spawnsteve")) {
+            if (event.command.toLowerCase().startsWith("/spawnsteve")) {
                 const world = event.sender.getServerForPlayer();
                 const senderPos = event.sender.getPosition();
 
