@@ -544,7 +544,19 @@ globalThis.modapi_postinit = `(() => {
         return x;
     };
 
-    var integratedServerStartup = ModAPI.util.getMethodFromPackage("net.lax1dude.eaglercraft.v1_8.sp.internal.ClientPlatformSingleplayer", "loadIntegratedServerSourceInline");
+    var inlineIntegratedServerStartup = ModAPI.util.getMethodFromPackage("net.lax1dude.eaglercraft.v1_8.sp.internal.ClientPlatformSingleplayer", "loadIntegratedServerSourceInline");
+    //Integrated server setup has a randomised suffix on the end
+    inlineIntegratedServerStartup = ModAPI.hooks._rippedMethodKeys.filter(key => { return key.startsWith(inlineIntegratedServerStartup); })[0];
+    const inlineIntegratedServerStartupMethod = ModAPI.hooks.methods[inlineIntegratedServerStartup];
+    ModAPI.hooks.methods[inlineIntegratedServerStartup] = function (worker, bootstrap) {
+        var x = inlineIntegratedServerStartupMethod.apply(this, [worker, bootstrap + ";" + globalThis.modapi_postinit + ";" + ModAPI.dedicatedServer._data.join(";")]);
+        ModAPI.dedicatedServer._data = [];
+        ModAPI.dedicatedServer._wasUsed = true;
+        console.log("[ModAPI] Hooked into inline integrated server.");
+        return x;
+    };
+
+    var integratedServerStartup = ModAPI.util.getMethodFromPackage("net.lax1dude.eaglercraft.v1_8.sp.internal.ClientPlatformSingleplayer", "createBlobObj");
     //Integrated server setup has a randomised suffix on the end
     integratedServerStartup = ModAPI.hooks._rippedMethodKeys.filter(key => { return key.startsWith(integratedServerStartup); })[0];
     const integratedServerStartupMethod = ModAPI.hooks.methods[integratedServerStartup];
@@ -552,6 +564,7 @@ globalThis.modapi_postinit = `(() => {
         var x = integratedServerStartupMethod.apply(this, [worker, bootstrap + ";" + globalThis.modapi_postinit + ";" + ModAPI.dedicatedServer._data.join(";")]);
         ModAPI.dedicatedServer._data = [];
         ModAPI.dedicatedServer._wasUsed = true;
+        console.log("[ModAPI] Hooked into external integrated server.");
         return x;
     };
 
@@ -682,6 +695,15 @@ globalThis.modapi_postinit = `(() => {
             }
         }
         var x = originalOptionsAction.apply(this, args);
+        return x;
+    }
+
+    const originalCrashMethod = ModAPI.hooks.methods[ModAPI.util.getMethodFromPackage("net.lax1dude.eaglercraft.v1_8.internal.teavm.ClientMain", "showCrashScreen")];
+    ModAPI.hooks.methods[ModAPI.util.getMethodFromPackage("net.lax1dude.eaglercraft.v1_8.internal.teavm.ClientMain", "showCrashScreen")] = function (...args) {
+        if (window.confirm("Your game has crashed, do you want to open the mod manager gui?")) {
+            return modapi_displayModGui();
+        };
+        var x = originalCrashMethod.apply(this, args);
         return x;
     }
 })();`;
