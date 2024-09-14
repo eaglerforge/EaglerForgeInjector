@@ -102,7 +102,7 @@ var main;(function(){`
     \<script id="modapi_modloader"\>${globalThis.modapi_modloader}\<\/script\>
     \<script id="modapi_guikit"\>${globalThis.modapi_guikit}\<\/script\>
     \<script id="modapi_postinit_data"\>globalThis.modapi_postinit = \`${globalThis.modapi_postinit}\`;\<\/script\>
-    \<script id="libserverside"\>{"._|_libserverside_|_."}\<\>`
+    \<script id="libserverside"\>{"._|_libserverside_|_."}\<\/script\>`
     );
 
     const extractConstructorRegex =
