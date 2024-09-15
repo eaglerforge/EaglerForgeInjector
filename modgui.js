@@ -26,7 +26,7 @@
         <thead>
           <tr>
             <td>
-              URL
+              Mod
             </td>
             <td class="nothing"></td>
             <td>

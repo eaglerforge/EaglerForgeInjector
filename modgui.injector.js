@@ -26,7 +26,7 @@ globalThis.modapi_guikit = `// ModAPI GUI made by TheIdiotPlays
         <thead>
           <tr>
             <td>
-              Metadata
+              Mod
             </td>
             <td class="nothing"></td>
             <td>
