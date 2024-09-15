@@ -675,7 +675,7 @@
         var x = originalOptionsInit.apply(this, args);
 
         //NOT A BUG DO NOT FIX
-        var msg = Math.random() < 0.05 ? "Plugins" : "Mods";
+        var msg = Math.random() < 0.025 ? "Plugins" : "Mods";
 
         // Find the right constructor. (int id, int x, int y, int width, int height, String buttonText);
         var btnConstructor = ModAPI.hooks._classMap['nmcg_GuiButton'].constructors.filter(c => { return c.length === 6 })[0];
