@@ -8,7 +8,7 @@
                 const senderPos = event.sender.getPosition();
 
                 // Create a fake player GameProfile
-                const GameProfileClass = ModAPI.reflect.getClassById("com.mojang.authlib.GameProfile");
+                const GameProfileClass = ModAPI.reflect.getClassById("net.lax1dude.eaglercraft.v1_8.mojang.authlib.GameProfile");
                 const fakeProfile = GameProfileClass.constructors[2](
                     ModAPI.reflect.getClassById("java.util.UUID").staticMethods.randomUUID(), ModAPI.util.str("Steve")
                 );
