@@ -37,3 +37,8 @@ Methods:
 - `ModAPI.util.isCritical() : boolean`
   - Checks wether the thread is in a critical state.
   - When patching methods, it is good practice to allow the method to resume as usual if this is `true`, to avoid stack implosions. (yes, those are real)
+- `ModAPI.util.createArray(class, jsArray) : Object[]`
+  - Makes a java array from a class and a javascript array.
+  - The class parameter can be retrieved via reflect: `ModAPI.reflect.getClassById("net.minecraft.util.BlockPos").class`
+- `ModAPI.util.wrap(obj: Object) : object`
+  - Returns a wrapper around native java objects, removing prefixes and fixing method outputs.

@@ -56,6 +56,9 @@ The global object has the following properties:
 - `ModAPI.meta`
     - This object is used to register metadata for mods such as their title, credits, icon and description.
     - More: [MetaDocumentation](meta.md)
+- `ModAPI.array`
+    - This object is used to interact and create arrays easily.
+    - More: [ArrayDocumentation](array.md)
  - `ModAPI.version: String`
     - The version of ModAPI.
  - `ModAPI.flavour: String`
@@ -72,10 +75,10 @@ The ModAPI object has the following methods:
     - Usage: `ModAPI.displayToChat("Hello World.")`
  - `clickMouse() : void`
     - Triggers a left click ingame.
-    - Usage: `ModAPI.clickMouse()`
  - `rightClickMouse() : void`
     - Triggers a right click ingame.
-    - Usage: `ModAPI.rightClickMouse()`
+ - `getFPS() : int`
+    - Gets the frames per second of the game
 
 
 ## Handling strings, numbers and booleans to and from java.

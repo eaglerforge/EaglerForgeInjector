@@ -20,6 +20,7 @@
     ModAPI.meta._developerMap = {};
     ModAPI.meta._iconMap = {};
     ModAPI.meta._versionMap = {};
+    ModAPI.array = {};
     function limitSize(x, n) {
         if (x.length > n) {
             return x.substring(0, n) + "…";
@@ -112,6 +113,75 @@
             }
         });
         return name;
+    }
+    ModAPI.util.wrap = function (outputValue) {
+        if (outputValue && typeof outputValue === "object" && Array.isArray(outputValue.data) && typeof outputValue.type === "function") {
+            return new Proxy(outputValue.data, ModAPI.util.TeaVMArray_To_Recursive_BaseData_ProxyConf);
+        }
+        if (outputValue && typeof outputValue === "object" && !Array.isArray(outputValue)) {
+            return new Proxy(outputValue, ModAPI.util.TeaVM_to_Recursive_BaseData_ProxyConf);
+        }
+        if (outputValue && typeof outputValue === "function") {
+            return function (...args) {
+                var xOut = outputValue.apply(target, args);
+                if (xOut && typeof xOut === "object" && Array.isArray(xOut.data) && typeof outputValue.type === "function") {
+                    return new Proxy(xOut.data, ModAPI.util.TeaVMArray_To_Recursive_BaseData_ProxyConf);
+                }
+                if (xOut && typeof xOut === "object" && !Array.isArray(xOut)) {
+                    return new Proxy(xOut, ModAPI.util.TeaVM_to_Recursive_BaseData_ProxyConf);
+                }
+                return xOut;
+            }
+        }
+        return null;
+    }
+    ModAPI.array.object = function (jclass, size) {
+        if (Array.isArray(size)) {
+            return ModAPI.hooks._teavm.$rt_createArrayFromData(jclass, size);
+        }
+        return ModAPI.hooks._teavm.$rt_createArray(jclass, size);
+    }
+    ModAPI.array.boolean = function (size) {
+        if (Array.isArray(size)) {
+            return ModAPI.hooks._teavm.$rt_createBooleanArrayFromData(size);
+        }
+        return ModAPI.hooks._teavm.$rt_createBooleanArray(size);
+    }
+    ModAPI.array.byte = function (size) {
+        if (Array.isArray(size)) {
+            return ModAPI.hooks._teavm.$rt_createByteArrayFromData(size);
+        }
+        return ModAPI.hooks._teavm.$rt_createByteArray(size);
+    }
+    ModAPI.array.char = function (size) {
+        if (Array.isArray(size)) {
+            return ModAPI.hooks._teavm.$rt_createCharArrayFromData(size);
+        }
+        return ModAPI.hooks._teavm.$rt_createCharArray(size);
+    }
+    ModAPI.array.short = function (size) {
+        if (Array.isArray(size)) {
+            return ModAPI.hooks._teavm.$rt_createShortArrayFromData(size);
+        }
+        return ModAPI.hooks._teavm.$rt_createShortArray(size);
+    }
+    ModAPI.array.int = function (size) {
+        if (Array.isArray(size)) {
+            return ModAPI.hooks._teavm.$rt_createIntArrayFromData(size);
+        }
+        return ModAPI.hooks._teavm.$rt_createIntArray(size);
+    }
+    ModAPI.array.float = function (size) {
+        if (Array.isArray(size)) {
+            return ModAPI.hooks._teavm.$rt_createFloatArrayFromData(size);
+        }
+        return ModAPI.hooks._teavm.$rt_createFloatArray(size);
+    }
+    ModAPI.array.double = function (size) {
+        if (Array.isArray(size)) {
+            return ModAPI.hooks._teavm.$rt_createDoubleArrayFromData(size);
+        }
+        return ModAPI.hooks._teavm.$rt_createDoubleArray(size);
     }
     ModAPI.version = "v2.0";
     ModAPI.flavour = "injector";
@@ -295,23 +365,9 @@
 
             var outProp = "$" + prop;
             var outputValue = Reflect.get(target, outProp, receiver);
-            if (outputValue && typeof outputValue === "object" && Array.isArray(outputValue.data) && typeof outputValue.type === "function") {
-                return new Proxy(outputValue.data, TeaVMArray_To_Recursive_BaseData_ProxyConf);
-            }
-            if (outputValue && typeof outputValue === "object" && !Array.isArray(outputValue)) {
-                return new Proxy(outputValue, TeaVM_to_Recursive_BaseData_ProxyConf);
-            }
-            if (outputValue && typeof outputValue === "function") {
-                return function (...args) {
-                    var xOut = outputValue.apply(target, args);
-                    if (xOut && typeof xOut === "object" && Array.isArray(xOut.data) && typeof outputValue.type === "function") {
-                        return new Proxy(xOut.data, TeaVMArray_To_Recursive_BaseData_ProxyConf);
-                    }
-                    if (xOut && typeof xOut === "object" && !Array.isArray(xOut)) {
-                        return new Proxy(xOut, TeaVM_to_Recursive_BaseData_ProxyConf);
-                    }
-                    return xOut;
-                }
+            var wrapped = ModAPI.util.wrap(outputValue);
+            if (wrapped) {
+                return wrapped;
             }
             return outputValue;
         },
@@ -521,6 +577,10 @@
 
     ModAPI.rightClickMouse = function () {
         ModAPI.hooks.methods["nmc_Minecraft_rightClickMouse"](ModAPI.javaClient);
+    }
+
+    ModAPI.getFPS = function () {
+        return ModAPI.hooks.methods["nmc_Minecraft_getDebugFPS"](ModAPI.javaClient);
     }
 
     const updateMethodName = ModAPI.util.getMethodFromPackage("net.minecraft.client.entity.EntityPlayerSP", "onUpdate");
