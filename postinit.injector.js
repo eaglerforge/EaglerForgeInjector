@@ -114,14 +114,14 @@ globalThis.modapi_postinit = `(() => {
         });
         return name;
     }
-    ModAPI.util.wrap = function (outputValue) {
+    ModAPI.util.wrap = function (outputValue, target) {
         if (outputValue && typeof outputValue === "object" && Array.isArray(outputValue.data) && typeof outputValue.type === "function") {
             return new Proxy(outputValue.data, ModAPI.util.TeaVMArray_To_Recursive_BaseData_ProxyConf);
         }
         if (outputValue && typeof outputValue === "object" && !Array.isArray(outputValue)) {
             return new Proxy(outputValue, ModAPI.util.TeaVM_to_Recursive_BaseData_ProxyConf);
         }
-        if (outputValue && typeof outputValue === "function") {
+        if (outputValue && typeof outputValue === "function" && target) {
             return function (...args) {
                 var xOut = outputValue.apply(target, args);
                 if (xOut && typeof xOut === "object" && Array.isArray(xOut.data) && typeof outputValue.type === "function") {
@@ -365,7 +365,7 @@ globalThis.modapi_postinit = `(() => {
 
             var outProp = "$" + prop;
             var outputValue = Reflect.get(target, outProp, receiver);
-            var wrapped = ModAPI.util.wrap(outputValue);
+            var wrapped = ModAPI.util.wrap(outputValue, target);
             if (wrapped) {
                 return wrapped;
             }
