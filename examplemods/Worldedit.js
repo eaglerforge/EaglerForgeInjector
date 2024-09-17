@@ -69,6 +69,11 @@ ModAPI.addEventListener("lib:libcustomitems:loaded", () => {
                 const displayTag = NBTTagCompoundClass.constructors[0]();
                 itemStack.$stackTagCompound.$setTag(ModAPI.util.str("display"), displayTag);
 
+                // Add the enchant effect to the item
+                let enchant = ModAPI.hooks._classMap.nme_Enchantment.staticMethods.getEnchantmentById.method(0);
+                enchant.$effectId = -1;
+                itemStack.$addEnchantment(enchant);
+
                 // Set item name
                 displayTag.$setString(ModAPI.util.str("Name"), ModAPI.util.str("Wand"));
 
@@ -144,30 +149,3 @@ ModAPI.addEventListener("lib:libcustomitems:loaded", () => {
         });
     });
 })();
-
-ModAPI.addEventListener("update", () => {
-    let inventoryItems = ModAPI.mcinstance.$thePlayer.$inventory.$mainInventory.data;
-    inventoryItems.forEach((item) => {
-        if (item != null) {
-            if (item.$getDisplayName() == 'Wand' && item.$isItemEnchanted() === 0) {
-              craftResult.$addEnchantment(); // add effect to item in inventory
-            }
-        }
-    })
-    if (String(ModAPI.mcinstance.$currentScreen).indexOf('inventory.GuiCrafting') > -1) {
-        let craftMatrixItems = ModAPI.mcinstance.$currentScreen.$inventorySlots0.$craftMatrix1.$stackList.data;
-        craftMatrixItems.forEach((item) => {
-            if (item != null) {
-                if (item.$getDisplayName() == 'Wand' && item.$isItemEnchanted() === 0) {
-                  craftResult.$addEnchantment(); // add effect to item in crafing grid
-                }
-            }
-        })
-        let craftResult = ModAPI.mcinstance.$currentScreen.$inventorySlots0.$craftResult0.$stackResult.data[0];
-        if (craftResult != null) {
-            if (craftResult.$getDisplayName() == 'Wand' && craftResult.$isItemEnchanted() === 0) {
-              craftResult.$addEnchantment(); // add effect to item in crafing result
-            }
-        }
-    }
-})
