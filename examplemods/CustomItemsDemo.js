@@ -6,6 +6,7 @@ ModAPI.addEventListener("lib:libcustomitems:loaded", () => {
         base: "magma_cream",
         name: "Custom Item",
         qty: 32,
+        useRecipe: true,
         recipe: [
             "###",
             "# #",
@@ -17,6 +18,7 @@ ModAPI.addEventListener("lib:libcustomitems:loaded", () => {
                 "id": "dirt"
             }
         },
+        //Optional: onRightClickGround
         onRightClickGround: `/*/user, world, itemstack, blockpos/*/
         itemstack.stackSize -= 1;
         if (itemstack.stackSize < 1) {
@@ -25,6 +27,7 @@ ModAPI.addEventListener("lib:libcustomitems:loaded", () => {
         user.setHealth(2);
         return true; //PreventDefault
         `,
+        //Optional: onLeftClickGround
         onLeftClickGround: `/*/user, world, itemstack, blockpos/*/
         itemstack.stackSize -= 1;
         if (itemstack.stackSize < 1) {
@@ -32,6 +35,11 @@ ModAPI.addEventListener("lib:libcustomitems:loaded", () => {
         }
         user.setHealth(20);
         return true; //PreventDefault
-        `
+        `,
+        //Optional: craftingExtra
+        craftingExtra: `/*/itemstack/*/
+        let enchant = ModAPI.reflect.getClassByName("Enchantment").staticMethods.getEnchantmentById.method(5); //ENCHANTMENT_OXYGEN (respiration)
+        itemstack.addEnchantment(enchant);
+        `,
     });
 });

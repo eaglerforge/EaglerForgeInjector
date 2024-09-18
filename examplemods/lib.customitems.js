@@ -142,7 +142,9 @@
         }
 
         var craftingManager = ModAPI.reflect.getClassById("net.minecraft.item.crafting.CraftingManager").staticMethods.getInstance.method();
-        ModAPI.hooks.methods.nmic_CraftingManager_addRecipe(craftingManager, testItem, recipe);
+        if((data.useRecipe !== false) || (data.useRecipe !== "false")) {
+            ModAPI.hooks.methods.nmic_CraftingManager_addRecipe(craftingManager, testItem, recipe);
+        }
     }
     ModAPI.dedicatedServer.appendCode(libServerside);
     ModAPI.dedicatedServer.appendCode("globalThis.LCI_registerItem = " + LCI_registerItem.toString());
