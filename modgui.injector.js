@@ -42,7 +42,7 @@ globalThis.modapi_guikit = `// ModAPI GUI made by TheIdiotPlays
         <button class="button" onclick="window.modapi_uploadmod()">Upload Mod (.js)</button>
         <button class="button" onclick="window.modapi_addmod()">Add Mod From URL</button>
         <button class="button" style="text-shadow: 0px 0px 10px rgba(255, 0, 0, 0.5)" onclick="window.modapi_clearmods()">Clear All Mods</button>
-        <button class="button" onclick="this.parentElement.parentElement.remove();">Done</button>
+        <button class="button" onclick="this.parentElement.parentElement.remove(); main();">Done</button>
       </div>
 
       <span>(reload to apply changes)</span>
@@ -159,6 +159,7 @@ globalThis.modapi_guikit = `// ModAPI GUI made by TheIdiotPlays
         }
       </style>
     </div>\`;
+    
   async function fileToDataURI(file) {
     return new Promise((res, rej) => {
       var fr = new FileReader();
