@@ -648,6 +648,18 @@ globalThis.modapi_postinit = `(() => {
         return sendChatMessage.apply(this, [$this, $message]);
     }
 
+    const ScaledResolutionConstructor = ModAPI.reflect.getClassByName("ScaledResolution").constructors[0];
+    ModAPI.events.newEvent("frame", "client");
+    const frameMethodName = ModAPI.util.getMethodFromPackage("net.minecraft.client.Minecraft", "runTick");
+    const frameMethod = ModAPI.hooks.methods[frameMethodName];
+    ModAPI.hooks.methods[frameMethodName] = function (...args) {
+        ModAPI.events.callEvent("frame", {});
+        if (ModAPI.required.has("resolution") && ModAPI.mcinstance) {
+            ModAPI.ScaledResolution = ModAPI.resolution = new Proxy(ScaledResolutionConstructor(ModAPI.mcinstance), TeaVM_to_Recursive_BaseData_ProxyConf);
+        }
+        return frameMethod.apply(this, args);
+    }
+
     ModAPI.events.newEvent("tick", "server");
     const serverTickMethodName = ModAPI.util.getMethodFromPackage("net.minecraft.server.MinecraftServer", "tick");
     const serverTickMethod = ModAPI.hooks.methods[serverTickMethodName];

@@ -6,11 +6,12 @@
     ModAPI.meta.description("Library to make adding basic custom items easier.");
     ModAPI.events.newEvent("lib:libcustomitems:loaded");
     function libServerside() {
-        var packetblockchange = ModAPI.reflect.getClassByName("S23PacketBlockChange").constructors.find(x => {return x.length === 2});
+        var packetblockchange = ModAPI.reflect.getClassByName("S23PacketBlockChange").constructors.find(x => { return x.length === 2 });
         var sendPacket = ModAPI.reflect.getClassByName("NetHandlerPlayServer").methods.sendPacket.method;
         globalThis.LCI_REGISTRY ||= [];
         globalThis.LCI_RMBEVENTS ||= {};
         globalThis.LCI_LMBEVENTS ||= {};
+        globalThis.LCI_RECIPEEVENTS ||= {};
         var useName = ModAPI.util.getMethodFromPackage("net.minecraft.network.NetHandlerPlayServer", "processPlayerBlockPlacement");
         var oldUse = ModAPI.hooks.methods[useName];
         ModAPI.hooks.methods[useName] = function ($this, packet) {
@@ -61,15 +62,15 @@
                             var statusTag = Object.keys(packet.$status).find(x => { return x.startsWith("$name") });
                             var positionTag = Object.keys(packet).filter(x => { return x.startsWith("$position") })[0];
                             var stat = ModAPI.util.unstr(packet.$status[statusTag]);
-                                if (stat === "START_DESTROY_BLOCK") {
+                            if (stat === "START_DESTROY_BLOCK") {
+                                sendPacket($this, packetblockchange($this.$serverController.$worldServerForDimension($this.$playerEntity.$dimension), packet[positionTag]));
+                            }
+                            if (stat !== "START_DESTROY_BLOCK") {
+                                if (stat === "STOP_DESTROY_BLOCK") {
                                     sendPacket($this, packetblockchange($this.$serverController.$worldServerForDimension($this.$playerEntity.$dimension), packet[positionTag]));
                                 }
-                                if (stat !== "START_DESTROY_BLOCK") {
-                                    if (stat === "STOP_DESTROY_BLOCK") {
-                                        sendPacket($this, packetblockchange($this.$serverController.$worldServerForDimension($this.$playerEntity.$dimension), packet[positionTag]));
-                                    }
-                                    return 0;
-                                }
+                                return 0;
+                            }
 
                             var r = globalThis.LCI_LMBEVENTS[cid].call(globalThis,
                                 new Proxy($this.$playerEntity, ModAPI.util.TeaVM_to_Recursive_BaseData_ProxyConf),
@@ -91,12 +92,16 @@
         globalThis.LCI_REGISTRY ||= [];
         globalThis.LCI_RMBEVENTS ||= {};
         globalThis.LCI_LMBEVENTS ||= {};
+        globalThis.LCI_RECIPEEVENTS ||= {};
         globalThis.LCI_REGISTRY.push(data.tag);
         if (data.onRightClickGround) {
             globalThis.LCI_RMBEVENTS[data.tag] = new Function("user", "world", "itemstack", "blockpos", data.onRightClickGround);
         }
         if (data.onLeftClickGround) {
             globalThis.LCI_LMBEVENTS[data.tag] = new Function("user", "world", "itemstack", "blockpos", data.onLeftClickGround);
+        }
+        if (data.craftingExtra) {
+            globalThis.LCI_RECIPEEVENTS[data.tag] = new Function("itemstack", data.craftingExtra);
         }
         var ObjectClass = ModAPI.reflect.getClassById("java.lang.Object").class;
         function ToChar(char) {
@@ -132,6 +137,9 @@
         var lore = ModAPI.reflect.getClassById("net.minecraft.nbt.NBTTagList").constructors[0]();
         lore.$appendTag(ModAPI.reflect.getClassById("net.minecraft.nbt.NBTTagString").constructors.filter(x => { return x.length === 1 })[0](ModAPI.util.str(data.tag)));
         displayTag.$setTag(ModAPI.util.str("Lore"), lore);
+        if (globalThis.LCI_RECIPEEVENTS[data.tag]) {
+            globalThis.LCI_RECIPEEVENTS[data.tag](new Proxy(testItem, ModAPI.util.TeaVM_to_Recursive_BaseData_ProxyConf));
+        }
 
         var craftingManager = ModAPI.reflect.getClassById("net.minecraft.item.crafting.CraftingManager").staticMethods.getInstance.method();
         ModAPI.hooks.methods.nmic_CraftingManager_addRecipe(craftingManager, testItem, recipe);

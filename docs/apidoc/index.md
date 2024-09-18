@@ -59,6 +59,10 @@ The global object has the following properties:
 - `ModAPI.array`
     - This object is used to interact and create arrays easily.
     - More: [ArrayDocumentation](array.md)
+- `ModAPI.resolution`
+    - This object is used to query information about GUI dimensions, to make drawing to the screen easier, generated when the `frame` event is fired.
+    - Deprecated alias (please do not use): `ModAPI.ScaledResolution`
+    - More: [ArrayDocumentation](array.md)
  - `ModAPI.version: String`
     - The version of ModAPI.
  - `ModAPI.flavour: String`

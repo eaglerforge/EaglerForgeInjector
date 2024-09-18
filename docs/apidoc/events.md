@@ -39,7 +39,9 @@ Events broadcast data for use in mods.
             - String representing the type of event being fired.
         - `data: Object`
             - Object representing the original arguments to be passed to the callback.
-
+- `frame`:
+    - Called just when a frame is rendered on the client.
+    - Event object is blank.
 ### Server Side Events
 Can only be used in the context of the dedicated server. More: [DedicatedServerDocumentation](dedicatedserver.md)
 - `serverstart`:
