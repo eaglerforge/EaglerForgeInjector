@@ -42,7 +42,7 @@
         <button class="button" onclick="window.modapi_uploadmod()">Upload Mod (.js)</button>
         <button class="button" onclick="window.modapi_addmod()">Add Mod From URL</button>
         <button class="button" style="text-shadow: 0px 0px 10px rgba(255, 0, 0, 0.5)" onclick="window.modapi_clearmods()">Clear All Mods</button>
-        <button class="button" onclick="this.parentElement.parentElement.remove(); main();">Done</button>
+        <button class="button _doneButton" onclick="this.parentElement.parentElement.remove();">Done</button>
       </div>
 
       <span>(reload to apply changes)</span>
@@ -168,7 +168,7 @@
       fr.readAsDataURL(file);
     });
   }
-  window.modapi_displayModGui = async function () {
+  window.modapi_displayModGui = async function (cb) {
     if (!getMods) {
       return;
     }
@@ -248,7 +248,19 @@
       tr.appendChild(button);
       tbody.appendChild(tr);
     });
+    var once = false;
+    if (cb) {
+      document.querySelector("#modapi_gui_container ._doneButton").addEventListener("mousedown", ()=>{
+        if (once) {
+          return;
+        }
+        once = true;
+        cb();
+        document.querySelector("#modapi_gui_container").remove();
+      })
+    }
   }
+  
   window.modapi_clearmods = async () => {
     await resetMods();
     window.modapi_displayModGui();

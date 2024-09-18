@@ -238,7 +238,6 @@ document.querySelector("#giveme").addEventListener("click", () => {
     ) {
         return;
     }
-
     // @type File
     var file = document.querySelector("input").files[0];
     var fileType = file.name.split(".");
@@ -259,7 +258,6 @@ document.querySelector("#givemeserver").addEventListener("click", () => {
     ) {
         return;
     }
-
     // @type File
     var file = document.querySelector("input").files[0];
     var fileType = file.name.split(".");

@@ -749,4 +749,14 @@
         var x = originalCrashMethod.apply(this, args);
         return x;
     }
+    var inited = false;
+    const originalMainMethod = ModAPI.hooks.methods[ModAPI.util.getMethodFromPackage("net.lax1dude.eaglercraft.v1_8.internal.teavm.ClientMain", "_main")];
+    ModAPI.hooks.methods[ModAPI.util.getMethodFromPackage("net.lax1dude.eaglercraft.v1_8.internal.teavm.ClientMain", "_main")] = function (...args) {
+        if (!inited) {
+            inited = true;
+            return modapi_displayModGui(globalThis.main);
+        } else {
+            return originalMainMethod.apply(this, args);
+        }
+    }
 })();
