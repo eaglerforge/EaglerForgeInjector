@@ -11,10 +11,14 @@
                 const GameProfileClass = ModAPI.reflect.getClassById("net.lax1dude.eaglercraft.v1_8.mojang.authlib.GameProfile");
                 const fakeProfile = GameProfileClass.constructors[1](null, ModAPI.util.str("Steve"));
 
+                // Get the PlayerInteractionManager class
+                const PlayerInteractionManagerClass = ModAPI.reflect.getClassById("net.minecraft.server.management.PlayerInteractionManager");
+                const playerInteractionManager = PlayerInteractionManagerClass.constructors[1](world.getRef());
+
                 // Get the EntityPlayerMP class to spawn the fake player
                 const EntityPlayerMPClass = ModAPI.reflect.getClassById("net.minecraft.entity.player.EntityPlayerMP");
                 const fakePlayer = EntityPlayerMPClass.constructors[1](
-                    world.getMinecraftServer(), world.getRef(), fakeProfile, world.getPlayerInteractionManager()
+                    world.getMinecraftServer(), world.getRef(), fakeProfile, playerInteractionManager
                 );
 
                 // Set the fake player position to be near the command sender
