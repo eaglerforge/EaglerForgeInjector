@@ -13,11 +13,11 @@
 
                 // Get the PlayerInteractionManager class
                 const PlayerInteractionManagerClass = ModAPI.reflect.getClassById("net.minecraft.server.management.PlayerInteractionManager");
-                const playerInteractionManager = PlayerInteractionManagerClass.constructors[1](world.getRef());
+                const playerInteractionManager = PlayerInteractionManagerClass.constructors[0](world.getRef());
 
                 // Get the EntityPlayerMP class to spawn the fake player
                 const EntityPlayerMPClass = ModAPI.reflect.getClassById("net.minecraft.entity.player.EntityPlayerMP");
-                const fakePlayer = EntityPlayerMPClass.constructors[1](
+                const fakePlayer = EntityPlayerMPClass.constructors[0](
                     world.getMinecraftServer(), world.getRef(), fakeProfile, playerInteractionManager
                 );
 
