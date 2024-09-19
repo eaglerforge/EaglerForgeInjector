@@ -9,7 +9,7 @@
 
                 // Create a fake player GameProfile
                 const GameProfileClass = ModAPI.reflect.getClassById("net.lax1dude.eaglercraft.v1_8.mojang.authlib.GameProfile");
-                const fakeProfile = GameProfileClass.constructors[2](null, ModAPI.util.str("Steve"));
+                const fakeProfile = GameProfileClass.constructors[1](null, ModAPI.util.str("Steve"));
 
                 // Get the EntityPlayerMP class to spawn the fake player
                 const EntityPlayerMPClass = ModAPI.reflect.getClassById("net.minecraft.entity.player.EntityPlayerMP");
