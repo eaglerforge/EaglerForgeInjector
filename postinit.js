@@ -741,6 +741,34 @@
     ModAPI.materials = new Proxy(ModAPI.hooks._classMap[ModAPI.util.getCompiledName("net.minecraft.block.material.Material")].staticVariables, StaticProps_ProxyConf);
     ModAPI.enchantments = new Proxy(ModAPI.hooks._classMap[ModAPI.util.getCompiledName("net.minecraft.enchantment.Enchantment")].staticVariables, StaticProps_ProxyConf);
 
+    const originalOptionsInit = ModAPI.hooks.methods[ModAPI.util.getMethodFromPackage("net.minecraft.client.gui.GuiOptions", "initGui")];
+    ModAPI.hooks.methods[ModAPI.util.getMethodFromPackage("net.minecraft.client.gui.GuiOptions", "initGui")] = function (...args) {
+        var x = originalOptionsInit.apply(this, args);
+
+        //NOT A BUG DO NOT FIX
+        var msg = Math.random() < 0.025 ? "Plugins" : "Mods";
+
+        // Find the right constructor. (int id, int x, int y, int width, int height, String buttonText);
+        var btnConstructor = ModAPI.hooks._classMap['nmcg_GuiButton'].constructors.filter(c => { return c.length === 6 })[0];
+        var btn = btnConstructor(9635329, 0, args[0].$height8 - 21, 100, 20, ModAPI.util.str(msg));
+        args[0].$buttonList.$add(btn);
+
+        return x;
+    }
+
+    const originalOptionsAction = ModAPI.hooks.methods[ModAPI.util.getMethodFromPackage("net.minecraft.client.gui.GuiOptions", "actionPerformed")];
+    ModAPI.hooks.methods[ModAPI.util.getMethodFromPackage("net.minecraft.client.gui.GuiOptions", "actionPerformed")] = function (...args) {
+        if (args[1] && args[1].$id12 === 9635329) {
+            if (typeof window.modapi_displayModGui === "function") {
+                window.modapi_displayModGui();
+            } else {
+                alert("[ModAPI] Mod Manager GUI does not exist!")
+            }
+        }
+        var x = originalOptionsAction.apply(this, args);
+        return x;
+    }
+
     const originalCrashMethod = ModAPI.hooks.methods[ModAPI.util.getMethodFromPackage("net.lax1dude.eaglercraft.v1_8.internal.teavm.ClientMain", "showCrashScreen")];
     ModAPI.hooks.methods[ModAPI.util.getMethodFromPackage("net.lax1dude.eaglercraft.v1_8.internal.teavm.ClientMain", "showCrashScreen")] = function (...args) {
         if (window.confirm("Your game has crashed, do you want to open the mod manager gui?")) {

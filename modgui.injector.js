@@ -173,8 +173,11 @@ globalThis.modapi_guikit = `// ModAPI GUI made by TheIdiotPlays
       return;
     }
     if (document.querySelector("#modapi_gui_container")) {
+      cb ||= document.querySelector("#modapi_gui_container")._cb;
       document.querySelector("#modapi_gui_container").remove();
     }
+    
+    document.querySelector("#modapi_gui_container")._cb = cb;
     var element = document.createElement("div");
 
     element.innerHTML = gui.replace("{splash_msg}", splashes[Math.floor(Math.random() * splashes.length)]);
