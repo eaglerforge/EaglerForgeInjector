@@ -105,11 +105,6 @@ var main;(function(){`
     \<script id="libserverside"\>{"._|_libserverside_|_."}\<\/script\>`
     );
 
-    patchedFile = patchedFile.replace(
-        `document.getElementById("launch_countdown_screen").remove(); main();`,
-        `document.getElementById("launch_countdown_screen").remove(); window.modapi_displayModGui();`
-    )
-
     const extractConstructorRegex =
         /^\s*function (\S*?)__init_\d*?\((?!\$)/gm;
     const extractConstructorFullNameRegex =
