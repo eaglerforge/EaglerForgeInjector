@@ -95,10 +95,13 @@ var main;(function(){`
         }
     );
 
+    patchedFile = patchedFile.replaceAll("function TeaVMThread(", "globalThis.ModAPI.hooks.TeaVMThread = TeaVMThread;\nfunction TeaVMThread(");
+
     patchedFile = patchedFile.replace(
         ` id="game_frame">`,
         ` id="game_frame">
     \<script id="modapi_postinit"\>${globalThis.modapi_postinit}\<\/script\>
+    \<script id="modapi_postinitasync"\>${globalThis.modapi_postinitasync}\<\/script\>
     \<script id="modapi_modloader"\>${globalThis.modapi_modloader}\<\/script\>
     \<script id="modapi_guikit"\>${globalThis.modapi_guikit}\<\/script\>
     \<script id="modapi_postinit_data"\>globalThis.modapi_postinit = \`${globalThis.modapi_postinit}\`;\<\/script\>

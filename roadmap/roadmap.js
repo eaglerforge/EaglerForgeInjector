@@ -23,7 +23,7 @@ list.forEach(a => {
     var d = document.createElement("span");
     var s = document.createElement("summary");
     d.appendChild(s);
-    s.innerText = x[0].trim();
+    s.innerHTML = x[0].trim().replaceAll("`", "<code>").replaceAll('#', "</code>");
     var z = document.createElement("span");
     d.classList.add(map[x[1].toLowerCase().trim()] || "todo");
     s.appendChild(z);
