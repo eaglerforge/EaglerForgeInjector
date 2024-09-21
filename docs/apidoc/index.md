@@ -1,6 +1,17 @@
 # EaglerForge ModAPI Documentation
 The EaglerForge ModAPI is housed in a global JavaScript object stored on `globalThis`, called `ModAPI` or `PluginAPI`. (both are identical)
 
+### Important Notice!
+From people used to the doc prior to EaglerForgeInjector, now, when you see something like `ModAPI.world`'s type is `World`, that literally means it is identical to an instance of `net.minecraft.world.World` from java. For easier modding, here are some online javadocs, that explain properties from each individual method and proerty of every 1.8 class:
+
+https://nurmarvin.github.io/Minecraft-1.8-JavaDocs/overview-summary.html - Javadoc for vanilla 1.8
+https://eaglerreborn.github.io/javadoc/ - EaglerReborn (EF precursor) javadoc, for EaglercraftX u17 (missing serverside classes, this version didn't have singleplayer)
+An up-to-date javadoc for EaglercraftX is coming soon, in the meanwhile, I recommend modding with a local EaglercraftX workspace, so you can inspect the contents of each class.
+
+Additionally, when you se that something like `ModAPI.mcinstance` is `Raw<Minecraft>` this means that it has a lot of TeaVM nonsense like '$' prefixes before everything, as well has making it difficult to call the objects methods.
+
+### Global ModAPI Object:
+
 The global object has the following properties:
  - `ModAPI.player: EntityPlayerSP`
     - Only accessible after `ModAPI.require("player")` is called, this is the local player entity. It is regenerated every time the `update` event is called.
