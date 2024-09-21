@@ -177,12 +177,13 @@ globalThis.modapi_guikit = `// ModAPI GUI made by TheIdiotPlays
       document.querySelector("#modapi_gui_container").remove();
     }
     
-    document.querySelector("#modapi_gui_container")._cb = cb;
     var element = document.createElement("div");
 
     element.innerHTML = gui.replace("{splash_msg}", splashes[Math.floor(Math.random() * splashes.length)]);
 
     document.body.appendChild(element);
+
+    document.querySelector("#modapi_gui_container")._cb = cb;
 
     var modsList = await getMods();
     var tbody = document.querySelector("#modapi_gui_container .modTable tbody");
