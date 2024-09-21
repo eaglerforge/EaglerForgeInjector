@@ -48,7 +48,7 @@ span.working summary span {
   background-color: rgb(255, 102, 0);
 }
 span.done summary span {
-  background-color: greenyellow;
+  background-color: lime;
 }
 #todolist {
   width: calc(50vw - 0.6rem);
