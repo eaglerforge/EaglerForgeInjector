@@ -24,5 +24,5 @@ TeaVM allows for writing asynchronous callbacks, which eaglercraft uses for file
  - Constructing an EntityPlayerMP
  - Setting blocks in the world in some occasions
 
-Potential workarounds: This isn't confirmed yet, but there is a probable chance that overriding or patching methods in classes like VFile2 is a viable workaround. (22/09/2024).
+Potential workarounds: This isn't confirmed yet, but there is a probable chance that overriding or patching methods in classes like VFile2 or PlatformFilesystem is a viable workaround. (22/09/2024).
 I'll be verifying this is the future and if it is possible, releasing a library for it. (the maybe-library is going to be called AsyncSink if it will exist)
