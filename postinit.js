@@ -1,4 +1,4 @@
-(() => {
+globalThis.modapi_postinit = "(" + (() => {
     //EaglerForge post initialization code.
     //This script cannot contain backticks, escape characters, or backslashes in order to inject into the dedicated server code.
     var startedModLoader = false;
@@ -787,4 +787,4 @@
             return originalMainMethod.apply(this, args);
         }
     }
-})();
+}).toString() + ")();";

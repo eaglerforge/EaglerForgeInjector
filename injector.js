@@ -1,3 +1,11 @@
+function wait(ms) {
+    return new Promise((resolve, reject) => {
+        setTimeout(() => { resolve(); }, ms);
+    });
+}
+function _status(x) {
+    document.querySelector("#status").innerText = x;
+}
 function entriesToStaticVariableProxy(entries, prefix) {
     var getComponents = "";
     entries.forEach((entry) => {
@@ -45,7 +53,9 @@ function entriesToStaticVariableProxy(entries, prefix) {
           });`;
     return proxy;
 }
-function processClasses(string) {
+async function processClasses(string) {
+    _status("Beginning patch process...");
+    await wait(50);
     var patchedFile = string;
     patchedFile = patchedFile.replaceAll(
         `(function(root, module) {`,
@@ -57,6 +67,10 @@ function processClasses(string) {
         `${modapi_preinit}
 var main;(function(){`
     );
+
+    _status("Patching threads and reflect metadata...");
+
+    await wait(50);
     patchedFile = patchedFile
         .replace("\r", "")
         .replace(
@@ -95,15 +109,10 @@ var main;(function(){`
         }
     );
 
-    patchedFile = patchedFile.replace(
-        ` id="game_frame">`,
-        ` id="game_frame">
-    \<script id="modapi_postinit"\>${globalThis.modapi_postinit}\<\/script\>
-    \<script id="modapi_modloader"\>${globalThis.modapi_modloader}\<\/script\>
-    \<script id="modapi_guikit"\>${globalThis.modapi_guikit}\<\/script\>
-    \<script id="modapi_postinit_data"\>globalThis.modapi_postinit = \`${globalThis.modapi_postinit}\`;\<\/script\>
-    \<script id="libserverside"\>{"._|_libserverside_|_."}\<\/script\>`
-    );
+    patchedFile = patchedFile.replaceAll("function TeaVMThread(", "globalThis.ModAPI.hooks.TeaVMThread = TeaVMThread;\nfunction TeaVMThread(");
+
+    _status("Extracting constructors and methods...");
+    await wait(50);
 
     const extractConstructorRegex =
         /^\s*function (\S*?)__init_\d*?\((?!\$)/gm;
@@ -208,7 +217,8 @@ var main;(function(){`
             return proxy + "\n" + match;
         }
     );
-
+    _status("Extracting teavm internals...");
+    await wait(50);
     patchedFile = patchedFile.replaceAll(
         /function \$rt_\S+?\(/gm,
         (match) => {
@@ -220,9 +230,28 @@ var main;(function(){`
             );
         }
     );
+
+    _status("Applying async override...");
+    await wait(50);
+
+    //patchedFile = await asyncify(patchedFile);
+    _status("Injecting scripts...");
+    await wait(50);
+    patchedFile = patchedFile.replace(
+        ` id="game_frame">`,
+        ` id="game_frame">
+    \<script id="modapi_postinit"\>${globalThis.modapi_postinit}\<\/script\>
+    \<script id="modapi_postinitasync"\>${globalThis.modapi_postinitasync}\<\/script\>
+    \<script id="modapi_modloader"\>${globalThis.modapi_modloader}\<\/script\>
+    \<script id="modapi_guikit"\>${globalThis.modapi_guikit}\<\/script\>
+    \<script id="modapi_postinit_data"\>globalThis.modapi_postinit = \`${globalThis.modapi_postinit}\`;\<\/script\>
+    \<script id="libserverside"\>{"._|_libserverside_|_."}\<\/script\>`
+    );
     patchedFile = patchedFile.replaceAll(/main\(\);\s*?}/gm, (match) => {
         return match.replace("main();", "main();ModAPI.hooks._postInit();");
     });
+    _status("Done, awaiting input...");
+    await wait(50);
     return patchedFile;
 }
 
@@ -238,8 +267,8 @@ document.querySelector("#giveme").addEventListener("click", () => {
     var fileType = file.name.split(".");
     fileType = fileType[fileType.length - 1];
 
-    file.text().then((string) => {
-        var patchedFile = processClasses(string);
+    file.text().then(async (string) => {
+        var patchedFile = await processClasses(string);
         patchedFile.replace(`{"._|_libserverside_|_."}`)
         var blob = new Blob([patchedFile], { type: file.type });
         saveAs(blob, "processed." + fileType);
@@ -258,8 +287,8 @@ document.querySelector("#givemeserver").addEventListener("click", () => {
     var fileType = file.name.split(".");
     fileType = fileType[fileType.length - 1];
 
-    file.text().then((string) => {
-        var patchedFile = processClasses(string);
+    file.text().then(async (string) => {
+        var patchedFile = await processClasses(string);
         patchedFile.replace(`{"._|_libserverside_|_."}`, `(${EFServer.toString()})()`);
         var blob = new Blob([patchedFile], { type: file.type });
         saveAs(blob, "efserver." + fileType);

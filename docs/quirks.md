@@ -1,4 +1,4 @@
-## Quirks in TeaVM
+## TeaVM Quirks and Caveats
 When TeaVM compiles code, it sometimes does strange things.
 
 #### Property Suffixes
@@ -15,3 +15,14 @@ Any form of incorrect data type, even passing the wrong values, can cause this s
 
 Update 13/09/2024:
 Calling methods while the TeaVM thread is in a critical transition state (see `ModAPI.util.isCritical()`) will shift the call stack, cause methods to access the incorrect values at runtime, and also cause the stack to implode. Gotta love TeaVM.
+
+Update 22/09/2024:
+See Asynchronous Code
+
+#### TeaVM thread suspension/resumption
+TeaVM allows for writing asynchronous callbacks, which eaglercraft uses for file operations and downloading from URIs. However, when a method that makes use of an async callback gets run from ModAPI, it triggers a stack implosion due to mismatches in value types upon return (as well as a whole other myriad of symptoms). Currently this is not supported by ModAPI, and it will take some time until it will be. In the meanwhile, avoid using constructors or methods that access a file or use other asynchronous apis. Examples:
+ - Constructing an EntityPlayerMP
+ - Setting blocks in the world in some occasions
+
+Potential workarounds: This isn't confirmed yet, but there is a probable chance that overriding or patching methods in classes like VFile2 or PlatformFilesystem is a viable workaround. (22/09/2024).
+I'll be verifying this is the future and if it is possible, releasing a library for it. (the maybe-library is going to be called AsyncSink if it will exist)

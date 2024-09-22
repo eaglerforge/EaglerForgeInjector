@@ -17,8 +17,9 @@
 
                 // Get the EntityPlayerMP class to spawn the fake player
                 const EntityPlayerMPClass = ModAPI.reflect.getClassById("net.minecraft.entity.player.EntityPlayerMP");
+                console.log(ModAPI.server.getConfigurationManager());
                 const fakePlayer = EntityPlayerMPClass.constructors[0](
-                    world.getMinecraftServer(), world.getRef(), fakeProfile, playerInteractionManager
+                    ModAPI.server.getRef(), world.getRef(), fakeProfile, playerInteractionManager
                 );
 
                 // Set the fake player position to be near the command sender

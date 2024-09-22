@@ -43,12 +43,17 @@ span summary span {
   right: -4px;
   background-color: red;
   border-radius: 9px;
+  opacity: 0.6;
+  transition: opacity 0.2s;
+}
+span summary span:hover {
+  opacity: 1;
 }
 span.working summary span {
   background-color: rgb(255, 102, 0);
 }
 span.done summary span {
-  background-color: greenyellow;
+  background-color: lime;
 }
 #todolist {
   width: calc(50vw - 0.6rem);
