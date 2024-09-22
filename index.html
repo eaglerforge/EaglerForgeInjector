@@ -89,6 +89,8 @@
         <label class="custom-file-label" for="htmlFile"
           >Choose .html file...</label
         >
+        <br />
+        <span><code id="status">Awaiting input...</code></span>
         <br /><br />
         <button class="btn btn-primary" id="giveme">Make modded client</button>
         <button class="btn btn-primary" id="givemeserver" disabled>
@@ -123,7 +125,9 @@
         </details>
         <details>
           <summary>Roadmap?</summary>
-          <a href="https://eaglerforge.github.io/EaglerForgeInjector/roadmap/">roadmap.</a>
+          <a href="https://eaglerforge.github.io/EaglerForgeInjector/roadmap/"
+            >roadmap.</a
+          >
         </details>
         <details>
           <summary>How does this tool work?</summary>
@@ -143,7 +147,9 @@
       </div>
     </div>
 
-    <script src="filesaver.min.js"></script>
+    <!-- Libraries -->
+    <script src="libs/babel.min.js"></script>
+    <script src="libs/filesaver.min.js"></script>
 
     <script>
       document.querySelector("#htmlFile").addEventListener("input", (e) => {
@@ -166,6 +172,7 @@
       `;
       var freezeCallstack = `if(ModAPI.hooks.freezeCallstack){return false};`;
     </script>
+    <script src="injector.stepAsync.js"></script>
     <script src="injector.js"></script>
 
     <!-- Code assets -->
