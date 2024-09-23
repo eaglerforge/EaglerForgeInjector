@@ -571,6 +571,19 @@ globalThis.modapi_postinit = "(" + (() => {
         return ModAPI.hooks._teavm.$rt_suspending() || ModAPI.hooks._teavm.$rt_resuming();
     }
 
+    ModAPI.util.getNearestProperty = function getNearestProperty(object, prop) {
+        if (!object) {
+            return null;
+        }
+        var possibleKeys = Object.keys(object).filter(x => { return x.startsWith(prop) });
+        possibleKeys = possibleKeys.filter(x => {
+            return Number.isFinite(parseInt(x.substring(prop.length))) || (x.substring(prop.length).length === 0);
+        })
+        return possibleKeys.sort((a, b) => {
+            return a.length - b.length;
+        })[0] || null;
+    }
+
     ModAPI.clickMouse = function () {
         ModAPI.hooks.methods["nmc_Minecraft_clickMouse"](ModAPI.javaClient);
     }
@@ -750,7 +763,8 @@ globalThis.modapi_postinit = "(" + (() => {
 
         // Find the right constructor. (int id, int x, int y, int width, int height, String buttonText);
         var btnConstructor = ModAPI.hooks._classMap['nmcg_GuiButton'].constructors.filter(c => { return c.length === 6 })[0];
-        var btn = btnConstructor(9635329, 0, args[0].$height8 - 21, 100, 20, ModAPI.util.str(msg));
+        var heightProp = ModAPI.util.getNearestProperty(args[0], "$height");
+        var btn = btnConstructor(9635329, 0, args[0][heightProp] - 21, 100, 20, ModAPI.util.str(msg));
         args[0].$buttonList.$add(btn);
 
         return x;
@@ -758,7 +772,8 @@ globalThis.modapi_postinit = "(" + (() => {
 
     const originalOptionsAction = ModAPI.hooks.methods[ModAPI.util.getMethodFromPackage("net.minecraft.client.gui.GuiOptions", "actionPerformed")];
     ModAPI.hooks.methods[ModAPI.util.getMethodFromPackage("net.minecraft.client.gui.GuiOptions", "actionPerformed")] = function (...args) {
-        if (args[1] && args[1].$id12 === 9635329) {
+        var idProp = ModAPI.util.getNearestProperty(args[1], "$id");
+        if (args[1] && args[1][idProp] === 9635329) {
             if (typeof window.modapi_displayModGui === "function") {
                 window.modapi_displayModGui();
             } else {

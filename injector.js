@@ -1,3 +1,4 @@
+globalThis.doEaglerforge = true;
 function wait(ms) {
     return new Promise((resolve, reject) => {
         setTimeout(() => { resolve(); }, ms);
@@ -231,10 +232,14 @@ var main;(function(){`
         }
     );
 
-    _status("Applying async override...");
-    await wait(50);
+    if (globalThis.doShronk) {
+        _status("Shrinking file...");
+        await wait(50);
 
-    //patchedFile = await asyncify(patchedFile);
+        patchedFile = await shronk(patchedFile);
+    }
+
+
     _status("Injecting scripts...");
     await wait(50);
     patchedFile = patchedFile.replace(
@@ -268,8 +273,15 @@ document.querySelector("#giveme").addEventListener("click", () => {
     fileType = fileType[fileType.length - 1];
 
     file.text().then(async (string) => {
-        var patchedFile = await processClasses(string);
-        patchedFile.replace(`{"._|_libserverside_|_."}`)
+        var patchedFile = string;
+
+        if (globalThis.doEaglerforge) {
+            patchedFile = await processClasses(patchedFile);
+        } else if (globalThis.doShronk) {
+            patchedFile = await shronk(patchedFile);
+        }
+        
+        patchedFile.replace(`{"._|_libserverside_|_."}`, "");
         var blob = new Blob([patchedFile], { type: file.type });
         saveAs(blob, "processed." + fileType);
     });
@@ -288,7 +300,14 @@ document.querySelector("#givemeserver").addEventListener("click", () => {
     fileType = fileType[fileType.length - 1];
 
     file.text().then(async (string) => {
-        var patchedFile = await processClasses(string);
+        var patchedFile = string;
+        
+        if (globalThis.doEaglerforge) {
+            patchedFile = await processClasses(patchedFile);
+        } else if (globalThis.doShronk) {
+            patchedFile = await shronk(patchedFile);
+        }
+        
         patchedFile.replace(`{"._|_libserverside_|_."}`, `(${EFServer.toString()})()`);
         var blob = new Blob([patchedFile], { type: file.type });
         saveAs(blob, "efserver." + fileType);

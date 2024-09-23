@@ -21,7 +21,7 @@ const ASYNC_PLUGIN_1 = function ({ types: t }) {
         }
     };
 };
-async function asyncify(input) {
+async function shronk(input) {
     let isHtml = true;
     let inputHtml = input;
 
@@ -45,7 +45,7 @@ async function asyncify(input) {
 
 
         const output = Babel.transform(code, {
-            plugins: [ASYNC_PLUGIN_1]
+            plugins: []
         });
         scriptTag.textContent = output.code;
     }

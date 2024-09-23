@@ -29,7 +29,7 @@ PluginAPI.addEventListener("update", () => { //Every client tick
     if (
         PluginAPI.player.fishEntity !== undefined && //If the fish hook exists
         GrappleHookPlugin.prev === "AIR" && //And the hook was previously in the air
-        PluginAPI.player.fishEntity.inGround2 //And the hook is in the ground
+        PluginAPI.player.fishEntity[PluginAPI.util.getNearestProperty(ModAPI.player.fishEntity, "inGround")] //And the hook is in the ground (the inGround property is botched with random suffixes sometimes)
     ) {
         GrappleHookPlugin.oldXYZ = [ //Set old grapple hook position
             PluginAPI.player.fishEntity.posX,
