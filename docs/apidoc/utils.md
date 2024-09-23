@@ -42,3 +42,5 @@ Methods:
   - The class parameter can be retrieved via reflect: `ModAPI.reflect.getClassById("net.minecraft.util.BlockPos").class`
 - `ModAPI.util.wrap(obj: Object) : object`
   - Returns a wrapper around native java objects, removing prefixes and fixing method outputs.
+- `ModAPI.util.getNearestProperty(object: Object, property: string) : string`
+  - Finds the nearest property name to the one you specify (suffix based). This is used to mitigate teavm adding random suffixes to properties.

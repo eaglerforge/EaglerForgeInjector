@@ -59,9 +59,10 @@
                             if (!globalThis.LCI_LMBEVENTS[cid]) {
                                 return oldDig.apply(this, [$this, packet]);
                             }
-                            var statusTag = Object.keys(packet.$status).find(x => { return x.startsWith("$name") });
+                            var $status = ModAPI.util.getNearestProperty(packet, "$status");
+                            var statusTag = Object.keys(packet[$status]).find(x => { return x.startsWith("$name") });
                             var positionTag = Object.keys(packet).filter(x => { return x.startsWith("$position") })[0];
-                            var stat = ModAPI.util.unstr(packet.$status[statusTag]);
+                            var stat = ModAPI.util.unstr(packet[$status][statusTag]);
                             if (stat === "START_DESTROY_BLOCK") {
                                 sendPacket($this, packetblockchange($this.$serverController.$worldServerForDimension($this.$playerEntity.$dimension), packet[positionTag]));
                             }
