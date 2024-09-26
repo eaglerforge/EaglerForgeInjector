@@ -40,7 +40,6 @@
 
                 // Get the EntityPlayerMP class to spawn the fake player
                 killFS = true;
-                AsyncSink.startDebuggingFS();
                 const EntityPlayerMPClass = ModAPI.reflect.getClassById("net.minecraft.entity.player.EntityPlayerMP");
                 var worldNameProp = ModAPI.util.getNearestProperty(ModAPI.server.getRef(), "$worldName");
                 var worldName = ModAPI.server.getRef()[worldNameProp];
@@ -55,7 +54,7 @@
                 fakePlayer.setPosition(senderPos.getX(), senderPos.getY(), senderPos.getZ());
 
                 // Add the fake player to the world
-                world.addEntityToWorld(fakePlayer.getEntityId(), fakePlayer.getRef());
+                world.spawnEntityInWorld(fakePlayer.getRef());
 
                 // Notify the player that the fake player has been spawned
                 const ChatComponentTextClass = ModAPI.reflect.getClassById("net.minecraft.util.ChatComponentText");
