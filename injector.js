@@ -55,6 +55,11 @@ function entriesToStaticVariableProxy(entries, prefix) {
     return proxy;
 }
 async function processClasses(string) {
+    if (globalThis.doShronk) {
+        if (!confirm("The minify step is extremely slow, especially on lower-end devices, and can take upwards of 15 minutes.")) {
+            return;
+        }
+    }
     _status("Beginning patch process...");
     await wait(50);
     var patchedFile = string;
