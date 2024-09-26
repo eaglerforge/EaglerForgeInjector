@@ -1,6 +1,6 @@
 ModAPI.meta.title("Advanced VClip Exploit");
 ModAPI.meta.description("Use .vclip <offset> to vertically phase through blocks with custom packet handling.");
-ModAPI.meta.credits("By ZXMushroom63");
+ModAPI.meta.credits("By radmanplays");
 
 // Custom syntax error function
 function syntaxError() {
