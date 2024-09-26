@@ -738,7 +738,13 @@ globalThis.modapi_postinit = "(" + (() => {
             sender: new Proxy($sender, TeaVM_to_Recursive_BaseData_ProxyConf),
             command: ModAPI.util.jclStrToJsStr($rawCommand)
         }
-        ModAPI.events.callEvent("processcommand", data);
+        if (data.command.toLowerCase().startsWith("/efdebug")) {
+            // Utility command to debug the dedicated server.
+            data.preventDefault = true;
+            debugger;
+        } else {
+            ModAPI.events.callEvent("processcommand", data);
+        }
         if (data.preventDefault) {
             return 0;
         }
@@ -749,10 +755,16 @@ globalThis.modapi_postinit = "(" + (() => {
         return x;
     }
 
-    ModAPI.items = new Proxy(ModAPI.hooks._classMap[ModAPI.util.getCompiledName("net.minecraft.init.Items")].staticVariables, StaticProps_ProxyConf);
-    ModAPI.blocks = new Proxy(ModAPI.hooks._classMap[ModAPI.util.getCompiledName("net.minecraft.init.Blocks")].staticVariables, StaticProps_ProxyConf);
-    ModAPI.materials = new Proxy(ModAPI.hooks._classMap[ModAPI.util.getCompiledName("net.minecraft.block.material.Material")].staticVariables, StaticProps_ProxyConf);
-    ModAPI.enchantments = new Proxy(ModAPI.hooks._classMap[ModAPI.util.getCompiledName("net.minecraft.enchantment.Enchantment")].staticVariables, StaticProps_ProxyConf);
+    const originalBootstrap = ModAPI.hooks.staticMethods[ModAPI.util.getMethodFromPackage("net.minecraft.init.Bootstrap", "register")];
+    ModAPI.hooks.methods[ModAPI.util.getMethodFromPackage("net.minecraft.init.Bootstrap", "register")] = function (...args) {
+        var x = originalBootstrap.apply(this, args);
+        ModAPI.items = new Proxy(ModAPI.hooks._classMap[ModAPI.util.getCompiledName("net.minecraft.init.Items")].staticVariables, StaticProps_ProxyConf);
+        ModAPI.blocks = new Proxy(ModAPI.hooks._classMap[ModAPI.util.getCompiledName("net.minecraft.init.Blocks")].staticVariables, StaticProps_ProxyConf);
+        ModAPI.materials = new Proxy(ModAPI.hooks._classMap[ModAPI.util.getCompiledName("net.minecraft.block.material.Material")].staticVariables, StaticProps_ProxyConf);
+        ModAPI.enchantments = new Proxy(ModAPI.hooks._classMap[ModAPI.util.getCompiledName("net.minecraft.enchantment.Enchantment")].staticVariables, StaticProps_ProxyConf);
+        console.log("[ModAPI] Hooked into bootstrap. .blocks, .items, .materials and .enchantments are now accessible.");
+        return x;
+    }
 
     const originalOptionsInit = ModAPI.hooks.methods[ModAPI.util.getMethodFromPackage("net.minecraft.client.gui.GuiOptions", "initGui")];
     ModAPI.hooks.methods[ModAPI.util.getMethodFromPackage("net.minecraft.client.gui.GuiOptions", "initGui")] = function (...args) {

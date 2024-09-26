@@ -36,6 +36,7 @@
         // @type Map<string, ArrayBuffer>
         AsyncSink.FS = new Map();
         AsyncSink.FSOverride = new Set();
+        AsyncSink.MIDDLEWARE = [];
         AsyncSink.setFile = function setFile(path, data) {
             if (typeof data === "string") {
                 data = encoder.encode(data).buffer;
@@ -75,6 +76,7 @@
                 }
                 return wrap(AsyncSink.getFile(ModAPI.util.ustr(args[1])));
             }
+            
             return originalReadWholeFile.apply(this, args);
         };
 
