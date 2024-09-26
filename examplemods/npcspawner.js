@@ -20,7 +20,7 @@
 
             if (event.command.toLowerCase().startsWith("/spawnnpc")) {
                 if (!globalThis.AsyncSink) {
-                    return alert("NPC Spawner relies on the AsyncSink library.");
+                    return console.log("NPC Spawner relies on the AsyncSink library.");
                 }
                 setup_filesystem_middleware();
                 const world = event.sender.getServerForPlayer();
