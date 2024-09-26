@@ -45,9 +45,9 @@
                 var worldNameProp = ModAPI.util.getNearestProperty(ModAPI.server.getRef(), "$worldName");
                 var worldName = ModAPI.server.getRef()[worldNameProp];
                 console.log(ModAPI.util.ustr(worldName));
-                const fakePlayer = EntityPlayerMPClass.constructors[0](
+                const fakePlayer = ModAPI.util.wrap(EntityPlayerMPClass.constructors[0](
                     ModAPI.server.getRef(), world.getRef(), fakeProfile, playerInteractionManager
-                );
+                ));
                 killFS = false;
 
                 // Set the fake player position to be near the command sender
@@ -55,7 +55,7 @@
                 fakePlayer.setPosition(senderPos.getX(), senderPos.getY(), senderPos.getZ());
 
                 // Add the fake player to the world
-                world.addEntityToWorld(fakePlayer.getEntityId(), fakePlayer);
+                world.addEntityToWorld(fakePlayer.getEntityId(), fakePlayer.getRef());
 
                 // Notify the player that the fake player has been spawned
                 const ChatComponentTextClass = ModAPI.reflect.getClassById("net.minecraft.util.ChatComponentText");
