@@ -76,7 +76,11 @@
                 }
                 return wrap(AsyncSink.getFile(ModAPI.util.ustr(args[1])));
             }
-            
+            var ev = {method: "read", file: ModAPI.util.ustr(args[1]), shim: false, shimOutput: new ArrayBuffer()};
+            AsyncSink.MIDDLEWARE.forEach((fn)=>{fn(ev)});
+            if (ev.shim) {
+                return wrap(ev.shimOutput);
+            }
             return originalReadWholeFile.apply(this, args);
         };
 
@@ -91,6 +95,11 @@
                 }
                 AsyncSink.setFile(ModAPI.util.ustr(args[1]), args[2]);
                 return booleanResult(true);
+            }
+            var ev = {method: "write", file: ModAPI.util.ustr(args[1]), data: args[2], shim: false, shimOutput: true};
+            AsyncSink.MIDDLEWARE.forEach((fn)=>{fn(ev)});
+            if (ev.shim) {
+                return booleanResult(ev.shimOutput);
             }
             return originalWriteWholeFile.apply(this, args);
         };
@@ -107,6 +116,11 @@
                 AsyncSink.deleteFile(ModAPI.util.ustr(args[1]));
                 return booleanResult(true);
             }
+            var ev = {method: "delete", file: ModAPI.util.ustr(args[1]), shim: false, shimOutput: true};
+            AsyncSink.MIDDLEWARE.forEach((fn)=>{fn(ev)});
+            if (ev.shim) {
+                return booleanResult(ev.shimOutput);
+            }
             return originalDeleteFile.apply(this, args);
         };
 
@@ -121,6 +135,11 @@
                 }
                 var result = AsyncSink.fileExists(ModAPI.util.ustr(args[1]));
                 return booleanResult(result);
+            }
+            var ev = {method: "exists", file: ModAPI.util.ustr(args[1]), shim: false, shimOutput: true};
+            AsyncSink.MIDDLEWARE.forEach((fn)=>{fn(ev)});
+            if (ev.shim) {
+                return booleanResult(ev.shimOutput);
             }
             return originalFileExists.apply(this, args);
         };
