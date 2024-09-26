@@ -11,7 +11,7 @@ ModAPI.require("player");
 ModAPI.addEventListener("sendchatmessage", (ev) => {
     var msg = ev.message.toLowerCase();
     if (msg.startsWith(".vclip")) {
-        ev.preventDefault();
+        ev.preventDefault == true;
 
         var args = msg.split(" ");
         if (args.length != 2) {
