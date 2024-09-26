@@ -755,7 +755,7 @@ globalThis.modapi_postinit = "(" + (() => {
         return x;
     }
 
-    const originalBootstrap = ModAPI.hooks.staticMethods[ModAPI.util.getMethodFromPackage("net.minecraft.init.Bootstrap", "register")];
+    const originalBootstrap = ModAPI.hooks.methods[ModAPI.util.getMethodFromPackage("net.minecraft.init.Bootstrap", "register")];
     ModAPI.hooks.methods[ModAPI.util.getMethodFromPackage("net.minecraft.init.Bootstrap", "register")] = function (...args) {
         var x = originalBootstrap.apply(this, args);
         ModAPI.items = new Proxy(ModAPI.hooks._classMap[ModAPI.util.getCompiledName("net.minecraft.init.Items")].staticVariables, StaticProps_ProxyConf);
