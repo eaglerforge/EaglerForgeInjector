@@ -1,3 +1,7 @@
+ModAPI.meta.title("AsyncSink");
+ModAPI.meta.description("Library for patching and hooking into asynchronous filesystem requests for EaglercraftX.");
+ModAPI.meta.icon("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABIAAAASCAYAAABWzo5XAAAAAXNSR0IArs4c6QAAAL9JREFUOE9jZGBg+M9ABcAIMsgtPo3hzZ2zYONEVIxJZu9aOIsBbJCRtTHcEJAgLgBSh82ic0fPIgyCKQAJXrx4EcUsfX19sBiIRrYU5gu4Qchew2cQyHSQYehBgdNruFwEcybMZci+gIcRIa+hhxu6LzBiDZvX0A1BDyuivYbLIJK8pqevjze5GlsbMxAdayCT/PQwDRS2gaQror2m36KH4SqjZybwxEl0gsQWRkM01ogpVQh6jaJihBgXEFIDAAIQ9AFDJlrxAAAAAElFTkSuQmCC");
+ModAPI.meta.credits("By ZXMushroom63");
 (function AsyncSinkFn() {
     //AsyncSink is a plugin to debug and override asynchronous methods in EaglercraftX
     function runtimeComponent() {
