@@ -4,11 +4,18 @@
             if (!ModAPI.reflect.getClassById("net.minecraft.entity.player.EntityPlayerMP").instanceOf(event.sender.getRef())) { return; }
 
             if (event.command.toLowerCase().startsWith("/spawnnpc")) {
+                if (!globalThis.AsyncSink) {
+                    return alert("NPC Spawner relies on the AsyncSink library.");
+                }
                 const world = event.sender.getServerForPlayer();
                 const senderPos = event.sender.getPosition();
 
                 // Create a fake player GameProfile
                 const GameProfileClass = ModAPI.reflect.getClassById("net.lax1dude.eaglercraft.v1_8.mojang.authlib.GameProfile");
+                var UUID = ModAPI.hooks.methods[ModAPI.util.getMethodFromPackage("net.lax1dude.eaglercraft.v1_8.EaglercraftUUID", "randomUUID")]();
+
+                //Not using UUID to make patching easier for now
+                
                 const fakeProfile = GameProfileClass.constructors[1](null, ModAPI.util.str("Steve"));
 
                 // Get the PlayerInteractionManager class
@@ -16,8 +23,11 @@
                 const playerInteractionManager = PlayerInteractionManagerClass.constructors[0](world.getRef());
 
                 // Get the EntityPlayerMP class to spawn the fake player
+                AsyncSink.startDebuggingFS();
                 const EntityPlayerMPClass = ModAPI.reflect.getClassById("net.minecraft.entity.player.EntityPlayerMP");
-                console.log(ModAPI.server.getConfigurationManager());
+                var worldNameProp = ModAPI.util.getNearestProperty(ModAPI.server.getRef(), "$worldName");
+                var worldName = ModAPI.server.getRef()[worldNameProp];
+                console.log(ModAPI.util.ustr(worldName));
                 const fakePlayer = EntityPlayerMPClass.constructors[0](
                     ModAPI.server.getRef(), world.getRef(), fakeProfile, playerInteractionManager
                 );
