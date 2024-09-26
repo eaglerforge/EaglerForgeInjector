@@ -51,7 +51,8 @@
                 killFS = false;
 
                 // Set the fake player position to be near the command sender
-                fakePlayer.setPosition(senderPos.$getX(), senderPos.$getY(), senderPos.$getZ());
+                console.log(senderPos);
+                fakePlayer.setPosition(senderPos.getX(), senderPos.getY(), senderPos.getZ());
 
                 // Add the fake player to the world
                 world.addEntityToWorld(fakePlayer.getEntityId(), fakePlayer);
