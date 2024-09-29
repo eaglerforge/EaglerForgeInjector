@@ -20,7 +20,7 @@
                 sheep.getDataWatcher().updateObject(15, 1); // AI flag, 15 is the byte for AI, 1 means no AI
 
                 // Disable gravity
-                sheep.noGravity = true;
+                sheep.noGravity = 1;
 
                 // Make sheep invincible
                 sheep.setEntityInvulnerable(true);
