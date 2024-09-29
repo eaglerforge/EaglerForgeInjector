@@ -149,6 +149,7 @@ ModAPI.meta.credits("By ZXMushroom63");
         };
         globalThis.AsyncSink = AsyncSink;
         ModAPI.events.callEvent("lib:asyncsink", {});
+        console.log("[AsyncSink] Loaded!");
     }
     runtimeComponent();
     ModAPI.dedicatedServer.appendCode(runtimeComponent);
