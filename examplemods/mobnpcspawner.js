@@ -23,7 +23,7 @@
                 sheep.noGravity = 1;
 
                 // Make sheep invincible
-                sheep.setEntityInvulnerable(true);
+                sheep.setEntityInvulnerable(1);
 
                 // Prevent the sheep from taking any damage
                 const DamageSourceClass = ModAPI.reflect.getClassById("net.minecraft.util.DamageSource");
