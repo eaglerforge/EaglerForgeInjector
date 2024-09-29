@@ -139,14 +139,26 @@ var main;(function(){`
     
     if(globalThis.optimizePi){
         patchedFile = patchedFile.replaceAll(
-            "3.1415927410125732 / 180",
+            "3.1415927410125732 / 180.0",
             "0.01745"
+        );
+
+        patchedFile = patchedFile.replaceAll(
+            "180.0 / 3.1415927410125732",
+            "57.2958"
         );
     
         patchedFile = patchedFile.replaceAll(
             "3.1415927410125732",
             "3.14159"
         );
+
+        patchedFile = patchedFile.replaceAll(
+            "0.01745329238474369",
+            "0.01745"
+        );
+
+        
     }
     
     const extractInstanceMethodRegex =
