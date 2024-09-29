@@ -51,7 +51,6 @@
                 neighbors.push(new APNode(x, y, z, 0, 0));
             }
         }
-    
         return neighbors;
     }
     
