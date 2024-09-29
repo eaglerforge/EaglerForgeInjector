@@ -680,25 +680,25 @@ globalThis.modapi_postinit = "(" + (() => {
         return sendChatMessage.apply(this, [$this, $message]);
     }
 
-    ModAPI.events.newEvent("render", "client");
-    const renderMethodName = ModAPI.util.getMethodFromPackage("net.minecraft.client.renderer.EntityRenderer", "renderWorldPass");
-    const renderMethod = ModAPI.hooks.methods[renderMethodName];
-    ModAPI.hooks.methods[renderMethodName] = function ($this, $int_pass, $float_partialTicks, $long_finishTimeNano) {
-        var shouldRenderHand = $this.$renderHand;
-        $this.$renderHand = 0; //Rendering the hand clears the depth bit, which we don't want to do.
-        var out = renderMethod.apply(this, [$this, $int_pass, $float_partialTicks, $long_finishTimeNano]);
-        var data = {
-            partialTicks: $float_partialTicks
-        }
-        ModAPI.events.callEvent("render", data);
-        if (shouldRenderHand) {
-            ModAPI.hooks.methods.nlevo_GlStateManager_clear(256); //GL_DEPTH_BUFFER_BIT, found in class RealOpenGLEnums
-            ModAPI.hooks.methods.nmcr_EntityRenderer_renderHand($this, $float_partialTicks, $int_pass);
-            ModAPI.hooks.methods.nmcr_EntityRenderer_renderWorldDirections($this, $float_partialTicks);
-        }
-        $this.$renderHand = shouldRenderHand;
-        return out;
-    }
+    // ModAPI.events.newEvent("render", "client");
+    // const renderMethodName = ModAPI.util.getMethodFromPackage("net.minecraft.client.renderer.EntityRenderer", "renderWorldPass");
+    // const renderMethod = ModAPI.hooks.methods[renderMethodName];
+    // ModAPI.hooks.methods[renderMethodName] = function ($this, $int_pass, $float_partialTicks, $long_finishTimeNano) {
+    //     var shouldRenderHand = $this.$renderHand;
+    //     $this.$renderHand = 0; //Rendering the hand clears the depth bit, which we don't want to do.
+    //     var out = renderMethod.apply(this, [$this, $int_pass, $float_partialTicks, $long_finishTimeNano]);
+    //     var data = {
+    //         partialTicks: $float_partialTicks
+    //     }
+    //     ModAPI.events.callEvent("render", data);
+    //     if (shouldRenderHand) {
+    //         ModAPI.hooks.methods.nlevo_GlStateManager_clear(256); //GL_DEPTH_BUFFER_BIT, found in class RealOpenGLEnums
+    //         ModAPI.hooks.methods.nmcr_EntityRenderer_renderHand($this, $float_partialTicks, $int_pass);
+    //         ModAPI.hooks.methods.nmcr_EntityRenderer_renderWorldDirections($this, $float_partialTicks);
+    //     }
+    //     $this.$renderHand = shouldRenderHand;
+    //     return out;
+    // }
 
     const ScaledResolutionConstructor = ModAPI.reflect.getClassByName("ScaledResolution").constructors[0];
     ModAPI.events.newEvent("frame", "client");
