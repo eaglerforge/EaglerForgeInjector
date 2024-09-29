@@ -1,4 +1,5 @@
 globalThis.doEaglerforge = true;
+globalThis.optimizePi = true;
 function wait(ms) {
     return new Promise((resolve, reject) => {
         setTimeout(() => { resolve(); }, ms);
@@ -135,7 +136,7 @@ var main;(function(){`
             );
         }
     );
-    
+    console.log(globalThis.optimizePi)
     if(globalThis.optimizePi){
         patchedFile = patchedFile.replaceAll(
             "3.1415927410125732 / 180",
