@@ -142,6 +142,11 @@ var main;(function(){`
             "3.1415927410125732 / 180.0",
             "0.01745"
         );
+
+        patchedFile = patchedFile.replaceAll(
+            "180.0 / 3.1415927410125732",
+            "57.2958"
+        );
     
         patchedFile = patchedFile.replaceAll(
             "3.1415927410125732",
