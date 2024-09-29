@@ -14,7 +14,7 @@
                 const sheep = EntitySheepClass.constructors[1](world.getRef());
 
                 // Set sheep's position to player's position
-                sheep.setPosition(senderPos.$getX(), senderPos.$getY(), senderPos.$getZ());
+                sheep.setPosition(senderPos.getX(), senderPos.getY(), senderPos.getZ());
 
                 // Disable AI (no AI behavior)
                 sheep.getDataWatcher().updateObject(15, 1); // AI flag, 15 is the byte for AI, 1 means no AI
