@@ -138,12 +138,12 @@ var main;(function(){`
     
     if(globalThis.optimizePi){
         patchedFile = patchedFile.replaceAll(
-            /3\.1415927410125732 \/ 180/i,
+            "3.1415927410125732 / 180",
             "0.01745"
         );
     
         patchedFile = patchedFile.replaceAll(
-            /3\.1415927410125732/i,
+            "3.1415927410125732",
             "3.14159"
         );
     }
