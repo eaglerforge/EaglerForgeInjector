@@ -1,4 +1,5 @@
 globalThis.doEaglerforge = true;
+globalThis.optimizePi = true;
 function wait(ms) {
     return new Promise((resolve, reject) => {
         setTimeout(() => { resolve(); }, ms);
@@ -135,6 +136,19 @@ var main;(function(){`
             );
         }
     );
+    
+    if(globalThis.optimizePi){
+        patchedFile = patchedFile.replaceAll(
+            "3.1415927410125732 / 180",
+            "0.01745"
+        );
+    
+        patchedFile = patchedFile.replaceAll(
+            "3.1415927410125732",
+            "3.14159"
+        );
+    }
+    
     const extractInstanceMethodRegex =
         /^[\t ]*function \S+?_\S+?_\S+?\((\$this)?/gm; // /^[\t ]*function \S+?_\S+?_\S+?\(\$this/gm
     const extractInstanceMethodFullNameRegex = /function (\S*?)\(/gm; // /function (\S*?)\(\$this/gm
@@ -197,6 +211,8 @@ var main;(function(){`
     );
     //Edge cases. sigh
     //Done: add support for static properties on classes with constructors like this: function nmcg_GuiMainMenu() {
+
+    
     patchedFile = patchedFile.replaceAll(
         /function [a-z]+?_([a-zA-Z\$]+?)\(\) \{/gm,
         (match) => {
