@@ -1,8 +1,6 @@
 (() => {
     PluginAPI.dedicatedServer.appendCode(function () {
         PluginAPI.addEventListener("processcommand", (event) => {
-            // Check if the sender is a player
-            if (!ModAPI.reflect.getClassById("net.minecraft.entity.player.EntityPlayerMP").instanceOf(event.sender.getRef())) { return; }
 
             // Check if the command is "/spawnnpc"
             if (event.command.toLowerCase().startsWith("/spawnnpc")) {
