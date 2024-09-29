@@ -25,14 +25,6 @@
                 // Make sheep invincible
                 sheep.setEntityInvulnerable(1);
 
-                // Prevent the sheep from taking any damage
-                const DamageSourceClass = ModAPI.reflect.getClassById("net.minecraft.util.DamageSource");
-                ModAPI.addEventListener("livinghurt", (event) => {
-                    if (sheep.equals(event.entityLiving)) {
-                        event.setCanceled(true);
-                    }
-                });
-
                 // Add the sheep to the world
                 world.spawnEntityInWorld(sheep);
 
@@ -40,13 +32,6 @@
                 const ChatComponentTextClass = ModAPI.reflect.getClassById("net.minecraft.util.ChatComponentText");
                 event.sender.addChatMessage(ChatComponentTextClass.constructors[0](ModAPI.util.str("A special sheep has been spawned!")));
 
-                // Add an event listener for when the sheep is right-clicked
-                ModAPI.addEventListener("rightclickentity", (clickEvent) => {
-                    if (sheep.equals(clickEvent.target)) {
-                        // Send message to the player who right-clicked
-                        clickEvent.entityPlayer.addChatMessage(ChatComponentTextClass.constructors[0](ModAPI.util.str("bahhh")));
-                    }
-                });
 
                 // Prevent the command from executing further
                 event.preventDefault = true;
