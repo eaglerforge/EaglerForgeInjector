@@ -34,7 +34,7 @@
                 });
 
                 // Add the sheep to the world
-                world.addEntityToWorld(sheep.getEntityId(), sheep);
+                world.spawnEntityInWorld(sheep.getEntityId(), sheep);
 
                 // Notify the player that the sheep has been spawned
                 const ChatComponentTextClass = ModAPI.reflect.getClassById("net.minecraft.util.ChatComponentText");
