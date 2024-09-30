@@ -17,13 +17,13 @@
                 sheep.$setLocationAndAngles(senderPos.getX(), senderPos.getY(), senderPos.getZ(), senderPos.rotationYaw, senderPos.rotationPitch);
 
                 // Disable AI (no AI behavior)
-                sheep.getDataWatcher().updateObject(15, 1); // AI flag, 15 is the byte for AI, 1 means no AI
+                sheep.$getDataWatcher().$updateObject(15, 1); // AI flag, 15 is the byte for AI, 1 means no AI
 
                 // Disable gravity
-                sheep.noGravity = 1;
+                sheep.$noGravity = 1;
 
                 // Make sheep invincible
-                sheep.setEntityInvulnerable(1);
+                sheep.$setEntityInvulnerable(1);
 
                 // Add the sheep to the world
                 world.spawnEntityInWorld(sheep);
