@@ -3,9 +3,52 @@ ModAPI.meta.credits("By ZXMushroom63");
 ModAPI.meta.icon("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAQdJREFUOE9jZGBg+M9AAWAEGbBl2QmyjPCJsmAgaABbdybc8F+l01EswmsATONXLi4GYSkpBgZ+foY1O3cyuHWuhhuC1QBkjf///QMrFtHWZmD4+BHDEBQDUGzU1ITb8ubqVZyGoBjwsCONQYqXl0FYU5MBpAlsKxRgM+STUwoDhgG66upgZ4IAuiEooRcXx/DpCRuqAU97shg0jYzgfsVpSFwcg5mZGcOedRewGDBhAgPDokUohsBthmoE8U+dOoXdBfHHjoElUQxB03i9oABspnTJNFQXgARB3oAbwsAAdirMRmSNMFdhTQcwQ/BpxGsAzCUwRSCn4gJE5QV8uQxuAFlZEaoJAKrYrAHl38o6AAAAAElFTkSuQmCC");
 ModAPI.meta.description("Library to make retexturing LCI items easier. Requires AsyncSink.");
 (async function LibRender() {
+    var BreakingFour = ModAPI.reflect.getClassByName("BreakingFour").constructors[0];
+    var BakedQuad = ModAPI.reflect.getClassByName("BakedQuad").constructors[0];
+    var EnumFacing = ModAPI.reflect.getClassByName("EnumFacing");
+    function createBreakingFour(sprite$) {
+        var sprite = ModAPI.util.wrap(sprite$);
+        var vertexData = ModAPI.array.int(28); // 7 integers per vertex, 4 vertices
+        var vertexDataInternal = vertexData.data;
+
+        var vertexDataWithNormals = ModAPI.array.int(32); // 8 integers per vertex, 4 vertices
+        var normalDataInternal = vertexDataWithNormals.data;
+
+        var vertices = [
+            [0, 0, 0], [1, 0, 0], [1, 1, 0], [0, 1, 0]
+        ];
+
+        var uvs = [
+            [0, 0], [1, 0], [1, 1], [0, 1]
+        ];
+
+        for (let i = 0; i < 4; i++) {
+            let j = i * 7;
+            vertexDataInternal[j] = ModAPI.hooks.methods.jl_Float_floatToIntBits(vertices[i][0]);
+            vertexDataInternal[j + 1] = ModAPI.hooks.methods.jl_Float_floatToIntBits(vertices[i][1]);
+            vertexDataInternal[j + 2] = ModAPI.hooks.methods.jl_Float_floatToIntBits(vertices[i][2]);
+            vertexDataInternal[j + 3] = rgbToInt(255, 0, 0); // Color (red)
+            vertexDataInternal[j + 4] = ModAPI.hooks.methods.jl_Float_floatToIntBits(sprite.getInterpolatedU(uvs[i][0] * 16));
+            vertexDataInternal[j + 5] = ModAPI.hooks.methods.jl_Float_floatToIntBits(sprite.getInterpolatedV(uvs[i][1] * 16));
+            vertexDataInternal[j + 6] = 0; // Normal
+
+            let k = i * 8;
+            normalDataInternal[k] = vertexDataInternal[j];
+            normalDataInternal[k + 1] = vertexDataInternal[j + 1];
+            normalDataInternal[k + 2] = vertexDataInternal[j + 2];
+            normalDataInternal[k + 3] = vertexDataInternal[j + 3];
+            normalDataInternal[k + 4] = vertexDataInternal[j + 4];
+            normalDataInternal[k + 5] = vertexDataInternal[j + 5];
+            normalDataInternal[k + 6] = vertexDataInternal[j + 6];
+            normalDataInternal[k + 7] = 0;
+        }
+
+        var baseQuad = BakedQuad(vertexData, vertexDataWithNormals, -1, EnumFacing.staticVariables.NORTH);
+        return BreakingFour(baseQuad, sprite$);
+    }
     function waitUntilPropertyExists(obj, prop) {
-        return new Promise((res, rej)=>{
-            var timer = setInterval(()=>{
+        return new Promise((res, rej) => {
+            var timer = setInterval(() => {
                 if (obj[prop]) {
                     clearInterval(timer);
                     res();
@@ -13,6 +56,9 @@ ModAPI.meta.description("Library to make retexturing LCI items easier. Requires 
             }, 50);
         });
     }
+    function rgbToInt(red, green, blue) {
+        return (red << 16) | (green << 8) | blue;
+    }    
     function rgbaToInt(red, green, blue, alpha) {
         return (alpha << 24) | (red << 16) | (green << 8) | blue;
     }
@@ -38,13 +84,15 @@ ModAPI.meta.description("Library to make retexturing LCI items easier. Requires 
         });
     }
     function cloneBaseModel(baseModel, newTexture, texName) {
+        var sprite = eaglerTextureAtlasSprite(imageDataToLaxImgData(newTexture), ModAPI.util.str(texName));
         var newBaseModelBuilder = ModAPI.reflect.getClassByName("SimpleBakedModel$Builder").constructors[0](0, 0, ModAPI.reflect.getClassByName("ItemCameraTransforms").constructors.find(x => x.length === 0)());
-        newBaseModelBuilder.$builderTexture = eaglerTextureAtlasSprite(imageDataToLaxImgData(newTexture), ModAPI.util.str(texName));
+        newBaseModelBuilder.$builderTexture = sprite;
+        ModAPI.hooks.methods.nmcrm_SimpleBakedModel$Builder_addGeneralQuad(newBaseModelBuilder, createBreakingFour(sprite));
         var newBaseModel = ModAPI.hooks.methods.nmcrm_SimpleBakedModel$Builder_makeBakedModel(newBaseModelBuilder);
-        newBaseModel.$generalQuads = baseModel.$generalQuads.$clone();
-        newBaseModel.$faceQuads = baseModel.$faceQuads.$clone();
-        var cameraTransformsId = ModAPI.util.getNearestProperty(newBaseModel, "$cameraTransforms");
-        recursiveAssign(newBaseModel[cameraTransformsId], baseModel[cameraTransformsId]);
+        //newBaseModel.$generalQuads = baseModel.$generalQuads.$clone();
+        //newBaseModel.$faceQuads = baseModel.$faceQuads.$clone();
+        //var cameraTransformsId = ModAPI.util.getNearestProperty(newBaseModel, "$cameraTransforms");
+        //recursiveAssign(newBaseModel[cameraTransformsId], baseModel[cameraTransformsId]);
         return newBaseModel;
     }
 
@@ -58,6 +106,7 @@ ModAPI.meta.description("Library to make retexturing LCI items easier. Requires 
         var atlas = ModAPI.reflect.getClassByName("EaglerTextureAtlasSprite").constructors[0](ModAPI.util.str(name));
         var alias = ModAPI.util.wrap(atlas);
         alias.loadSprite(ModAPI.util.makeArray(laxImgDataClass, [imageData]), null);
+        alias.initSprite(1, 1, 0, 0, 0);
         return atlas;
     };
 
@@ -128,3 +177,12 @@ ModAPI.meta.description("Library to make retexturing LCI items easier. Requires 
     globalThis.LibCustomRender = LibCustomRender;
 })();
 //LibCustomRender.addRetextureRule("mymod:test_item_1", new ImageData(1, 1));
+
+// const imageData = new ImageData(16, 16);
+// for (let i = 0; i < imageData.data.length; i += 4) {
+//     imageData.data[i] = Math.floor(Math.random() * 256);
+//     imageData.data[i + 1] = Math.floor(Math.random() * 256);
+//     imageData.data[i + 2] = Math.floor(Math.random() * 256);
+//     imageData.data[i + 3] = 255;
+// }
+// LibCustomRender.addRetextureRule("mymod:test_item_1", imageData);
