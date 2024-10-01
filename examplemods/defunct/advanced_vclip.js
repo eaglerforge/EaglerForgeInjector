@@ -1,3 +1,4 @@
+//NOT FUNCTIONAL
 ModAPI.meta.title("Advanced VClip Exploit");
 ModAPI.meta.description("Use .vclip <offset> to vertically phase through blocks with custom packet handling.");
 ModAPI.meta.credits("By radmanplays");
@@ -11,7 +12,7 @@ ModAPI.require("player");
 ModAPI.addEventListener("sendchatmessage", (ev) => {
     var msg = ev.message.toLowerCase();
     if (msg.startsWith(".vclip")) {
-        ev.preventDefault();
+        ev.preventDefault == true;
 
         var args = msg.split(" ");
         if (args.length != 2) {
@@ -38,7 +39,7 @@ ModAPI.addEventListener("sendchatmessage", (ev) => {
             for (var packetNumber = 0; packetNumber < (packetsRequired - 1); packetNumber++) {
                 // Simulate entity movement
                 ridingEntity.posY += offset / packetsRequired; // Move a fraction of the total offset
-                player.sendQueue.addToSendQueue({
+                ModAPI.network.addToSendQueue({
                     "action": "RIDING_JUMP", // Simulate a riding jump action
                     "entityId": ridingEntity.getEntityId(),
                 });
@@ -46,7 +47,7 @@ ModAPI.addEventListener("sendchatmessage", (ev) => {
 
             // Final move
             ridingEntity.posY += offset / packetsRequired;
-            player.sendQueue.addToSendQueue({
+            ModAPI.network.addToSendQueue({
                 "action": "RIDING_JUMP",
                 "entityId": ridingEntity.getEntityId(),
             });
@@ -54,7 +55,7 @@ ModAPI.addEventListener("sendchatmessage", (ev) => {
         } else {
             // Player is not riding any entity
             for (var packetNumber = 0; packetNumber < (packetsRequired - 1); packetNumber++) {
-                player.getNetHandler().addToSendQueue({
+                ModAPI.network.addToSendQueue({
                     "x": player.posX,
                     "y": player.posY,
                     "z": player.posZ,
@@ -63,7 +64,7 @@ ModAPI.addEventListener("sendchatmessage", (ev) => {
             }
 
             // Final move
-            player.getNetHandler().addToSendQueue({
+            ModAPI.network.addToSendQueue({
                 "x": player.posX,
                 "y": player.posY + offset,
                 "z": player.posZ,

@@ -296,6 +296,15 @@ globalThis.modapi_postinit = "(" + (() => {
     }
     var reloadDeprecationWarnings = 0;
     const TeaVM_to_BaseData_ProxyConf = {
+        ownKeys(target) {
+            return Reflect.ownKeys(target).flatMap(x => x.substring(1));
+        },
+        getOwnPropertyDescriptor(target, prop) {
+            return Object.getOwnPropertyDescriptor(target, "$" + prop);
+        },
+        has(target, prop) {
+            return ("$" + prop) in target;
+        },
         get(target, prop, receiver) {
             if (prop === "getRef") {
                 return function () {
@@ -348,6 +357,15 @@ globalThis.modapi_postinit = "(" + (() => {
         }
     }
     const TeaVM_to_Recursive_BaseData_ProxyConf = {
+        ownKeys(target) {
+            return Reflect.ownKeys(target).flatMap(x => x.substring(1));
+        },
+        getOwnPropertyDescriptor(target, prop) {
+            return Object.getOwnPropertyDescriptor(target, "$" + prop);
+        },
+        has(target, prop) {
+            return ("$" + prop) in target;
+        },
         get(target, prop, receiver) {
             if (prop === "getRef") {
                 return function () {
@@ -584,6 +602,25 @@ globalThis.modapi_postinit = "(" + (() => {
         })[0] || null;
     }
 
+    ModAPI.util.modifyFunction = function (fn, patcherFn) {
+        // Convert the original function to a string
+        let functionString = fn.toString();
+
+        // Extract the function body
+        let bodyStart = functionString.indexOf('{') + 1;
+        let bodyEnd = functionString.lastIndexOf('}');
+        let functionBody = functionString.substring(bodyStart, bodyEnd);
+
+        // Replace the function body with new instructions
+        let modifiedFunctionBody = patcherFn(functionBody) || 'return;';
+
+        // Create a new function with the same arguments and the modified body
+        let args = functionString.substring(functionString.indexOf('(') + 1, functionString.indexOf(')'));
+        let modifiedFunction = new Function(args, modifiedFunctionBody);
+
+        return modifiedFunction;
+    }
+
     ModAPI.clickMouse = function () {
         ModAPI.hooks.methods["nmc_Minecraft_clickMouse"](ModAPI.javaClient);
     }
@@ -660,6 +697,26 @@ globalThis.modapi_postinit = "(" + (() => {
         }
         return sendChatMessage.apply(this, [$this, $message]);
     }
+
+    // ModAPI.events.newEvent("render", "client");
+    // const renderMethodName = ModAPI.util.getMethodFromPackage("net.minecraft.client.renderer.EntityRenderer", "renderWorldPass");
+    // const renderMethod = ModAPI.hooks.methods[renderMethodName];
+    // ModAPI.hooks.methods[renderMethodName] = function ($this, $int_pass, $float_partialTicks, $long_finishTimeNano) {
+    //     var shouldRenderHand = $this.$renderHand;
+    //     $this.$renderHand = 0; //Rendering the hand clears the depth bit, which we don't want to do.
+    //     var out = renderMethod.apply(this, [$this, $int_pass, $float_partialTicks, $long_finishTimeNano]);
+    //     var data = {
+    //         partialTicks: $float_partialTicks
+    //     }
+    //     ModAPI.events.callEvent("render", data);
+    //     if (shouldRenderHand) {
+    //         ModAPI.hooks.methods.nlevo_GlStateManager_clear(256); //GL_DEPTH_BUFFER_BIT, found in class RealOpenGLEnums
+    //         ModAPI.hooks.methods.nmcr_EntityRenderer_renderHand($this, $float_partialTicks, $int_pass);
+    //         ModAPI.hooks.methods.nmcr_EntityRenderer_renderWorldDirections($this, $float_partialTicks);
+    //     }
+    //     $this.$renderHand = shouldRenderHand;
+    //     return out;
+    // }
 
     const ScaledResolutionConstructor = ModAPI.reflect.getClassByName("ScaledResolution").constructors[0];
     ModAPI.events.newEvent("frame", "client");

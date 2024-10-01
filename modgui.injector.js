@@ -8,7 +8,8 @@ globalThis.modapi_guikit = `// ModAPI GUI made by TheIdiotPlays
     "https://github.com/EaglerForge",
     "hey you should check out https://github.com/ZXMushroom63/scratch-gui",
     "99% of people stop gambling before they win big.",
-    "Now with free estradiol!"
+    "Now with free estradiol!",
+    "Now with H.I.V (Hyper Injected Virtual-debugger)"
   ];
   var gui = \`<div id="modapi_gui_container">
       <header>
