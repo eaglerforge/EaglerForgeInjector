@@ -296,6 +296,15 @@ globalThis.modapi_postinit = "(" + (() => {
     }
     var reloadDeprecationWarnings = 0;
     const TeaVM_to_BaseData_ProxyConf = {
+        ownKeys(target) {
+            return Reflect.ownKeys(target).flatMap(x => x.substring(1));
+        },
+        getOwnPropertyDescriptor(target, prop) {
+            return Object.getOwnPropertyDescriptor(target, "$" + prop);
+        },
+        has(target, prop) {
+            return ("$" + prop) in target;
+        },
         get(target, prop, receiver) {
             if (prop === "getRef") {
                 return function () {
@@ -348,6 +357,15 @@ globalThis.modapi_postinit = "(" + (() => {
         }
     }
     const TeaVM_to_Recursive_BaseData_ProxyConf = {
+        ownKeys(target) {
+            return Reflect.ownKeys(target).flatMap(x => x.substring(1));
+        },
+        getOwnPropertyDescriptor(target, prop) {
+            return Object.getOwnPropertyDescriptor(target, "$" + prop);
+        },
+        has(target, prop) {
+            return ("$" + prop) in target;
+        },
         get(target, prop, receiver) {
             if (prop === "getRef") {
                 return function () {
@@ -587,19 +605,19 @@ globalThis.modapi_postinit = "(" + (() => {
     ModAPI.util.modifyFunction = function (fn, patcherFn) {
         // Convert the original function to a string
         let functionString = fn.toString();
-        
+
         // Extract the function body
         let bodyStart = functionString.indexOf('{') + 1;
         let bodyEnd = functionString.lastIndexOf('}');
         let functionBody = functionString.substring(bodyStart, bodyEnd);
-    
+
         // Replace the function body with new instructions
         let modifiedFunctionBody = patcherFn(functionBody) || 'return;';
-    
+
         // Create a new function with the same arguments and the modified body
         let args = functionString.substring(functionString.indexOf('(') + 1, functionString.indexOf(')'));
         let modifiedFunction = new Function(args, modifiedFunctionBody);
-    
+
         return modifiedFunction;
     }
 
