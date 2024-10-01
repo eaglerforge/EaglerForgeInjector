@@ -23,7 +23,7 @@
                 sheep.$noGravity = 1;
 
                 // Make sheep invincible
-                sheep.$setEntityInvulnerable(1);
+                sheep.$invulnerable = 1
 
                 // Add the sheep to the world
                 world.spawnEntityInWorld(sheep);
