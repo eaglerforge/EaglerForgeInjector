@@ -17,7 +17,7 @@
                 sheep.$setLocationAndAngles(senderPos.getX(), senderPos.getY(), senderPos.getZ(), senderPos.rotationYaw, senderPos.rotationPitch);
 
                 // Disable AI (no AI behavior)
-                sheep.$getDataWatcher().$updateObject(15, 1); // AI flag, 15 is the byte for AI, 1 means no AI
+                sheep.$setNoAI(1)
 
                 // Disable gravity
                 sheep.$noGravity = 1;
