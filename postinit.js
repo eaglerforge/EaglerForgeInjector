@@ -200,7 +200,7 @@ globalThis.modapi_postinit = "(" + (() => {
     ModAPI.version = "v2.0";
     ModAPI.flavour = "injector";
     ModAPI.GNU = "terry pratchett";
-    ModAPI.credits = ["ZXMushroom63", "radmanplays", "OtterCodes101", "TheIdiotPlays"];
+    ModAPI.credits = ["ZXMushroom63", "radmanplays", "Murturtle", "OtterCodes101", "TheIdiotPlays", "OeildeLynx31", "Stpv22"];
     ModAPI.hooks.regenerateClassMap = function () {
         ModAPI.hooks._rippedConstructorKeys = Object.keys(ModAPI.hooks._rippedConstructors);
         ModAPI.hooks._rippedMethodKeys = Object.keys(ModAPI.hooks._rippedMethodTypeMap);
