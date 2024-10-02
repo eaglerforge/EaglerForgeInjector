@@ -147,7 +147,7 @@ globalThis.modapi_postinit = "(" + (() => {
                 return xOut;
             }
         }
-        return outputValue;
+        return null;
     }
     ModAPI.array.object = function (jclass, size) {
         if (Array.isArray(size)) {
@@ -311,16 +311,17 @@ globalThis.modapi_postinit = "(" + (() => {
     var reloadDeprecationWarnings = 0;
     const TeaVMArray_To_Recursive_BaseData_ProxyConf = {
         get(target, prop, receiver) {
-            var outputValue = Reflect.get(target, prop, receiver);
-            if (outputValue && typeof outputValue === "object" && !Array.isArray(outputValue)) {
-                return ModAPI.util.wrap(outputValue, target, this._corrective);
-            }
             if (prop === "getRef") {
                 return function () {
                     return target;
                 }
             }
-            return ModAPI.util.wrap(outputValue, target, this._corrective);
+            var outputValue = Reflect.get(target, prop, receiver);
+            var wrapped = ModAPI.util.wrap(outputValue, target, this._corrective);
+            if (wrapped) {
+                return wrapped;
+            }
+            return outputValue;
         },
         set(object, prop, value) {
             object[prop] = value;
