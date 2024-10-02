@@ -4,6 +4,13 @@ class PatchesRegistry {
     static getEventInjectorCode() {
         return "globalThis.modapi_specialevents = [" + PatchesRegistry.patchedEventNames.flatMap(x=>`\`${x}\``).join(",") + "]"
     }
+    static patchFile(x) {
+        var current = x;
+        PatchesRegistry.patchFns.forEach(fn => {
+            current = fn(current);
+        });
+        return current;
+    }
     static addPatch(fn) {
         PatchesRegistry.patchFns.push(fn);
     }

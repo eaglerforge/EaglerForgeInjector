@@ -276,6 +276,7 @@ var main;(function(){`
     patchedFile = patchedFile.replace(
         ` id="game_frame">`,
         ` id="game_frame">
+    \<script id="modapi_patchesreg_events"\>${PatchesRegistry.getEventInjectorCode()}\`;\<\/script\>
     \<script id="modapi_postinit"\>${globalThis.modapi_postinit}\<\/script\>
     \<script id="modapi_postinitasync"\>${globalThis.modapi_postinitasync}\<\/script\>
     \<script id="modapi_modloader"\>${globalThis.modapi_modloader}\<\/script\>
@@ -286,6 +287,11 @@ var main;(function(){`
     patchedFile = patchedFile.replaceAll(/main\(\);\s*?}/gm, (match) => {
         return match.replace("main();", "main();ModAPI.hooks._postInit();");
     });
+
+    _status("Applying bonus patches from patch registry...");
+    await wait(50);
+    patchedFile = PatchesRegistry.patchFile(patchedFile);
+
     _status("Done, awaiting input...");
     await wait(50);
     return patchedFile;

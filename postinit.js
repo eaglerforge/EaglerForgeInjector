@@ -859,4 +859,10 @@ globalThis.modapi_postinit = "(" + (() => {
             return originalMainMethod.apply(this, args);
         }
     }
+
+    if (globalThis.modapi_specialevents && Array.isArray(globalThis.modapi_specialevents)) {
+        globalThis.modapi_specialevents.forEach(eventName => {
+            ModAPI.events.newEvent(eventName, "patcher");
+        });
+    }
 }).toString() + ")();";
