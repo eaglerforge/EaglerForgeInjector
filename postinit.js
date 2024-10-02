@@ -114,7 +114,7 @@ globalThis.modapi_postinit = "(" + (() => {
         });
         return name;
     }
-    ModAPI.util.wrap = function (outputValue, target, corrective) {
+    ModAPI.util.wrap = function (outputValue, target, corrective, disableFunctions) {
         const CorrectiveArray = patchProxyConfToCorrective(ModAPI.util.TeaVMArray_To_Recursive_BaseData_ProxyConf);
         const CorrectiveRecursive = patchProxyConfToCorrective(ModAPI.util.TeaVM_to_Recursive_BaseData_ProxyConf);
         if (outputValue && typeof outputValue === "object" && Array.isArray(outputValue.data) && typeof outputValue.type === "function") {
@@ -129,7 +129,7 @@ globalThis.modapi_postinit = "(" + (() => {
             }
             return new Proxy(outputValue, ModAPI.util.TeaVM_to_Recursive_BaseData_ProxyConf);
         }
-        if (outputValue && typeof outputValue === "function" && target) {
+        if (!disableFunctions && outputValue && typeof outputValue === "function" && target) {
             return function (...args) {
                 var xOut = outputValue.apply(target, args);
                 if (xOut && typeof xOut === "object" && Array.isArray(xOut.data) && typeof outputValue.type === "function") {
@@ -311,16 +311,13 @@ globalThis.modapi_postinit = "(" + (() => {
     var reloadDeprecationWarnings = 0;
     const TeaVMArray_To_Recursive_BaseData_ProxyConf = {
         get(target, prop, receiver) {
-            var outputValue = Reflect.get(target, prop, receiver);
-            if (outputValue && typeof outputValue === "object" && !Array.isArray(outputValue)) {
-                return ModAPI.util.wrap(outputValue, target, this._corrective);
-            }
             if (prop === "getRef") {
                 return function () {
                     return target;
                 }
             }
-            var wrapped = ModAPI.util.wrap(outputValue, target, this._corrective);
+            var outputValue = Reflect.get(target, prop, receiver);
+            var wrapped = ModAPI.util.wrap(outputValue, target, this._corrective, true);
             if (wrapped) {
                 return wrapped;
             }
@@ -371,7 +368,7 @@ globalThis.modapi_postinit = "(" + (() => {
                 outProp = ModAPI.util.getNearestProperty(target, outProp);
             }
             var outputValue = Reflect.get(target, outProp, receiver);
-            var wrapped = ModAPI.util.wrap(outputValue, target, this._corrective);
+            var wrapped = ModAPI.util.wrap(outputValue, target, this._corrective, false);
             if (wrapped) {
                 return wrapped;
             }
