@@ -27,12 +27,11 @@ class PatchesRegistry {
 PatchesRegistry.regSpecialEvent("render");
 PatchesRegistry.addPatch(function (input) {
     var output = input.replaceAll(
-        /continue main;\s+?}\s+?if\s?\(!\$this.\$renderHand\)/gm
+        /\$tmp = \$entity.\$getEyeHeight\(\);\s+?if \(\$rt_suspending\(\)\) {/gm
         ,
-`continue main;
-            }
+`$tmp = $entity.$getEyeHeight();
             ModAPI.events.callEvent("render",{partialTicks:$partialTicks})
-            if (!$this.$renderHand)`
+            if ($rt_suspending()) {`
     );
     return output;
 })
