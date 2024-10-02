@@ -263,6 +263,10 @@ var main;(function(){`
         }
     );
 
+    _status("Applying bonus patches from patch registry...");
+    await wait(50);
+    patchedFile = PatchesRegistry.patchFile(patchedFile);
+
     if (globalThis.doShronk) {
         _status("Shrinking file...");
         await wait(50);
@@ -287,10 +291,6 @@ var main;(function(){`
     patchedFile = patchedFile.replaceAll(/main\(\);\s*?}/gm, (match) => {
         return match.replace("main();", "main();ModAPI.hooks._postInit();");
     });
-
-    _status("Applying bonus patches from patch registry...");
-    await wait(50);
-    patchedFile = PatchesRegistry.patchFile(patchedFile);
 
     _status("Done, awaiting input...");
     await wait(50);
