@@ -5,15 +5,14 @@ class PatchesRegistry {
         return "globalThis.modapi_specialevents = [" + PatchesRegistry.patchedEventNames.flatMap(x=>`\`${x}\``).join(",") + "]"
     }
     static addPatch(fn) {
-        patchFns.push(fn);
+        PatchesRegistry.patchFns.push(fn);
     }
-    static addSpecialEvent(x) {
+    static regSpecialEvent(x) {
         PatchesRegistry.patchedEventNames.push(x);
     }
 }
-function addPatch() {
-    
-}
-function addSpecialEvent(eventName) {
-    
-}
+// PatchesRegistry.regSpecialEvent("test");
+// PatchesRegistry.addPatch(function (input) {
+//     var output = input;
+//     return output;
+// })
