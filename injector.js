@@ -280,7 +280,7 @@ var main;(function(){`
     patchedFile = patchedFile.replace(
         ` id="game_frame">`,
         ` id="game_frame">
-    \<script id="modapi_patchesreg_events"\>${PatchesRegistry.getEventInjectorCode()}\`;\<\/script\>
+    \<script id="modapi_patchesreg_events"\>${PatchesRegistry.getEventInjectorCode()};\<\/script\>
     \<script id="modapi_postinit"\>${globalThis.modapi_postinit}\<\/script\>
     \<script id="modapi_postinitasync"\>${globalThis.modapi_postinitasync}\<\/script\>
     \<script id="modapi_modloader"\>${globalThis.modapi_modloader}\<\/script\>

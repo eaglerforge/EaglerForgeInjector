@@ -2,7 +2,7 @@ class PatchesRegistry {
     static patchFns = []
     static patchedEventNames = []
     static getEventInjectorCode() {
-        return "globalThis.modapi_specialevents = [" + PatchesRegistry.patchedEventNames.flatMap(x=>`\`${x}\``).join(",") + "]"
+        return "globalThis.modapi_specialevents = [" + PatchesRegistry.patchedEventNames.flatMap(x=>`\`${x}\``).join(",") + "];";
     }
     static patchFile(x) {
         var current = x;
