@@ -667,6 +667,17 @@ globalThis.modapi_postinit = "(" + (() => {
         return x;
     };
 
+    var desktopServerStartup = ModAPI.util.getMethodFromPackage("net.lax1dude.eaglercraft.v1_8.sp.internal.ClientPlatformSingleplayer", "startIntegratedServer");
+    const desktopServerStartupMethod = ModAPI.hooks.methods[desktopServerStartup];
+    ModAPI.hooks.methods[desktopServerStartup] = function (...args) {
+        var x = desktopServerStartupMethod.apply(this, args);
+        ModAPI.dedicatedServer._data.forEach((code)=>{
+            (new Function(code))();
+        });
+        console.log("[ModAPI] Hooked into external integrated server.");
+        return x;
+    };
+
     ModAPI.events.newEvent("load", "client");
 
     ModAPI.events.newEvent("sendchatmessage", "client");
