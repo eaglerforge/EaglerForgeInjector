@@ -22,25 +22,21 @@
 
                 // Get the EntityPlayerMP class to spawn the fake player
                 const EntityPlayerMPClass = ModAPI.reflect.getClassById("net.minecraft.entity.player.EntityPlayerMP");
-                setTimeout(() => {
-                    ModAPI.hooks._teavm.$rt_startThread(() => {
-                        return EntityPlayerMPClass.constructors[0](ModAPI.server.getRef(), world.getRef(), fakeProfile, playerInteractionManager);
-                    }, function (...args) {
-                        console.log(this, args);
-                        var fakePlayer = ModAPI.util.wrap(args[0]);
+                ModAPI.promisify(EntityPlayerMPClass.constructors[0])(ModAPI.server.getRef(), world.getRef(), fakeProfile, playerInteractionManager).then(result => {
+                    console.log(result);
+                    var fakePlayer = ModAPI.util.wrap(result);
 
-                        // Set the fake player position to be near the command sender
-                        console.log(senderPos);
-                        fakePlayer.setPosition(senderPos.getX(), senderPos.getY(), senderPos.getZ());
+                    // Set the fake player position to be near the command sender
+                    console.log(senderPos);
+                    fakePlayer.setPosition(senderPos.getX(), senderPos.getY(), senderPos.getZ());
 
-                        // Add the fake player to the world
-                        world.spawnEntityInWorld(fakePlayer.getRef());
+                    // Add the fake player to the world
+                    world.spawnEntityInWorld(fakePlayer.getRef());
 
-                        // Notify the player that the fake player has been spawned
-                        const ChatComponentTextClass = ModAPI.reflect.getClassById("net.minecraft.util.ChatComponentText");
-                        event.sender.addChatMessage(ChatComponentTextClass.constructors[0](ModAPI.util.str("Fake Steve has been spawned!")));
-                    });
-                }, 1);
+                    // Notify the player that the fake player has been spawned
+                    const ChatComponentTextClass = ModAPI.reflect.getClassById("net.minecraft.util.ChatComponentText");
+                    event.sender.addChatMessage(ChatComponentTextClass.constructors[0](ModAPI.util.str("Fake Steve has been spawned!")));
+                });
 
 
                 // Prevent the command from executing further

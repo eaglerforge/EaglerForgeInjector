@@ -94,6 +94,9 @@ The ModAPI object has the following methods:
     - Triggers a right click ingame.
  - `getFPS() : int`
     - Gets the frames per second of the game
+ - `promisify(asyncJavaMethod: Method | Constructor) : PromisifiedJavaRunner`
+    - Allows running java methods that are @Async/@Async dependent.
+    - More [PromisifyDocumentation](promisify.md)
 
 
 ## Handling strings, numbers and booleans to and from java.

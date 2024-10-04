@@ -543,6 +543,23 @@ globalThis.modapi_postinit = "(" + (() => {
         ModAPI.hooks.freezeCallstack = false;
     }
 
+    //Function used for running @Async / @Async-dependent TeaVM methods.
+    ModAPI.promisify = function promisify(fn) {
+        return function promisifiedJavaMethpd(...inArguments) {
+            return new Promise((res, rej) => {
+                Promise.resolve().then( //queue microtask
+                    () => {
+                        ModAPI.hooks._teavm.$rt_startThread(() => {
+                            return fn(...inArguments);
+                        }, function (out) {
+                            res(out);
+                        });
+                    }
+                );
+            });
+        }
+    }
+
     ModAPI.util.string = ModAPI.util.str = ModAPI.hooks._teavm.$rt_str;
 
     ModAPI.util.setStringContent = function (jclString, string) {
@@ -671,7 +688,7 @@ globalThis.modapi_postinit = "(" + (() => {
     const desktopServerStartupMethod = ModAPI.hooks.methods[desktopServerStartup];
     ModAPI.hooks.methods[desktopServerStartup] = function (...args) {
         var x = desktopServerStartupMethod.apply(this, args);
-        ModAPI.dedicatedServer._data.forEach((code)=>{
+        ModAPI.dedicatedServer._data.forEach((code) => {
             (new Function(code))();
         });
         console.log("[ModAPI] Hooked into external integrated server.");
