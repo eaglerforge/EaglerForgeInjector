@@ -1,28 +1,10 @@
 (() => {
     PluginAPI.dedicatedServer.appendCode(function () {
-        var ready = false;
-        var killFS = false;
-        function setup_filesystem_middleware() {
-            if (!ready) {
-                AsyncSink.MIDDLEWARE.push((ev)=>{
-                    if (killFS) {
-                        ev.shim = true;
-                        if (typeof ev.shimOutput === "boolean") {
-                            ev.shimOutput = true;
-                        }
-                    }
-                });
-                ready = true;
-            }
-        }
         PluginAPI.addEventListener("processcommand", (event) => {
             if (!ModAPI.reflect.getClassById("net.minecraft.entity.player.EntityPlayerMP").instanceOf(event.sender.getRef())) { return; }
 
-            if (event.command.toLowerCase().startsWith("/spawnnpc")) {
-                if (!globalThis.AsyncSink) {
-                    return console.error("NPC Spawner relies on the AsyncSink library.");
-                }
-                setup_filesystem_middleware();
+            if (event.command.toLowerCase().startsWith("/spawnnpc2")) {
+                AsyncSink.startDebuggingFS();
                 const world = event.sender.getServerForPlayer();
                 const senderPos = event.sender.getPosition();
 
@@ -31,7 +13,7 @@
                 var UUID = ModAPI.hooks.methods[ModAPI.util.getMethodFromPackage("net.lax1dude.eaglercraft.v1_8.EaglercraftUUID", "randomUUID")]();
 
                 //Not using UUID to make patching easier for now
-                
+
                 const fakeProfile = GameProfileClass.constructors[1](null, ModAPI.util.str("Steve"));
 
                 // Get the PlayerInteractionManager class
@@ -39,23 +21,23 @@
                 const playerInteractionManager = PlayerInteractionManagerClass.constructors[0](world.getRef());
 
                 // Get the EntityPlayerMP class to spawn the fake player
-                killFS = true;
                 const EntityPlayerMPClass = ModAPI.reflect.getClassById("net.minecraft.entity.player.EntityPlayerMP");
-                const fakePlayer = ModAPI.util.wrap(EntityPlayerMPClass.constructors[0](
-                    ModAPI.server.getRef(), world.getRef(), fakeProfile, playerInteractionManager
-                ));
-                killFS = false;
+                ModAPI.promisify(EntityPlayerMPClass.constructors[0])(ModAPI.server.getRef(), world.getRef(), fakeProfile, playerInteractionManager).then(result => {
+                    console.log(result);
+                    var fakePlayer = ModAPI.util.wrap(result);
 
-                // Set the fake player position to be near the command sender
-                console.log(senderPos);
-                fakePlayer.setPosition(senderPos.getX(), senderPos.getY(), senderPos.getZ());
+                    // Set the fake player position to be near the command sender
+                    console.log(senderPos);
+                    fakePlayer.setPosition(senderPos.getX(), senderPos.getY(), senderPos.getZ());
 
-                // Add the fake player to the world
-                world.spawnEntityInWorld(fakePlayer.getRef());
+                    // Add the fake player to the world
+                    world.spawnEntityInWorld(fakePlayer.getRef());
 
-                // Notify the player that the fake player has been spawned
-                const ChatComponentTextClass = ModAPI.reflect.getClassById("net.minecraft.util.ChatComponentText");
-                event.sender.addChatMessage(ChatComponentTextClass.constructors[0](ModAPI.util.str("Fake Steve has been spawned!")));
+                    // Notify the player that the fake player has been spawned
+                    const ChatComponentTextClass = ModAPI.reflect.getClassById("net.minecraft.util.ChatComponentText");
+                    event.sender.addChatMessage(ChatComponentTextClass.constructors[0](ModAPI.util.str("Fake Steve has been spawned!")));
+                });
+
 
                 // Prevent the command from executing further
                 event.preventDefault = true;
