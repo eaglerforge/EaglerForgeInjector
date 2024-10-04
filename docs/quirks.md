@@ -2,7 +2,7 @@
 When TeaVM compiles code, it sometimes does strange things.
 
 #### Property Suffixes
-TeaVM will add suffixes to some variables, seemingly randomly. An example is the property `inGround` of any entity. When accessing this on the `ModAPI.player.fishEntity` object, TeaVM has renamed it to `inGround2`. Can be mitigated with `ModAPI.util.getNearestProperty`.
+TeaVM will add suffixes to some variables, seemingly randomly. An example is the property `inGround` of any entity. When accessing this on the `ModAPI.player.fishEntity` object, TeaVM has renamed it to `inGround2`. Can be mitigated with `ModAPI.util.getNearestProperty`, or, even better, using a corrective version of ModAPI.player.
 
 #### Collapsing Methods
 When I was trying to hook into the server-side processing of chat messages, I found that chat packets were handled by the method `processChatMessage` in `NetHandlerPlayServer`. However, in the compiled JavaScript, this method no longer exists. This is because it is only used once, in the `processPacket` method of `C01PacketChatMessage`. TeaVM automatically saw this, and collapsed one method into the other.
@@ -18,6 +18,9 @@ Calling methods while the TeaVM thread is in a critical transition state (see `M
 
 Update 22/09/2024:
 See Asynchronous Code
+
+Update 4/10/2024:
+@Async issue solved, see [PromisifyDocumentation](apidoc/promisify.md)
 
 #### TeaVM thread suspension/resumption
 TeaVM allows for writing asynchronous callbacks, which eaglercraft uses for file operations and downloading from URIs. However, when a method that makes use of an async callback gets run from ModAPI, it triggers a stack implosion due to mismatches in value types upon return (as well as a whole other myriad of symptoms). Currently this is not supported by ModAPI, and it will take some time until it will be. In the meanwhile, avoid using constructors or methods that access a file or use other asynchronous apis. Examples:

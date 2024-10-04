@@ -114,20 +114,34 @@ globalThis.modapi_postinit = "(" + (() => {
         });
         return name;
     }
-    ModAPI.util.wrap = function (outputValue, target) {
+    ModAPI.util.wrap = function (outputValue, target, corrective, disableFunctions) {
+        const CorrectiveArray = patchProxyConfToCorrective(ModAPI.util.TeaVMArray_To_Recursive_BaseData_ProxyConf);
+        const CorrectiveRecursive = patchProxyConfToCorrective(ModAPI.util.TeaVM_to_Recursive_BaseData_ProxyConf);
         if (outputValue && typeof outputValue === "object" && Array.isArray(outputValue.data) && typeof outputValue.type === "function") {
+            if (corrective) {
+                return new Proxy(outputValue.data, CorrectiveArray);
+            }
             return new Proxy(outputValue.data, ModAPI.util.TeaVMArray_To_Recursive_BaseData_ProxyConf);
         }
         if (outputValue && typeof outputValue === "object" && !Array.isArray(outputValue)) {
+            if (corrective) {
+                return new Proxy(outputValue.data, CorrectiveRecursive);
+            }
             return new Proxy(outputValue, ModAPI.util.TeaVM_to_Recursive_BaseData_ProxyConf);
         }
-        if (outputValue && typeof outputValue === "function" && target) {
+        if (!disableFunctions && outputValue && typeof outputValue === "function" && target) {
             return function (...args) {
                 var xOut = outputValue.apply(target, args);
                 if (xOut && typeof xOut === "object" && Array.isArray(xOut.data) && typeof outputValue.type === "function") {
+                    if (corrective) {
+                        return new Proxy(outputValue.data, CorrectiveArray);
+                    }
                     return new Proxy(xOut.data, ModAPI.util.TeaVMArray_To_Recursive_BaseData_ProxyConf);
                 }
                 if (xOut && typeof xOut === "object" && !Array.isArray(xOut)) {
+                    if (corrective) {
+                        return new Proxy(outputValue.data, CorrectiveRecursive);
+                    }
                     return new Proxy(xOut, ModAPI.util.TeaVM_to_Recursive_BaseData_ProxyConf);
                 }
                 return xOut;
@@ -186,7 +200,7 @@ globalThis.modapi_postinit = "(" + (() => {
     ModAPI.version = "v2.0";
     ModAPI.flavour = "injector";
     ModAPI.GNU = "terry pratchett";
-    ModAPI.credits = ["ZXMushroom63", "radmanplays", "OtterCodes101", "TheIdiotPlays"];
+    ModAPI.credits = ["ZXMushroom63", "radmanplays", "Murturtle", "OtterCodes101", "TheIdiotPlays", "OeildeLynx31", "Stpv22"];
     ModAPI.hooks.regenerateClassMap = function () {
         ModAPI.hooks._rippedConstructorKeys = Object.keys(ModAPI.hooks._rippedConstructors);
         ModAPI.hooks._rippedMethodKeys = Object.keys(ModAPI.hooks._rippedMethodTypeMap);
@@ -295,59 +309,17 @@ globalThis.modapi_postinit = "(" + (() => {
         return key ? ModAPI.hooks._classMap[key] : null;
     }
     var reloadDeprecationWarnings = 0;
-    const TeaVM_to_BaseData_ProxyConf = {
-        ownKeys(target) {
-            return Reflect.ownKeys(target).flatMap(x => x.substring(1));
-        },
-        getOwnPropertyDescriptor(target, prop) {
-            return Object.getOwnPropertyDescriptor(target, "$" + prop);
-        },
-        has(target, prop) {
-            return ("$" + prop) in target;
-        },
-        get(target, prop, receiver) {
-            if (prop === "getRef") {
-                return function () {
-                    return target;
-                }
-            }
-            if (prop === "reload") {
-                return function () {
-                    if (reloadDeprecationWarnings < 10) {
-                        console.warn("ModAPI/PluginAPI reload() is obsolete, please stop using it in code.")
-                        reloadDeprecationWarnings++;
-                    }
-                }
-            }
-
-            var outProp = "$" + prop;
-            var outputValue = Reflect.get(target, outProp, receiver);
-            if (outputValue && typeof outputValue === "object" && Array.isArray(outputValue.data) && typeof outputValue.type === "function") {
-                return outputValue.data;
-            }
-            if (outputValue && typeof outputValue === "function") {
-                return function (...args) {
-                    return outputValue.apply(target, args);
-                }
-            }
-            return outputValue;
-        },
-        set(object, prop, value) {
-            var outProp = "$" + prop;
-            object[outProp] = value;
-            return true;
-        },
-    };
     const TeaVMArray_To_Recursive_BaseData_ProxyConf = {
         get(target, prop, receiver) {
-            var outputValue = Reflect.get(target, prop, receiver);
-            if (outputValue && typeof outputValue === "object" && !Array.isArray(outputValue)) {
-                return new Proxy(outputValue, TeaVM_to_Recursive_BaseData_ProxyConf);
-            }
             if (prop === "getRef") {
                 return function () {
                     return target;
                 }
+            }
+            var outputValue = Reflect.get(target, prop, receiver);
+            var wrapped = ModAPI.util.wrap(outputValue, target, this._corrective, true);
+            if (wrapped) {
+                return wrapped;
             }
             return outputValue;
         },
@@ -367,6 +339,16 @@ globalThis.modapi_postinit = "(" + (() => {
             return ("$" + prop) in target;
         },
         get(target, prop, receiver) {
+            if (prop === "getCorrective") {
+                return function () {
+                    return new Proxy(target, patchProxyConfToCorrective(TeaVM_to_Recursive_BaseData_ProxyConf));
+                }
+            }
+            if (prop === "isCorrective") {
+                return function () {
+                    return !!this._corrective;
+                }
+            }
             if (prop === "getRef") {
                 return function () {
                     return target;
@@ -382,8 +364,11 @@ globalThis.modapi_postinit = "(" + (() => {
             }
 
             var outProp = "$" + prop;
+            if (this._corrective) {
+                outProp = ModAPI.util.getNearestProperty(target, outProp);
+            }
             var outputValue = Reflect.get(target, outProp, receiver);
-            var wrapped = ModAPI.util.wrap(outputValue, target);
+            var wrapped = ModAPI.util.wrap(outputValue, target, this._corrective, false);
             if (wrapped) {
                 return wrapped;
             }
@@ -395,6 +380,11 @@ globalThis.modapi_postinit = "(" + (() => {
             return true;
         },
     };
+    function patchProxyConfToCorrective(conf) {
+        var pconf = Object.assign({}, conf);
+        pconf._corrective = true;
+        return pconf;
+    }
     const StaticProps_ProxyConf = {
         get(target, prop, receiver) {
             var outProp = prop;
@@ -413,7 +403,6 @@ globalThis.modapi_postinit = "(" + (() => {
             return true;
         },
     };
-    ModAPI.util.TeaVM_to_BaseData_ProxyConf = TeaVM_to_BaseData_ProxyConf;
     ModAPI.util.TeaVMArray_To_Recursive_BaseData_ProxyConf = TeaVMArray_To_Recursive_BaseData_ProxyConf;
     ModAPI.util.TeaVM_to_Recursive_BaseData_ProxyConf = TeaVM_to_Recursive_BaseData_ProxyConf;
     ModAPI.util.StaticProps_ProxyConf = StaticProps_ProxyConf;
@@ -554,6 +543,23 @@ globalThis.modapi_postinit = "(" + (() => {
         ModAPI.hooks.freezeCallstack = false;
     }
 
+    //Function used for running @Async / @Async-dependent TeaVM methods.
+    ModAPI.promisify = function promisify(fn) {
+        return function promisifiedJavaMethpd(...inArguments) {
+            return new Promise((res, rej) => {
+                Promise.resolve().then( //queue microtask
+                    () => {
+                        ModAPI.hooks._teavm.$rt_startThread(() => {
+                            return fn(...inArguments);
+                        }, function (out) {
+                            res(out);
+                        });
+                    }
+                );
+            });
+        }
+    }
+
     ModAPI.util.string = ModAPI.util.str = ModAPI.hooks._teavm.$rt_str;
 
     ModAPI.util.setStringContent = function (jclString, string) {
@@ -674,6 +680,17 @@ globalThis.modapi_postinit = "(" + (() => {
         var x = integratedServerStartupMethod.apply(this, [worker, bootstrap + ";" + globalThis.modapi_postinit + ";" + ModAPI.dedicatedServer._data.join(";")]);
         ModAPI.dedicatedServer._data = [];
         ModAPI.dedicatedServer._wasUsed = true;
+        console.log("[ModAPI] Hooked into external integrated server.");
+        return x;
+    };
+
+    var desktopServerStartup = ModAPI.util.getMethodFromPackage("net.lax1dude.eaglercraft.v1_8.sp.internal.ClientPlatformSingleplayer", "startIntegratedServer");
+    const desktopServerStartupMethod = ModAPI.hooks.methods[desktopServerStartup];
+    ModAPI.hooks.methods[desktopServerStartup] = function (...args) {
+        var x = desktopServerStartupMethod.apply(this, args);
+        ModAPI.dedicatedServer._data.forEach((code) => {
+            (new Function(code))();
+        });
         console.log("[ModAPI] Hooked into external integrated server.");
         return x;
     };
@@ -870,5 +887,11 @@ globalThis.modapi_postinit = "(" + (() => {
         } else {
             return originalMainMethod.apply(this, args);
         }
+    }
+
+    if (globalThis.modapi_specialevents && Array.isArray(globalThis.modapi_specialevents)) {
+        globalThis.modapi_specialevents.forEach(eventName => {
+            ModAPI.events.newEvent(eventName, "patcher");
+        });
     }
 }).toString() + ")();";

@@ -3,6 +3,11 @@ ModAPI.hooks._teavm.$rt_startThread(() => {
     return ModAPI.hooks.methods.nlevi_PlatformRuntime_downloadRemoteURI(ModAPI.util.str("data:text/plain,hi"))
 }, function (...args) { console.log(this, args) })
 
+// SUCCESS - Runs anywhere, anytime. Might work with async/await, but for now stick to .then()
+ModAPI.promisify(ModAPI.hooks.methods.nlevi_PlatformRuntime_downloadRemoteURI)(ModAPI.util.str("data:text/plain,hi")).then(result => {
+    console.log(result); //Log arraybuffer
+});
+
 
 //WIP - Pausing and resuming client thread
 globalThis.suspendTest = function (...args) {
