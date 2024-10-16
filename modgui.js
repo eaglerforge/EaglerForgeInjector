@@ -56,6 +56,9 @@
           Modloader linker by
           <a href="https://github.com/ZXMushroom63">ZXMushroom63</a>
         </p>
+        <p>
+          API by <a href="https://github.com/ZXMushroom63">ZXMushroom63,</a> <a href="https://leah.chromebooks.lol">Leah Anderson,</a> and <a href="https://github.com/radmanplays">radmanplays</a>
+        </p>
       </footer>
 
       <style>
