@@ -1,5 +1,5 @@
 (function servermod() {
-    ModAPI.meta.title("Server Manager Mod Thingy");
+    ModAPI.meta.title("Server Manager");
     ModAPI.meta.version("a0");
     ModAPI.meta.description("_");
     ModAPI.meta.credits("ZXMushroom63 & radmanplays");
