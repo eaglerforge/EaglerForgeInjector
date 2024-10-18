@@ -71,8 +71,8 @@
     function openSharedWorld(){
         if(ModAPI.mc.theWorld && !ModAPI.hooks.methods.nlevsl_LANServerController_isLANOpen()){
             ModAPI.hooks.methods.nlevi_PlatformWebRTC_startRTCLANServer();
-            var worldName = ModAPI.mc.thePlayer.getName() + "'s World";
-			var ls = ModAPI.mc.loadingScreen;
+            var worldName = ModAPI.util.unstr(ModAPI.mc.thePlayer.getName()) + "'s World";
+	    var ls = ModAPI.mc.loadingScreen;
             var code = ModAPI.hooks.methods.nlevsl_LANServerController_shareToLAN(ls.resetProgressAndMessage, worldName, false)
             if (code != null) {
 				ModAPI.hooks.methods.nlevs_SingleplayerServerController_configureLAN(ModAPI.mc.playerController.getCurrentGameType(), false);
