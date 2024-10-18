@@ -23,4 +23,15 @@ ModAPI.addEventListener("sendchatmessage", function downloadSomething(e) {
 });
 ```
 
+The way this promisify method works is by taking in a java method, and (effectively) converting it into a javascript async function.
+For example, you can do:
+```javascript
+var asyncDownloadRemoteURI = ModAPI.promisify(ModAPI.hooks.methods.nlevi_PlatformRuntime_downloadRemoteURI);
+
+console.log(typeof asyncDownloadRemoteURI); //Logs function
+```
+
+When it is called, like any other asyncronoush function, it returns a `Promise` object.
+https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise
+
 You can replace the argument with any other method or constructor, including non asynchronous ones.

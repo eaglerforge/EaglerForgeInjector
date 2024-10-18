@@ -115,6 +115,9 @@ globalThis.modapi_postinit = "(" + (() => {
         return name;
     }
     ModAPI.util.wrap = function (outputValue, target, corrective, disableFunctions) {
+        target ||= {};
+        corrective ||= false;
+        disableFunctions ||= false;
         const CorrectiveArray = patchProxyConfToCorrective(ModAPI.util.TeaVMArray_To_Recursive_BaseData_ProxyConf);
         const CorrectiveRecursive = patchProxyConfToCorrective(ModAPI.util.TeaVM_to_Recursive_BaseData_ProxyConf);
         if (outputValue && typeof outputValue === "object" && Array.isArray(outputValue.data) && typeof outputValue.type === "function") {
@@ -125,7 +128,7 @@ globalThis.modapi_postinit = "(" + (() => {
         }
         if (outputValue && typeof outputValue === "object" && !Array.isArray(outputValue)) {
             if (corrective) {
-                return new Proxy(outputValue.data, CorrectiveRecursive);
+                return new Proxy(outputValue, CorrectiveRecursive);
             }
             return new Proxy(outputValue, ModAPI.util.TeaVM_to_Recursive_BaseData_ProxyConf);
         }
@@ -197,7 +200,7 @@ globalThis.modapi_postinit = "(" + (() => {
         }
         return ModAPI.hooks._teavm.$rt_createDoubleArray(size);
     }
-    ModAPI.version = "v2.0";
+    ModAPI.version = "v2.1";
     ModAPI.flavour = "injector";
     ModAPI.GNU = "terry pratchett";
     ModAPI.credits = ["ZXMushroom63", "radmanplays", "Murturtle", "OtterCodes101", "TheIdiotPlays", "OeildeLynx31", "Stpv22"];

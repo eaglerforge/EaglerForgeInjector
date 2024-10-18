@@ -41,4 +41,4 @@
             GrappleHookPlugin.prev = "GROUND";//Update state
         }
     });
-});
+})();
