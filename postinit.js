@@ -200,7 +200,7 @@ globalThis.modapi_postinit = "(" + (() => {
         }
         return ModAPI.hooks._teavm.$rt_createDoubleArray(size);
     }
-    ModAPI.version = "v2.0";
+    ModAPI.version = "v2.1";
     ModAPI.flavour = "injector";
     ModAPI.GNU = "terry pratchett";
     ModAPI.credits = ["ZXMushroom63", "radmanplays", "Murturtle", "OtterCodes101", "TheIdiotPlays", "OeildeLynx31", "Stpv22"];
