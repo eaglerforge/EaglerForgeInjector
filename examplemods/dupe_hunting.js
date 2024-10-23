@@ -55,6 +55,7 @@ function button_utility_script(inputArr, bindingClass, actionBindMode) {
     });
 
     ModAPI.meta.title("Dupe Hunting");
+    ModAPI.meta.description("⚠️Only works over WS, not local. May induce bans.⚠️");
     ModAPI.meta.credits("by ZXMushroom63");
 
     var dupeHuntButtons = [{
