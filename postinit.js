@@ -602,6 +602,9 @@ globalThis.modapi_postinit = "(" + (() => {
         if (!object) {
             return null;
         }
+        if (prop in object) {
+            return prop;
+        }
         var possibleKeys = Object.keys(object).filter(x => { return x.startsWith(prop) });
         possibleKeys = possibleKeys.filter(x => {
             return Number.isFinite(parseInt(x.substring(prop.length))) || (x.substring(prop.length).length === 0);
