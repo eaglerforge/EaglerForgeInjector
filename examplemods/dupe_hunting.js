@@ -34,6 +34,7 @@ function button_utility_script(inputArr, bindingClass, actionBindMode) {
 
 
 (() => {
+    ModAPI.require("player");
     var backlog = [];
     var delayState = false;
 
@@ -61,13 +62,13 @@ function button_utility_script(inputArr, bindingClass, actionBindMode) {
     var dupeHuntButtons = [{
         text: "Silently Close",
         click: () => {
-            ModAPI.minecraft.currentScreen = null;
+            ModAPI.minecraft.displayGuiScreen(null);
         },
         x: 0,
         y: 0,
         w: 100,
         h: 20,
-        uid: 15254
+        uid: 142715254
     },
     {
         text: "Toggle Delay",
@@ -86,8 +87,57 @@ function button_utility_script(inputArr, bindingClass, actionBindMode) {
         y: 20,
         w: 100,
         h: 20,
-        uid: 15252
+        uid: 142715253
+    },
+    {
+        text: "Server Close",
+        click: () => {
+            var CloseWindow = ModAPI.reflect.getClassByName("C0DPacketCloseWindow").constructors.find(x => x.length === 1);
+            ModAPI.player.sendQueue.addToSendQueue(CloseWindow(ModAPI.player.openContainer.getCorrective().windowId));
+        },
+        x: 0,
+        y: 40,
+        w: 100,
+        h: 20,
+        uid: 142715252
+    },
+    {
+        text: "Send & Disconnect",
+        click: () => {
+            delayState = false;
+            for (let i = 0; i < backlog.length; i++) {
+                const backlogItem = backlog[i];
+                originalSend.call(backlogItem.thisArg, backlogItem.data);
+            }
+            backlog = [];
+            ModAPI.mc.getNetHandler().getNetworkManager().doClientDisconnect(ModAPI.hooks._classMap[ModAPI.util.getCompiledName("net.minecraft.util.ChatComponentText")].constructors[0](ModAPI.util.str("Dupe Hunting Utils Disconnect")));
+        },
+        x: 0,
+        y: 60,
+        w: 100,
+        h: 20,
+        uid: 142715251
+    },
+    {
+        text: "Use Chat",
+        click: () => {
+            var p = window.prompt("Input chat/command:", "Hello World");
+            if (p) {
+                ModAPI.player.sendChatMessage(ModAPI.util.str(p));
+            }
+        },
+        x: 0,
+        y: 80,
+        w: 100,
+        h: 20,
+        uid: 142715250
     }];
 
-    button_utility_script(dupeHuntButtons, "net.minecraft.client.gui.inventory.GuiInventory");
-})()
+    [
+        "net.minecraft.client.gui.inventory.GuiInventory",
+        "net.minecraft.client.gui.inventory.GuiContainerCreative",
+        "net.minecraft.client.gui.inventory.GuiBeacon"
+    ].forEach(ui => {
+        button_utility_script(dupeHuntButtons, ui, 0);
+    });
+})();
