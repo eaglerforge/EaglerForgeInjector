@@ -67,3 +67,5 @@ Each `ReflectClass` has the following methods:
   - This is the java method.
   - If it is an instance method (accessed from a ReflectClasses' `methods` property), the first argument should be an instance of the class. Eg: `ModAPI.reflect.getClassByName("EntityPlayerSP").methods.closeScreen.method(ModAPI.player.getRef())`
   - If it is a static method (accessed from a ReflectClasses' `staticMethods` property), call the method as usual. Eg: `ModAPI.reflect.getClassById("net.minecraft.init.Items").staticMethods.getRegisteredItem.method(ModAPI.util.str("apple"))`
+
+Keep in mind that you need to wrap strings using `ModAPI.util.str("MyString")`, convert booleans into respective numbers (`true`->`1`, `false`->`0`), and get references of ModAPI proxies (`ModAPI.player`->`ModAPI.player.getRef()`);

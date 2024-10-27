@@ -12,6 +12,12 @@
         globalThis.LCI_RMBEVENTS ||= {};
         globalThis.LCI_LMBEVENTS ||= {};
         globalThis.LCI_RECIPEEVENTS ||= {};
+        globalThis.LCI_ITEMDB ||= {};
+        globalThis.LibCustomItems = {
+            makeItemStack: function makeItemStack(tag) {
+                return globalThis.LCI_ITEMBD[tag] || null;
+            }
+        };
         var useName = ModAPI.util.getMethodFromPackage("net.minecraft.network.NetHandlerPlayServer", "processPlayerBlockPlacement");
         var oldUse = ModAPI.hooks.methods[useName];
         ModAPI.hooks.methods[useName] = function ($this, packet) {
@@ -94,6 +100,7 @@
         globalThis.LCI_RMBEVENTS ||= {};
         globalThis.LCI_LMBEVENTS ||= {};
         globalThis.LCI_RECIPEEVENTS ||= {};
+        globalThis.LCI_ITEMDB ||= {};
         globalThis.LCI_REGISTRY.push(data.tag);
         if (data.onRightClickGround) {
             globalThis.LCI_RMBEVENTS[data.tag] = new Function("user", "world", "itemstack", "blockpos", data.onRightClickGround);
@@ -141,6 +148,7 @@
         if (globalThis.LCI_RECIPEEVENTS[data.tag]) {
             globalThis.LCI_RECIPEEVENTS[data.tag](new Proxy(testItem, ModAPI.util.TeaVM_to_Recursive_BaseData_ProxyConf));
         }
+        globalThis.LCI_ITEMBD[data.tag] = new Proxy(testItem, ModAPI.util.TeaVM_to_Recursive_BaseData_ProxyConf);
 
         var craftingManager = ModAPI.reflect.getClassById("net.minecraft.item.crafting.CraftingManager").staticMethods.getInstance.method();
         if((data.useRecipe !== false) || (data.useRecipe !== "false")) {
@@ -152,6 +160,9 @@
     window.LibCustomItems = {};
     LibCustomItems.registerItem = function register(data) {
         LCI_registerItem(data);
+    }
+    LibCustomItems.makeItemStack = function makeItemStack(tag) {
+        return globalThis.LCI_ITEMBD[tag] || null;
     }
     ModAPI.events.callEvent("lib:libcustomitems:loaded", {});
 })();
