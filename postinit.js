@@ -21,6 +21,12 @@ globalThis.modapi_postinit = "(" + (() => {
     ModAPI.meta._iconMap = {};
     ModAPI.meta._versionMap = {};
     ModAPI.array = {};
+
+    ModAPI.version = "v2.1.2";
+    ModAPI.flavour = "injector";
+    ModAPI.GNU = "terry pratchett";
+    ModAPI.credits = ["ZXMushroom63", "radmanplays", "Murturtle", "OtterCodes101", "TheIdiotPlays", "OeildeLynx31", "Stpv22"];
+
     function limitSize(x, n) {
         if (x.length > n) {
             return x.substring(0, n) + "…";
@@ -200,10 +206,7 @@ globalThis.modapi_postinit = "(" + (() => {
         }
         return ModAPI.hooks._teavm.$rt_createDoubleArray(size);
     }
-    ModAPI.version = "v2.1.1";
-    ModAPI.flavour = "injector";
-    ModAPI.GNU = "terry pratchett";
-    ModAPI.credits = ["ZXMushroom63", "radmanplays", "Murturtle", "OtterCodes101", "TheIdiotPlays", "OeildeLynx31", "Stpv22"];
+    
     ModAPI.hooks.regenerateClassMap = function () {
         ModAPI.hooks._rippedConstructorKeys = Object.keys(ModAPI.hooks._rippedConstructors);
         ModAPI.hooks._rippedMethodKeys = Object.keys(ModAPI.hooks._rippedMethodTypeMap);
