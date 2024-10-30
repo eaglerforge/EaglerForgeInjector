@@ -21,6 +21,12 @@ globalThis.modapi_postinit = "(" + (() => {
     ModAPI.meta._iconMap = {};
     ModAPI.meta._versionMap = {};
     ModAPI.array = {};
+
+    ModAPI.version = "v2.1.2";
+    ModAPI.flavour = "injector";
+    ModAPI.GNU = "terry pratchett";
+    ModAPI.credits = ["ZXMushroom63", "radmanplays", "Murturtle", "OtterCodes101", "TheIdiotPlays", "OeildeLynx31", "Stpv22"];
+
     function limitSize(x, n) {
         if (x.length > n) {
             return x.substring(0, n) + "…";
@@ -200,10 +206,7 @@ globalThis.modapi_postinit = "(" + (() => {
         }
         return ModAPI.hooks._teavm.$rt_createDoubleArray(size);
     }
-    ModAPI.version = "v2.1.1";
-    ModAPI.flavour = "injector";
-    ModAPI.GNU = "terry pratchett";
-    ModAPI.credits = ["ZXMushroom63", "radmanplays", "Murturtle", "OtterCodes101", "TheIdiotPlays", "OeildeLynx31", "Stpv22"];
+    
     ModAPI.hooks.regenerateClassMap = function () {
         ModAPI.hooks._rippedConstructorKeys = Object.keys(ModAPI.hooks._rippedConstructors);
         ModAPI.hooks._rippedMethodKeys = Object.keys(ModAPI.hooks._rippedMethodTypeMap);
@@ -216,6 +219,10 @@ globalThis.modapi_postinit = "(" + (() => {
             block.forEach(item => {
                 if (typeof item === "function") {
                     if (!item.$meta || typeof item.$meta.name !== "string") {
+                        if (item.name && item.name.split("_").length === 2) {
+                            metaMap[item.name] = item;
+                            compiledNames.add(item.name);
+                        }
                         return;
                     }
                     var compiledName = ModAPI.util.getCompiledNameFromPackage(item.$meta.name);
@@ -224,6 +231,7 @@ globalThis.modapi_postinit = "(" + (() => {
                 }
             });
         });
+        
 
         ModAPI.hooks._rippedConstructorKeys.forEach(constructor => {
             if (typeof constructor === "string" && constructor.length > 0) {
@@ -291,7 +299,7 @@ globalThis.modapi_postinit = "(" + (() => {
                     };
 
                     //Prototype Injection, allows for far easier access to methods
-                    if (typeof item === "function" && item.$meta && ModAPI.hooks._rippedMethodTypeMap[method] === "instance") {
+                    if (typeof item === "function" && ModAPI.hooks._rippedMethodTypeMap[method] === "instance") {
                         item.prototype["$" + method.replace(compiledName + "_", "")] ||= function (...args) {
                             return ModAPI.hooks.methods[method].apply(this, [this, ...args]);
                         }
