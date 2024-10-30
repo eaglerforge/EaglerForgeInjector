@@ -216,6 +216,10 @@ globalThis.modapi_postinit = "(" + (() => {
             block.forEach(item => {
                 if (typeof item === "function") {
                     if (!item.$meta || typeof item.$meta.name !== "string") {
+                        if (item.name && item.name.split("_").length === 2) {
+                            metaMap[item.name] = item;
+                            compiledNames.add(item.name);
+                        }
                         return;
                     }
                     var compiledName = ModAPI.util.getCompiledNameFromPackage(item.$meta.name);
@@ -224,6 +228,7 @@ globalThis.modapi_postinit = "(" + (() => {
                 }
             });
         });
+        
 
         ModAPI.hooks._rippedConstructorKeys.forEach(constructor => {
             if (typeof constructor === "string" && constructor.length > 0) {
