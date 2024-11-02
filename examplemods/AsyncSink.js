@@ -1,10 +1,11 @@
 ModAPI.meta.title("AsyncSink");
 ModAPI.meta.description("Library for patching and hooking into asynchronous filesystem requests for EaglercraftX.");
-ModAPI.meta.icon("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABIAAAASCAYAAABWzo5XAAAAAXNSR0IArs4c6QAAAL9JREFUOE9jZGBg+M9ABcAIMsgtPo3hzZ2zYONEVIxJZu9aOIsBbJCRtTHcEJAgLgBSh82ic0fPIgyCKQAJXrx4EcUsfX19sBiIRrYU5gu4Qchew2cQyHSQYehBgdNruFwEcybMZci+gIcRIa+hhxu6LzBiDZvX0A1BDyuivYbLIJK8pqevjze5GlsbMxAdayCT/PQwDRS2gaQror2m36KH4SqjZybwxEl0gsQWRkM01ogpVQh6jaJihBgXEFIDAAIQ9AFDJlrxAAAAAElFTkSuQmCC");
+const asyncSinkIcon = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABIAAAASCAYAAABWzo5XAAAAAXNSR0IArs4c6QAAAL9JREFUOE9jZGBg+M9ABcAIMsgtPo3hzZ2zYONEVIxJZu9aOIsBbJCRtTHcEJAgLgBSh82ic0fPIgyCKQAJXrx4EcUsfX19sBiIRrYU5gu4Qchew2cQyHSQYehBgdNruFwEcybMZci+gIcRIa+hhxu6LzBiDZvX0A1BDyuivYbLIJK8pqevjze5GlsbMxAdayCT/PQwDRS2gaQror2m36KH4SqjZybwxEl0gsQWRkM01ogpVQh6jaJihBgXEFIDAAIQ9AFDJlrxAAAAAElFTkSuQmCC";
+ModAPI.meta.icon(asyncSinkIcon);
 ModAPI.meta.credits("By ZXMushroom63");
 (function AsyncSinkFn() {
     //AsyncSink is a plugin to debug and override asynchronous methods in EaglercraftX
-    function runtimeComponent() {
+    async function runtimeComponent() {
         const booleanResult = (b) => ModAPI.hooks.methods.nlevit_BooleanResult__new(b * 1);
         const wrap = ModAPI.hooks.methods.otji_JSWrapper_wrap;
         const unwrap = ModAPI.hooks.methods.otji_JSWrapper_unwrap;
@@ -80,8 +81,8 @@ ModAPI.meta.credits("By ZXMushroom63");
                 }
                 return wrap(AsyncSink.getFile(ModAPI.util.ustr(args[1])));
             }
-            var ev = {method: "read", file: ModAPI.util.ustr(args[1]), shim: false, shimOutput: new ArrayBuffer()};
-            AsyncSink.MIDDLEWARE.forEach((fn)=>{fn(ev)});
+            var ev = { method: "read", file: ModAPI.util.ustr(args[1]), shim: false, shimOutput: new ArrayBuffer() };
+            AsyncSink.MIDDLEWARE.forEach((fn) => { fn(ev) });
             if (ev.shim) {
                 return wrap(ev.shimOutput);
             }
@@ -100,8 +101,8 @@ ModAPI.meta.credits("By ZXMushroom63");
                 AsyncSink.setFile(ModAPI.util.ustr(args[1]), args[2]);
                 return booleanResult(true);
             }
-            var ev = {method: "write", file: ModAPI.util.ustr(args[1]), data: args[2], shim: false, shimOutput: true};
-            AsyncSink.MIDDLEWARE.forEach((fn)=>{fn(ev)});
+            var ev = { method: "write", file: ModAPI.util.ustr(args[1]), data: args[2], shim: false, shimOutput: true };
+            AsyncSink.MIDDLEWARE.forEach((fn) => { fn(ev) });
             if (ev.shim) {
                 return booleanResult(ev.shimOutput);
             }
@@ -120,8 +121,8 @@ ModAPI.meta.credits("By ZXMushroom63");
                 AsyncSink.deleteFile(ModAPI.util.ustr(args[1]));
                 return booleanResult(true);
             }
-            var ev = {method: "delete", file: ModAPI.util.ustr(args[1]), shim: false, shimOutput: true};
-            AsyncSink.MIDDLEWARE.forEach((fn)=>{fn(ev)});
+            var ev = { method: "delete", file: ModAPI.util.ustr(args[1]), shim: false, shimOutput: true };
+            AsyncSink.MIDDLEWARE.forEach((fn) => { fn(ev) });
             if (ev.shim) {
                 return booleanResult(ev.shimOutput);
             }
@@ -140,17 +141,91 @@ ModAPI.meta.credits("By ZXMushroom63");
                 var result = AsyncSink.fileExists(ModAPI.util.ustr(args[1]));
                 return booleanResult(result);
             }
-            var ev = {method: "exists", file: ModAPI.util.ustr(args[1]), shim: false, shimOutput: true};
-            AsyncSink.MIDDLEWARE.forEach((fn)=>{fn(ev)});
+            var ev = { method: "exists", file: ModAPI.util.ustr(args[1]), shim: false, shimOutput: true };
+            AsyncSink.MIDDLEWARE.forEach((fn) => { fn(ev) });
             if (ev.shim) {
                 return booleanResult(ev.shimOutput);
             }
             return originalFileExists.apply(this, args);
         };
+
         globalThis.AsyncSink = AsyncSink;
         ModAPI.events.callEvent("lib:asyncsink", {});
         console.log("[AsyncSink] Loaded!");
     }
     runtimeComponent();
     ModAPI.dedicatedServer.appendCode(runtimeComponent);
+
+
+    async function assureAsyncSinkResources() {
+        const dec = new TextDecoder("utf-8");
+        const enc = new TextEncoder("utf-8");
+        var resourcePackKey = (await indexedDB.databases()).find(x => x?.name?.endsWith("_resourcePacks")).name;
+        const dbRequest = indexedDB.open(resourcePackKey);
+        const db = await promisifyIDBRequest(dbRequest);
+        const transaction = db.transaction(["filesystem"], "readonly");
+        const objectStore = transaction.objectStore("filesystem");
+        var object = (await promisifyIDBRequest(objectStore.get(["resourcepacks/manifest.json"])))?.data;
+        var resourcePackList = object ? JSON.parse(dec.decode(object)) : { resourcePacks: [] };
+        if (!resourcePackList.resourcePacks.find(x => x.name === "AsyncSinkLib")) {
+            resourcePackList.resourcePacks.push({
+                domains: ["minecraft"],
+                folder: "AsyncSinkLib",
+                name: "AsyncSinkLib",
+                timestamp: Date.now()
+            });
+            const writeableTransaction = db.transaction(["filesystem"], "readwrite");
+            const writeableObjectStore = writeableTransaction.objectStore("filesystem");
+            await promisifyIDBRequest(writeableObjectStore.put({
+                path: "resourcepacks/manifest.json",
+                data: enc.encode(JSON.stringify(resourcePackList)).buffer
+            }));
+            await promisifyIDBRequest(writeableObjectStore.put({
+                path: "resourcepacks/AsyncSinkLib/pack.mcmeta",
+                data: enc.encode(JSON.stringify({
+                    "pack": {
+                        "pack_format": 1,
+                        "description": "AsyncSink Library Resources"
+                    }
+                })).buffer
+            }));
+
+            var icon = {
+                path: "resourcepacks/AsyncSinkLib/pack.png",
+                data: await (await fetch(asyncSinkIcon)).arrayBuffer()
+            };
+
+            const imageTransaction = db.transaction(["filesystem"], "readwrite");
+            const imageObjectStore = imageTransaction.objectStore("filesystem");
+
+            await promisifyIDBRequest(imageObjectStore.put(icon));
+        }
+    }
+
+    // Client side reminders to enable the AsyncSink Resource Pack
+    var asyncSinkInstallStatus = false;
+    var installMessage = document.createElement("span");
+    installMessage.innerText = "Please enable the AsyncSink resource pack\nIn game, use the .reload_tex command to load textures for modded blocks and items.";
+    installMessage.style = "background-color: rgba(0,0,0,0.7); color: red; position: fixed; top: 0; left: 0; font-family: sans-serif; pointer-events: none; user-select: none;";
+    document.body.appendChild(installMessage);
+
+    assureAsyncSinkResources();
+    setInterval(() => {
+        var resourcePackEntries = ModAPI.mc.mcResourcePackRepository.getRepositoryEntries().getCorrective();
+        var array = resourcePackEntries.array || [resourcePackEntries.element];
+        asyncSinkInstallStatus = array.find(x => ModAPI.util.ustr(x.reResourcePack.resourcePackFile.getRef()) === "AsyncSinkLib") ? true : false;
+        assureAsyncSinkResources();
+        if (asyncSinkInstallStatus) {
+            installMessage.style.display = "none";
+        } else {
+            installMessage.style.display = "initial";
+        }
+    }, 8000);
+
+    ModAPI.addEventListener("sendchatmessage", (e) => {
+        if (e.message.toLowerCase().startsWith(".reload_tex")) {
+            e.preventDefault = true;
+            ModAPI.promisify(ModAPI.mc.refreshResources)();
+        }
+    });
 })();
