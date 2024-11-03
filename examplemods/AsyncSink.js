@@ -40,6 +40,7 @@ ModAPI.meta.credits("By ZXMushroom63");
 
         // @type Map<string, ArrayBuffer>
         AsyncSink.FS = new Map();
+        AsyncSink.L10N = new Map();
         AsyncSink.FSOverride = new Set();
         AsyncSink.MIDDLEWARE = [];
         AsyncSink.setFile = function setFile(path, data) {
@@ -149,7 +150,27 @@ ModAPI.meta.credits("By ZXMushroom63");
             return originalFileExists.apply(this, args);
         };
 
+        const L10NRead = ModAPI.util.getMethodFromPackage("net.minecraft.util.StatCollector", "translateToLocal");
+        const originalL10NRead = ModAPI.hooks.methods[L10NRead];
+        ModAPI.hooks.methods[L10NRead] = function (...args) {
+            var key = ModAPI.util.ustr(args[0]);
+            if (AsyncSink.L10N.has(key)) {
+                return ModAPI.util.str(AsyncSink.L10N.get(key));
+            }
+            return originalL10NRead.apply(this, args);
+        };
+
+        const L10NCheck = ModAPI.util.getMethodFromPackage("net.minecraft.util.StatCollector", "canTranslate");
+        const originalL10NCheck = ModAPI.hooks.methods[L10NRead];
+        ModAPI.hooks.methods[L10NCheck] = function (...args) {
+            if (AsyncSink.L10N.has(ModAPI.util.ustr(args[0]))) {
+                return 1;
+            }
+            return originalL10NCheck.apply(this, args);
+        };
+
         globalThis.AsyncSink = AsyncSink;
+        ModAPI.events.newEvent("lib:asyncsink");
         ModAPI.events.callEvent("lib:asyncsink", {});
         console.log("[AsyncSink] Loaded!");
     }
@@ -225,6 +246,7 @@ ModAPI.meta.credits("By ZXMushroom63");
     ModAPI.addEventListener("sendchatmessage", (e) => {
         if (e.message.toLowerCase().startsWith(".reload_tex")) {
             e.preventDefault = true;
+            ModAPI.mc.renderItem.itemModelMesher.simpleShapesCache.clear();
             ModAPI.promisify(ModAPI.mc.refreshResources)();
         }
     });

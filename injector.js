@@ -136,6 +136,20 @@ var main;(function(){`
             );
         }
     );
+
+    const extractInternalConstructorRegex =
+        /^\s*function (\S*?)__init_\d*?\(\$this/gm; //same as extract constructor regex, but only allow $this as first argument
+    patchedFile = patchedFile.replaceAll(
+        extractInternalConstructorRegex,
+        (match) => {
+            var fullName = match.match(extractConstructorFullNameRegex);
+            fullName = fullName[0].replace("function ", "");
+            return (
+                `ModAPI.hooks._rippedInternalConstructors[\`${fullName}\`] = ${fullName};
+` + match
+            );
+        }
+    );
     
     if(globalThis.optimizePi){
         patchedFile = patchedFile.replaceAll(

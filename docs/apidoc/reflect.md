@@ -44,7 +44,9 @@ Each `ReflectClass` has the following properties:
   - List of all the static variable names for the class.
 - `staticVariables: Map<String, *>`
   - key-value dictionary of all the static variables in a class.
-- `superclass: String?`
+- `superclass: Class?`
+  - The raw teavm class of the superclass.
+- `superclassName: String?`
   - The class id of the class's superclass. Eg: `net.minecraft.client.entity.AbstractClientPlayer`
   - Will be `null` if `hasMeta` is equal to `false`
 
