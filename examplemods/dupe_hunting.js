@@ -92,7 +92,7 @@ function button_utility_script(inputArr, bindingClass, actionBindMode) {
     {
         text: "Server Close",
         click: () => {
-            var CloseWindow = ModAPI.reflect.getClassByName("C0DPacketCloseWindow").constructors.find(x => x.length === 1);
+            var CloseWindow = ModAPI.reflect.getClassByName("C0DPacketCloseWindow").constructors[0];
             ModAPI.player.sendQueue.addToSendQueue(CloseWindow(ModAPI.player.openContainer.getCorrective().windowId));
         },
         x: 0,

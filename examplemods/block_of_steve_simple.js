@@ -14,29 +14,14 @@ function fixupBlockIds() {
         }
     });
 }
-function makeSteveBlock() {
-    var blockClass = ModAPI.reflect.getClassById("net.minecraft.block.Block");
-    var iproperty = ModAPI.reflect.getClassById("net.minecraft.block.properties.IProperty").class;
-    var makeBlockState = ModAPI.reflect.getClassById("net.minecraft.block.state.BlockState").constructors.find(x => x.length === 2);
-    var blockSuper = ModAPI.reflect.getSuper(blockClass, (x) => x.length === 2);
-    var nmb_BlockSteve = function nmb_BlockSteve() {
-        blockSuper(this, ModAPI.materials.rock.getRef());
-    }
-    ModAPI.reflect.prototypeStack(blockClass, nmb_BlockSteve);
-    nmb_BlockSteve.prototype.$isOpaqueCube = function () {
-        return 1;
-    }
-    nmb_BlockSteve.prototype.$createBlockState = function () {
-        return makeBlockState(this, ModAPI.array.object(iproperty, 0));
-    }
-    globalThis.nmb_BlockSteve = nmb_BlockSteve;
-}
 function registerSteveClientSide() {
+    var creativeBlockTab = ModAPI.reflect.getClassById("net.minecraft.creativetab.CreativeTabs").staticVariables.tabBlock;
     var itemClass = ModAPI.reflect.getClassById("net.minecraft.item.Item");
     var blockClass = ModAPI.reflect.getClassById("net.minecraft.block.Block");
-    var block_of_steve = (new nmb_BlockSteve()).$setHardness(-1.0).$setStepSound(blockClass.staticVariables.soundTypeGravel).$setUnlocalizedName(
+    var constructor = blockClass.constructors.find(x=>x.length === 1);
+    var block_of_steve = constructor(ModAPI.materials.rock.getRef()).$setHardness(-1.0).$setStepSound(blockClass.staticVariables.soundTypeGravel).$setUnlocalizedName(
         ModAPI.util.str("steve")
-    );
+    ).$setCreativeTab(creativeBlockTab);
     blockClass.staticMethods.registerBlock0.method(
         198,
         ModAPI.util.str("steve"),
@@ -95,12 +80,14 @@ function registerSteveServerSide() {
             }
         });
     }
+    var creativeBlockTab = ModAPI.reflect.getClassById("net.minecraft.creativetab.CreativeTabs").staticVariables.tabBlock;
     var blockClass = ModAPI.reflect.getClassById("net.minecraft.block.Block");
     var itemClass = ModAPI.reflect.getClassById("net.minecraft.item.Item");
+    var constructor = blockClass.constructors.find(x=>x.length === 1);
     ModAPI.addEventListener("bootstrap", () => {
-        var block_of_steve = (new nmb_BlockSteve()).$setHardness(-1.0).$setStepSound(blockClass.staticVariables.soundTypeGravel).$setUnlocalizedName(
+        var block_of_steve = constructor(ModAPI.materials.rock.getRef()).$setHardness(-1.0).$setStepSound(blockClass.staticVariables.soundTypeGravel).$setUnlocalizedName(
             ModAPI.util.str("steve")
-        );
+        ).$setCreativeTab(creativeBlockTab);
         blockClass.staticMethods.registerBlock0.method(
             198,
             ModAPI.util.str("steve"),
@@ -110,8 +97,6 @@ function registerSteveServerSide() {
         fixupBlockIds();
     });
 }
-ModAPI.dedicatedServer.appendCode(makeSteveBlock);
-makeSteveBlock();
 registerSteveClientSide();
 fixupBlockIds();
 ModAPI.dedicatedServer.appendCode(registerSteveServerSide);
