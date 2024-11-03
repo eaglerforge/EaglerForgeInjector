@@ -242,12 +242,13 @@ ModAPI.meta.credits("By ZXMushroom63");
             installMessage.style.display = "initial";
         }
     }, 8000);
-
+    ModAPI.events.newEvent("custom:asyncsink_reloaded");
     ModAPI.addEventListener("sendchatmessage", (e) => {
         if (e.message.toLowerCase().startsWith(".reload_tex")) {
             e.preventDefault = true;
             ModAPI.mc.renderItem.itemModelMesher.simpleShapesCache.clear();
             ModAPI.promisify(ModAPI.mc.refreshResources)();
+            ModAPI.events.callEvent("custom:asyncsink_reloaded", {});
         }
     });
 })();

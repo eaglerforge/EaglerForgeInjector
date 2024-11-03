@@ -15,8 +15,6 @@ function fixupBlockIds() {
     });
 }
 function makeSteveBlock() {
-    var boolean_valueOf = ModAPI.reflect.getClassByName("Boolean").staticMethods.valueOf.method;
-    var testProperty = ModAPI.reflect.getClassById("net.minecraft.block.properties.PropertyBool").staticMethods.create.method(ModAPI.util.str("example_property"));
     var blockClass = ModAPI.reflect.getClassById("net.minecraft.block.Block");
     var iproperty = ModAPI.reflect.getClassById("net.minecraft.block.properties.IProperty").class;
     var makeBlockState = ModAPI.reflect.getClassById("net.minecraft.block.state.BlockState").constructors.find(x => x.length === 2);
@@ -34,12 +32,6 @@ function makeSteveBlock() {
     nmb_BlockSteve.prototype.$createBlockState = function (t) {
         return makeBlockState(this, ModAPI.array.object(iproperty, 0));
     }
-    // nmb_BlockSteve.prototype.$getMetaFromState = function (iblockstate) {
-    //     return iblockstate.$getValue(testProperty).$booleanValue();
-    // }
-    // nmb_BlockSteve.prototype.$getStateFromMeta = function (meta) {
-    //     return this.$getDefaultState().$withProperty(testProperty, boolean_valueOf(meta > 0))
-    // }
     globalThis.nmb_BlockSteve = nmb_BlockSteve;
 }
 function registerSteveClientSide() {
@@ -55,7 +47,11 @@ function registerSteveClientSide() {
         block_of_steve
     );
     itemClass.staticMethods.registerItemBlock0.method(block_of_steve);
+    ModAPI.mc.renderItem.registerBlock(block_of_steve, ModAPI.util.str("steve"));
     ModAPI.addEventListener("lib:asyncsink", async () => {
+        ModAPI.addEventListener("custom:asyncsink_reloaded", ()=>{
+            ModAPI.mc.renderItem.registerBlock(block_of_steve, ModAPI.util.str("steve"));
+        });
         AsyncSink.L10N.set("tile.steve.name", "Block Of Steve");
         AsyncSink.setFile("resourcepacks/AsyncSinkLib/assets/minecraft/models/block/steve.json", JSON.stringify(
             {

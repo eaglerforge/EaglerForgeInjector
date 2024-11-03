@@ -1,3 +1,4 @@
+AsyncSink.MIDDLEWARE.push(ev=>{if (ev.method === "read" && ev.file.includes("steve")) {console.log(ev.file)}});
 //nice little utility function to fix the block identity map
 function fixupBlockIds() {
     var blockRegistry = ModAPI.util.wrap(ModAPI.reflect.getClassById("net.minecraft.block.Block").staticVariables.blockRegistry).getCorrective();
@@ -28,7 +29,13 @@ function registerSteveClientSide() {
         block_of_steve
     );
     itemClass.staticMethods.registerItemBlock0.method(block_of_steve);
+    ModAPI.mc.renderItem.registerBlock(block_of_steve, ModAPI.util.str("steve"));
+    
+    
     ModAPI.addEventListener("lib:asyncsink", async () => {
+        ModAPI.addEventListener("custom:asyncsink_reloaded", ()=>{
+            ModAPI.mc.renderItem.registerBlock(block_of_steve, ModAPI.util.str("steve"));
+        });
         AsyncSink.L10N.set("tile.steve.name", "Block Of Steve");
         AsyncSink.setFile("resourcepacks/AsyncSinkLib/assets/minecraft/models/block/steve.json", JSON.stringify(
             {
