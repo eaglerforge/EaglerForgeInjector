@@ -1,3 +1,6 @@
+//THIS IS A DEMO MOD
+
+
 //nice little utility function to fix the block identity map
 function fixupBlockIds() {
     var blockRegistry = ModAPI.util.wrap(ModAPI.reflect.getClassById("net.minecraft.block.Block").staticVariables.blockRegistry).getCorrective();
