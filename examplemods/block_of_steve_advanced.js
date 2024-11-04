@@ -35,7 +35,6 @@ function makeSteveBlock() {
     globalThis.nmb_BlockSteve = nmb_BlockSteve;
 }
 function registerSteveClientSide() {
-    globalThis.testBlockImpl = ModAPI.util.wrap(new nmb_BlockSteve());
     var itemClass = ModAPI.reflect.getClassById("net.minecraft.item.Item");
     var blockClass = ModAPI.reflect.getClassById("net.minecraft.block.Block");
     var block_of_steve = (new nmb_BlockSteve()).$setHardness(-1.0).$setStepSound(blockClass.staticVariables.soundTypeGravel).$setUnlocalizedName(

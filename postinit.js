@@ -22,7 +22,7 @@ globalThis.modapi_postinit = "(" + (() => {
     ModAPI.meta._versionMap = {};
     ModAPI.array = {};
 
-    ModAPI.version = "v2.1.2";
+    ModAPI.version = "v2.2";
     ModAPI.flavour = "injector";
     ModAPI.GNU = "terry pratchett";
     ModAPI.credits = ["ZXMushroom63", "radmanplays", "Murturtle", "OtterCodes101", "TheIdiotPlays", "OeildeLynx31", "Stpv22"];
