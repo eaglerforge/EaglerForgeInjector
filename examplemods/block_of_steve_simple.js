@@ -1,4 +1,3 @@
-AsyncSink.MIDDLEWARE.push(ev=>{if (ev.method === "read" && ev.file.includes("steve")) {console.log(ev.file)}});
 //nice little utility function to fix the block identity map
 function fixupBlockIds() {
     var blockRegistry = ModAPI.util.wrap(ModAPI.reflect.getClassById("net.minecraft.block.Block").staticVariables.blockRegistry).getCorrective();
@@ -24,7 +23,7 @@ function registerSteveClientSide() {
         ModAPI.util.str("steve")
     ).$setCreativeTab(creativeBlockTab);
     blockClass.staticMethods.registerBlock0.method(
-        198,
+        198, //use blockid 198
         ModAPI.util.str("steve"),
         block_of_steve
     );

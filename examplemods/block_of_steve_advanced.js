@@ -41,7 +41,7 @@ function registerSteveClientSide() {
         ModAPI.util.str("steve")
     );
     blockClass.staticMethods.registerBlock0.method(
-        198,
+        198, //use blockid 198
         ModAPI.util.str("steve"),
         block_of_steve
     );
