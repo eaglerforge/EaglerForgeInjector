@@ -73,7 +73,7 @@
         const oldDecorate = ModAPI.hooks.methods[BiomeDecorator_decorate];
         ModAPI.hooks.methods[BiomeDecorator_decorate] = function ($this, $world, $random, $biomeGenBase, $blockpos) {
             if (!$this.$currentWorld) {
-                $this.$unluckyBlockGen = WorldGenMineable(ModAPI.blocks.unluckiness.getDefaultState().getRef(), 5);
+                $this.$unluckyBlockGen = WorldGenMineable(ModAPI.blocks.unluckiness.getDefaultState().getRef(), 4);
             }
             return oldDecorate.apply(this, [$this, $world, $random, $biomeGenBase, $blockpos]);
         }
@@ -81,7 +81,7 @@
         const BiomeDecorator_generateOres = ModAPI.util.getMethodFromPackage("net.minecraft.world.biome.BiomeDecorator", "generateOres");
         const oldGenerateOres = ModAPI.hooks.methods[BiomeDecorator_generateOres];
         ModAPI.hooks.methods[BiomeDecorator_generateOres] = function ($this) {
-            $this.$genStandardOre1(145, $this.$unluckyBlockGen || null, 0, 256);
+            $this.$genStandardOre1(105, $this.$unluckyBlockGen || null, 0, 256);
             return oldGenerateOres.apply(this, [$this]);
         }
 
