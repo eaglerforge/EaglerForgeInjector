@@ -16,6 +16,9 @@ Methods:
   - This method is used to find a class by its id.
   - For example, to get the `Minecraft` class, you can use `ModAPI.reflect.getClassById("Minecraft")`
   - This runs slower than `getClassById` because it has to filter through all classes. Make sure to cache the result rather than calling it over and over again.
+- `ModAPI.reflect.getSuper(rClass: ReflectClass, filter: Function) : Function`
+  - Gets a super function from a reflect class. This is used to extend build in classes, like `Block`.
+  - For an example, see lines
 
 ### ReflectClass Definition
 
