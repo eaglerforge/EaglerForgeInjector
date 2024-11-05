@@ -9,13 +9,22 @@ function _status(x) {
     document.querySelector("#status").innerText = x;
 }
 function entriesToStaticVariableProxy(entries, prefix) {
+    if (entries.length === 0) {
+        return `ModAPI.hooks._rippedStaticProperties[\`${prefix.replace(
+            "var ",
+            ""
+        )}\`]={};`;
+    }
     var getComponents = "";
     entries.forEach((entry) => {
         getComponents += `
-          case \`${entry.name}\`:
-              return ${entry.variable};
-              break;`;
+             case \`${entry.name}\`:
+                 return ${entry.variable};
+                 break;`;
     });
+    getComponents += `
+            default:
+                return Reflect.get(a,b,c);`
 
     var setComponents = "";
     entries.forEach((entry) => {
@@ -24,7 +33,11 @@ function entriesToStaticVariableProxy(entries, prefix) {
                 ${entry.variable} = c;
                 break;`;
     });
-    var proxy = `
+    setComponents += `
+            default:
+                a[b]=c;`
+    /*/
+
         ModAPI.hooks._rippedStaticIndexer[\`${prefix.replace(
         "var ",
         ""
@@ -33,7 +46,8 @@ function entriesToStaticVariableProxy(entries, prefix) {
             return '"' + x.name + '"';
         })
         .join(",")}];
-        ModAPI.hooks._rippedStaticProperties[\`${prefix.replace(
+    /*/
+    var proxy = `ModAPI.hooks._rippedStaticProperties[\`${prefix.replace(
             "var ",
             ""
         )}\`] = new Proxy({${entries
@@ -51,6 +65,7 @@ function entriesToStaticVariableProxy(entries, prefix) {
                 switch (b) {
                     ${setComponents}
                 }
+                return true;
             }
           });`;
     return proxy;
@@ -132,6 +147,20 @@ var main;(function(){`
             fullName = fullName[0].replace("function ", "");
             return (
                 `ModAPI.hooks._rippedConstructors[\`${fullName}\`] = ${fullName};
+` + match
+            );
+        }
+    );
+
+    const extractInternalConstructorRegex =
+        /^\s*function (\S*?)__init_\d*?\(\$this/gm; //same as extract constructor regex, but only allow $this as first argument
+    patchedFile = patchedFile.replaceAll(
+        extractInternalConstructorRegex,
+        (match) => {
+            var fullName = match.match(extractConstructorFullNameRegex);
+            fullName = fullName[0].replace("function ", "");
+            return (
+                `ModAPI.hooks._rippedInternalConstructors[\`${fullName}\`] = ${fullName};
 ` + match
             );
         }
@@ -224,7 +253,7 @@ var main;(function(){`
 
     
     patchedFile = patchedFile.replaceAll(
-        /function [a-z]+?_([a-zA-Z\$]+?)\(\) \{/gm,
+        /function [a-z]+?_([a-zA-Z0-9\$]+?)\(\) \{/gm,
         (match) => {
             var prefix = "var " + match.replace("function ", "").replace("() {", "");
             var entries = [];

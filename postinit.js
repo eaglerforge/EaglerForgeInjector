@@ -22,7 +22,7 @@ globalThis.modapi_postinit = "(" + (() => {
     ModAPI.meta._versionMap = {};
     ModAPI.array = {};
 
-    ModAPI.version = "v2.1.2";
+    ModAPI.version = "v2.2";
     ModAPI.flavour = "injector";
     ModAPI.GNU = "terry pratchett";
     ModAPI.credits = ["ZXMushroom63", "radmanplays", "Murturtle", "OtterCodes101", "TheIdiotPlays", "OeildeLynx31", "Stpv22"];
@@ -149,7 +149,7 @@ globalThis.modapi_postinit = "(" + (() => {
                 }
                 if (xOut && typeof xOut === "object" && !Array.isArray(xOut)) {
                     if (corrective) {
-                        return new Proxy(outputValue.data, CorrectiveRecursive);
+                        return new Proxy(xOut, CorrectiveRecursive);
                     }
                     return new Proxy(xOut, ModAPI.util.TeaVM_to_Recursive_BaseData_ProxyConf);
                 }
@@ -209,6 +209,7 @@ globalThis.modapi_postinit = "(" + (() => {
     
     ModAPI.hooks.regenerateClassMap = function () {
         ModAPI.hooks._rippedConstructorKeys = Object.keys(ModAPI.hooks._rippedConstructors);
+        ModAPI.hooks._rippedInternalConstructorKeys = Object.keys(ModAPI.hooks._rippedInternalConstructors);
         ModAPI.hooks._rippedMethodKeys = Object.keys(ModAPI.hooks._rippedMethodTypeMap);
 
         var compiledNames = new Set();
@@ -255,6 +256,7 @@ globalThis.modapi_postinit = "(" + (() => {
                     "id": classId,
                     "binaryName": item?.$meta?.binaryName || null,
                     "constructors": [],
+                    "internalConstructors": [],
                     "methods": {},
                     "staticMethods": {},
                     "staticVariables": {},
@@ -268,12 +270,16 @@ globalThis.modapi_postinit = "(" + (() => {
                 }
             }
             if (typeof item?.$meta?.superclass === "function" && item?.$meta?.superclass?.$meta) {
-                ModAPI.hooks._classMap[compiledName].superclass = item.$meta.superclass.$meta.name;
+                ModAPI.hooks._classMap[compiledName].superclassName = item.$meta.superclass.$meta.name;
+                ModAPI.hooks._classMap[compiledName].superclass = item.$meta.superclass;
             } else {
                 ModAPI.hooks._classMap[compiledName].superclass = null;
+                ModAPI.hooks._classMap[compiledName].superclassName = null;
             }
-            ModAPI.hooks._classMap[compiledName].staticVariableNames = ModAPI.hooks._rippedStaticIndexer[compiledName];
+            
             ModAPI.hooks._classMap[compiledName].staticVariables = ModAPI.hooks._rippedStaticProperties[compiledName];
+            ModAPI.hooks._classMap[compiledName].staticVariableNames = Object.keys(ModAPI.hooks._classMap[compiledName].staticVariables || {});
+
             if (item?.["$$constructor$$"]) {
                 //Class does not have any hand written constructors
                 //Eg: class MyClass {}
@@ -286,6 +292,13 @@ globalThis.modapi_postinit = "(" + (() => {
                     }
                 });
             }
+
+            ModAPI.hooks._rippedInternalConstructorKeys.forEach(initialiser => { // Find internal constructors/initialisers. Used for calling super() on custom classes. (They are the different implementations of a classes constructor, that don't automatically create an object. Thus, it is identical to calling super)
+                if (initialiser.startsWith(compiledName + "__init_") && !initialiser.includes("$lambda$")) {
+                    ModAPI.hooks._classMap[compiledName].internalConstructors.push(ModAPI.hooks._rippedInternalConstructors[initialiser]);
+                }
+            });
+
             ModAPI.hooks._rippedMethodKeys.forEach((method) => {
                 if (method.startsWith(compiledName + "_") && !method.includes("$lambda$")) {
                     var targetMethodMap = ModAPI.hooks._classMap[compiledName].methods;
@@ -319,6 +332,31 @@ globalThis.modapi_postinit = "(" + (() => {
         var key = classKeys.filter(k => { return ModAPI.hooks._classMap[k].name === className })[0];
         return key ? ModAPI.hooks._classMap[key] : null;
     }
+
+    //Magical function for making a subclass with a custom constructor that you can easily use super(...) on.
+    ModAPI.reflect.getSuper = function getSuper(reflectClass, filter) {
+        filter ||= ()=>true;
+        var initialiser = reflectClass.internalConstructors.find(filter);
+        return function superFunction(thisArg, ...extra_args) {
+            reflectClass.class.call(thisArg);
+            initialiser(thisArg, ...extra_args);
+        }
+    }
+
+    //Iteratively load the superclasses' prototype methods.
+    ModAPI.reflect.prototypeStack = function prototypeStack(reflectClass, classFn) {
+        var stack = [reflectClass.class.prototype];
+        var currentSuperclass = reflectClass.superclass;
+        while (currentSuperclass) {
+            stack.push(currentSuperclass.prototype);
+            currentSuperclass = currentSuperclass?.$meta?.superclass;
+        }
+        stack.reverse();
+        stack.forEach(proto => {
+            Object.assign(classFn.prototype, proto);
+        });
+    }
+
     var reloadDeprecationWarnings = 0;
     const TeaVMArray_To_Recursive_BaseData_ProxyConf = {
         get(target, prop, receiver) {
@@ -556,7 +594,7 @@ globalThis.modapi_postinit = "(" + (() => {
 
     //Function used for running @Async / @Async-dependent TeaVM methods.
     ModAPI.promisify = function promisify(fn) {
-        return function promisifiedJavaMethpd(...inArguments) {
+        return function promisifiedJavaMethod(...inArguments) {
             return new Promise((res, rej) => {
                 Promise.resolve().then( //queue microtask
                     () => {
@@ -843,13 +881,19 @@ globalThis.modapi_postinit = "(" + (() => {
         return x;
     }
 
-    const originalBootstrap = ModAPI.hooks.methods[ModAPI.util.getMethodFromPackage("net.minecraft.init.Bootstrap", "register")];
-    ModAPI.hooks.methods[ModAPI.util.getMethodFromPackage("net.minecraft.init.Bootstrap", "register")] = function (...args) {
-        var x = originalBootstrap.apply(this, args);
+    ModAPI.util.bootstrap = function () {
         ModAPI.items = new Proxy(ModAPI.hooks._classMap[ModAPI.util.getCompiledName("net.minecraft.init.Items")].staticVariables, StaticProps_ProxyConf);
         ModAPI.blocks = new Proxy(ModAPI.hooks._classMap[ModAPI.util.getCompiledName("net.minecraft.init.Blocks")].staticVariables, StaticProps_ProxyConf);
         ModAPI.materials = new Proxy(ModAPI.hooks._classMap[ModAPI.util.getCompiledName("net.minecraft.block.material.Material")].staticVariables, StaticProps_ProxyConf);
         ModAPI.enchantments = new Proxy(ModAPI.hooks._classMap[ModAPI.util.getCompiledName("net.minecraft.enchantment.Enchantment")].staticVariables, StaticProps_ProxyConf);
+    }
+
+    ModAPI.events.newEvent("bootstrap", "server");
+    const originalBootstrap = ModAPI.hooks.methods[ModAPI.util.getMethodFromPackage("net.minecraft.init.Bootstrap", "register")];
+    ModAPI.hooks.methods[ModAPI.util.getMethodFromPackage("net.minecraft.init.Bootstrap", "register")] = function (...args) {
+        var x = originalBootstrap.apply(this, args);
+        ModAPI.util.bootstrap();
+        ModAPI.events.callEvent("bootstrap", {});
         console.log("[ModAPI] Hooked into bootstrap. .blocks, .items, .materials and .enchantments are now accessible.");
         return x;
     }

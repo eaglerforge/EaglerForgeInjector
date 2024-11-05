@@ -49,6 +49,10 @@ Can only be used in the context of the dedicated server. More: [DedicatedServerD
 - `serverstart`:
     - Called when the dedicated server starts.
     - Event object is blank.
+- `bootstrap`:
+    - Called when the dedicated server registers blocks, items, materials, enchantments, etc.
+    - This is when you should register cstom blocks and items.
+    - Event object is blank.
 - `serverstop`:
     - Called when the dedicated server stops.
     - Event object is blank.

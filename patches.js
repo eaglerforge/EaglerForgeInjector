@@ -35,4 +35,4 @@ PatchesRegistry.addPatch(function (input) {
             if (!$this.$renderHand)`
     );
     return output;
-})
+});
