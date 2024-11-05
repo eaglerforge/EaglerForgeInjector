@@ -44,7 +44,7 @@ function registerSteveClientSide() {
         ModAPI.util.str("steve")
     );
     blockClass.staticMethods.registerBlock0.method(
-        198, //use blockid 198
+        198, //use blockid 198. MAKE SURE TO CHANGE IF YOU ARE MAKING A MOD USING THIS, MAXIMUM BLOCK ID IS 4095.
         ModAPI.util.str("steve"),
         block_of_steve
     );
@@ -112,7 +112,7 @@ function registerSteveServerSide() {
             ModAPI.util.str("steve")
         );
         blockClass.staticMethods.registerBlock0.method(
-            198,
+            198, //use blockid 198. MAKE SURE TO CHANGE IF YOU ARE MAKING A MOD USING THIS, MAXIMUM BLOCK ID IS 4095.
             ModAPI.util.str("steve"),
             block_of_steve
         );
