@@ -17,9 +17,11 @@ Methods:
   - For example, to get the `Minecraft` class, you can use `ModAPI.reflect.getClassById("Minecraft")`
   - This runs slower than `getClassById` because it has to filter through all classes. Make sure to cache the result rather than calling it over and over again.
 - `ModAPI.reflect.getSuper(rClass: ReflectClass, filter: Function) : Function`
-  - Gets a super function from a reflect class. This is used to extend build in classes, like `Block`.
-  - For an example, see lines
-
+  - Gets a super function from a reflect class. This is used to extend built in classes, like `Block`.
+  - For an example, see lines [29](https://github.com/eaglerforge/EaglerForgeInjector/blob/6e8598c180f96a65c0c101be72e6d0fa53195404/examplemods/unlucky_blocks.js#L29) and [33](https://github.com/eaglerforge/EaglerForgeInjector/blob/6e8598c180f96a65c0c101be72e6d0fa53195404/examplemods/unlucky_blocks.js#L33) in unlucky_blocks.js
+- `ModAPI.reflect.prototypeStack(rClass: ReflectClass, target: Class/ConstructorFunction) : void`
+  - Copies methods from a reflect class and it's parents onto a target native JavaScript class. This allows TeaVM to use these objects normally, without you having to manually reimplement every method. In other words, this is the equivalent of extending a class.
+  - [Example usage](https://github.com/eaglerforge/EaglerForgeInjector/blob/6e8598c180f96a65c0c101be72e6d0fa53195404/examplemods/unlucky_blocks.js#L37)
 ### ReflectClass Definition
 
 Each `ReflectClass` has the following properties:
