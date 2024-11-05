@@ -247,8 +247,9 @@ ModAPI.meta.credits("By ZXMushroom63");
         if (e.message.toLowerCase().startsWith(".reload_tex")) {
             e.preventDefault = true;
             ModAPI.mc.renderItem.itemModelMesher.simpleShapesCache.clear();
-            ModAPI.promisify(ModAPI.mc.refreshResources)();
-            ModAPI.events.callEvent("custom:asyncsink_reloaded", {});
+            ModAPI.promisify(ModAPI.mc.refreshResources)().then(()=>{
+                ModAPI.events.callEvent("custom:asyncsink_reloaded", {});
+            });
         }
     });
 })();

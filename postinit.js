@@ -276,8 +276,10 @@ globalThis.modapi_postinit = "(" + (() => {
                 ModAPI.hooks._classMap[compiledName].superclass = null;
                 ModAPI.hooks._classMap[compiledName].superclassName = null;
             }
-            ModAPI.hooks._classMap[compiledName].staticVariableNames = ModAPI.hooks._rippedStaticIndexer[compiledName];
+            
             ModAPI.hooks._classMap[compiledName].staticVariables = ModAPI.hooks._rippedStaticProperties[compiledName];
+            ModAPI.hooks._classMap[compiledName].staticVariableNames = Object.keys(ModAPI.hooks._classMap[compiledName].staticVariables || {});
+
             if (item?.["$$constructor$$"]) {
                 //Class does not have any hand written constructors
                 //Eg: class MyClass {}
