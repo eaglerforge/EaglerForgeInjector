@@ -31,8 +31,6 @@ function registerSteveClientSide() {
         block_of_steve
     );
     itemClass.staticMethods.registerItemBlock0.method(block_of_steve);
-    ModAPI.mc.renderItem.registerBlock(block_of_steve, ModAPI.util.str("steve"));
-    
     
     ModAPI.addEventListener("lib:asyncsink", async () => {
         ModAPI.addEventListener("custom:asyncsink_reloaded", ()=>{
