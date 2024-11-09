@@ -70,6 +70,7 @@ function registerSteveClientSide() {
             "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAE0SURBVDhPpdO9S8NAHMbxy3sVfJmMg6h7FRXXkkUUX0addSjo4OAfIDqLIoiLi3+BRRx0EIQOnV0EcVAIWkR0KIFgrcEktX6vcXD0nuE+5Afhnhw5bWy4qylaidOfVQhT0zFKYozjBHVdzi3TwCZvteaS/0fLD8oGf5OzTeyxNUyE3Ln2HmGctpuxKuS3wd76CgPHsrEj142NeojCkHsFry+4c3aJ6g1OtlZp0Ok4DD4i+Y2GIZ+DMMAhtw+fHu8xi3IDM9t5YfMQF71dLHo+ZjsfXbh4WtnH0vYaqp/BcXGGM3D7BxiYTi+el8uYZWm2gM/VB/Tfaqje4GB5iga2Jv+sUuUa5/ITmOXq7gbnC+MY1r9QvcHG9AgN0lRex1u/ilr7ehqWvBNZvMlRbESfqNhAiG/Pb1bHXpMbFgAAAABJRU5ErkJggg=="
         )).arrayBuffer());
     });
+    ModAPI.blocks["steve"] = block_of_steve;
 }
 function registerSteveServerSide() {
     function fixupBlockIds() {
@@ -102,6 +103,7 @@ function registerSteveServerSide() {
         );
         itemClass.staticMethods.registerItemBlock0.method(block_of_steve);
         fixupBlockIds();
+        ModAPI.blocks["steve"] = block_of_steve;
     });
 }
 registerSteveClientSide();
