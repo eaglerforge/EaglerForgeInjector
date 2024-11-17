@@ -15,7 +15,7 @@
         globalThis.LCI_ITEMDB ||= {};
         globalThis.LibCustomItems = {
             makeItemStack: function makeItemStack(tag) {
-                return globalThis.LCI_ITEMBD[tag] || null;
+                return globalThis.LCI_ITEMDB[tag] || null;
             }
         };
         var useName = ModAPI.util.getMethodFromPackage("net.minecraft.network.NetHandlerPlayServer", "processPlayerBlockPlacement");
@@ -148,7 +148,7 @@
         if (globalThis.LCI_RECIPEEVENTS[data.tag]) {
             globalThis.LCI_RECIPEEVENTS[data.tag](new Proxy(testItem, ModAPI.util.TeaVM_to_Recursive_BaseData_ProxyConf));
         }
-        globalThis.LCI_ITEMBD[data.tag] = new Proxy(testItem, ModAPI.util.TeaVM_to_Recursive_BaseData_ProxyConf);
+        globalThis.LCI_ITEMDB[data.tag] = new Proxy(testItem, ModAPI.util.TeaVM_to_Recursive_BaseData_ProxyConf);
 
         var craftingManager = ModAPI.reflect.getClassById("net.minecraft.item.crafting.CraftingManager").staticMethods.getInstance.method();
         if((data.useRecipe !== false) || (data.useRecipe !== "false")) {
@@ -162,7 +162,7 @@
         LCI_registerItem(data);
     }
     LibCustomItems.makeItemStack = function makeItemStack(tag) {
-        return globalThis.LCI_ITEMBD[tag] || null;
+        return globalThis.LCI_ITEMDB[tag] || null;
     }
     ModAPI.events.callEvent("lib:libcustomitems:loaded", {});
 })();

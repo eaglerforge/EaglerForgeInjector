@@ -180,6 +180,58 @@ ModAPI.addEventListener("lib:libcustomitems:loaded", () => {
                 }
                 event.preventDefault = true;
             }
+            // "this command was made by EymenWSMC. comments included" - radmanplays
+            if (event.command.toLowerCase().startsWith("//replacenear")) {
+            const args = event.command.split(" ").slice(1); 
+            if (args.length < 3) {
+                event.sender.addChatMessage(ModAPI.reflect.getClassById("net.minecraft.util.ChatComponentText").constructors[0](ModAPI.util.str(prefix + "Usage: //replacenear <radius> <targetBlock> <replacementBlock>")));
+                event.preventDefault = true;
+                return;
+            }
+        
+            const radius = parseInt(args[0]);
+            const targetBlockName = args[1];
+            const replacementBlockName = args[2];
+        
+           const targetBlock = ModAPI.blocks[targetBlockName];
+            const replacementBlock = ModAPI.blocks[replacementBlockName];
+            if (!targetBlock || !replacementBlock) {
+                event.sender.addChatMessage(ModAPI.reflect.getClassById("net.minecraft.util.ChatComponentText").constructors[0](ModAPI.util.str(prefix + "Invalid block names!")));
+                event.preventDefault = true;
+                return;
+            }
+        
+
+            //Replacing logic
+            const targetBlockState = targetBlock.getDefaultState().getRef();
+            const replacementBlockState = replacementBlock.getDefaultState().getRef();
+        
+            const playerPos = event.sender.getPosition();
+            const xStart = Math.floor(playerPos.x - radius);
+            const xEnd = Math.floor(playerPos.x + radius);
+            const yStart = Math.floor(playerPos.y - radius);
+            const yEnd = Math.floor(playerPos.y + radius);
+            const zStart = Math.floor(playerPos.z - radius);
+            const zEnd = Math.floor(playerPos.z + radius);
+        
+            //Replace ity with radoius
+            for (let x = xStart; x <= xEnd; x++) {
+                for (let y = yStart; y <= yEnd; y++) {
+                    for (let z = zStart; z <= zEnd; z++) {
+                        const blockPos = blockPosConstructor(x, y, z);
+                        const currentBlock = event.sender.getServerForPlayer().getBlockState(blockPos);
+        
+                        if (currentBlock.equals(targetBlockState)) {
+                            event.sender.getServerForPlayer().setBlockState(blockPos, replacementBlockState, 3);
+                        }
+                    }
+                }
+            }
+        
+            //Send messages shit
+            event.sender.addChatMessage(ModAPI.reflect.getClassById("net.minecraft.util.ChatComponentText").constructors[0](ModAPI.util.str(prefix + `Replaced ${targetBlockName} with ${replacementBlockName} within radius ${radius}`)));
+            event.preventDefault = true;
+        }
         });
     });
 })();
