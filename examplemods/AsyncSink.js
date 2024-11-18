@@ -194,9 +194,12 @@ ModAPI.meta.credits("By ZXMushroom63");
             name: "AsyncSinkLib",
             timestamp: Date.now()
         };
+        if (!Array.isArray(resourcePackList.resourcePacks)) {
+            resourcePackList.resourcePacks = [];
+        }
         if (resourcePackList.resourcePacks.find(x => x.name === "AsyncSinkLib")) {
             var idx = resourcePackList.resourcePacks.indexOf(resourcePackList.resourcePacks.find(x => x.name === "AsyncSinkLib"));
-            resourcePackList.resourcePacks = pack;
+            resourcePackList.resourcePacks[idx] = pack;
         } else {
             resourcePackList.resourcePacks.push(pack);
         }
@@ -240,7 +243,7 @@ ModAPI.meta.credits("By ZXMushroom63");
         var resourcePackEntries = ModAPI.mc.mcResourcePackRepository.getRepositoryEntries().getCorrective();
         var array = resourcePackEntries.array || [resourcePackEntries.element];
         asyncSinkInstallStatus = array.find(x => ModAPI.util.ustr(x.reResourcePack.resourcePackFile.getRef()) === "AsyncSinkLib") ? true : false;
-        assureAsyncSinkResources();
+        //assureAsyncSinkResources();
         if (asyncSinkInstallStatus) {
             installMessage.style.display = "none";
         } else {
