@@ -10,7 +10,8 @@
 // Open a command prompt / terminal in eagler-binary-tools
 // To convert to an eaglercraft MDL, Run: java -jar EaglerBinaryTools.jar obj2mdl-1.8 MyModel.obj OutputModel.mdl true
 // the 'true' at the end means enable exporting UVs
-// Use https://base64.guru/converter/encode/image to convert both your mdl file and png texture file into data uris
+// Use https://base64.guru/converter/encode/image to convert both your mdl file and png texture file into data uris, and replace the data URIs in this file.
+// change some names.
 
 
 (function LoadSphereModel() {
