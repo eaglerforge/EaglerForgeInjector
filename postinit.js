@@ -981,8 +981,8 @@ globalThis.modapi_postinit = "(" + (() => {
         var values = [...ModAPI.reflect.getClassById("net.minecraft.item.Item").staticVariables.itemRegistry.$modapi_specmap.values()];
         return qhash(item, values);
     }
-    ModAPI.keygen.block = function () {
+    ModAPI.keygen.block = function (block) {
         var values = [...ModAPI.reflect.getClassById("net.minecraft.block.Block").staticVariables.blockRegistry.$modapi_specmap.values()];
-        return qhash(item, values);
+        return qhash(block, values);
     }
 }).toString() + ")();";
