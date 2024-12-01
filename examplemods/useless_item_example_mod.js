@@ -24,7 +24,7 @@
             var example_item = (new nmi_ItemExample()).$setUnlocalizedName(
                 ModAPI.util.str("exampleitem")
             );
-            itemClass.staticMethods.registerItem0.method(432, ModAPI.util.str("exampleitem"), example_item);
+            itemClass.staticMethods.registerItem0.method(ModAPI.keygen.item("exampleitem"), ModAPI.util.str("exampleitem"), example_item);
             ModAPI.items["exampleitem"] = example_item;
             
             return example_item;

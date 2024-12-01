@@ -22,7 +22,7 @@ globalThis.modapi_postinit = "(" + (() => {
     ModAPI.meta._versionMap = {};
     ModAPI.array = {};
 
-    ModAPI.version = "v2.2";
+    ModAPI.version = "v2.3";
     ModAPI.flavour = "injector";
     ModAPI.GNU = "terry pratchett";
     ModAPI.credits = ["ZXMushroom63", "radmanplays", "Murturtle", "OtterCodes101", "TheIdiotPlays", "OeildeLynx31", "Stpv22"];
@@ -951,5 +951,38 @@ globalThis.modapi_postinit = "(" + (() => {
         globalThis.modapi_specialevents.forEach(eventName => {
             ModAPI.events.newEvent(eventName, "patcher");
         });
+    }
+
+    function qhash(txt, arr) {
+        var interval = 4095 - arr.length;
+        var x = 1;
+        for (let i = 0; i < txt.length; i++) {
+            x += txt.charCodeAt(i);
+            x = x << txt.charCodeAt(i);
+            x = Math.abs(x);
+            x = x % interval;
+        }
+        var hash = x + arr.length;
+        while (arr.includes(hash)) {
+            hash = (hash + 1) % (interval + arr.length);
+        }
+        return hash;
+    }
+    
+
+    ModAPI.keygen = {};
+    var registryNamespaceMethod = ModAPI.hooks.methods[ModAPI.util.getMethodFromPackage("net.minecraft.util.RegistryNamespaced", "register")];
+    ModAPI.hooks.methods[ModAPI.util.getMethodFromPackage("net.minecraft.util.RegistryNamespaced", "register")] = function (...args) {
+        args[0].$modapi_specmap ||= new Map();
+        args[0].$modapi_specmap.set(args[2], args[1]);
+        return registryNamespaceMethod.apply(this, args);
+    }
+    ModAPI.keygen.item = function (item) {
+        var values = [...ModAPI.reflect.getClassById("net.minecraft.item.Item").staticVariables.itemRegistry.$modapi_specmap.values()];
+        return qhash(item, values);
+    }
+    ModAPI.keygen.block = function (block) {
+        var values = [...ModAPI.reflect.getClassById("net.minecraft.block.Block").staticVariables.blockRegistry.$modapi_specmap.values()];
+        return qhash(block, values);
     }
 }).toString() + ")();";

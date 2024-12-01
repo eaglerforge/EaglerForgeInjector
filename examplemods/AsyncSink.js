@@ -188,39 +188,47 @@ ModAPI.meta.credits("By ZXMushroom63");
         const objectStore = transaction.objectStore("filesystem");
         var object = (await promisifyIDBRequest(objectStore.get(["resourcepacks/manifest.json"])))?.data;
         var resourcePackList = object ? JSON.parse(dec.decode(object)) : { resourcePacks: [] };
-        if (!resourcePackList.resourcePacks.find(x => x.name === "AsyncSinkLib")) {
-            resourcePackList.resourcePacks.push({
-                domains: ["minecraft"],
-                folder: "AsyncSinkLib",
-                name: "AsyncSinkLib",
-                timestamp: Date.now()
-            });
-            const writeableTransaction = db.transaction(["filesystem"], "readwrite");
-            const writeableObjectStore = writeableTransaction.objectStore("filesystem");
-            await promisifyIDBRequest(writeableObjectStore.put({
-                path: "resourcepacks/manifest.json",
-                data: enc.encode(JSON.stringify(resourcePackList)).buffer
-            }));
-            await promisifyIDBRequest(writeableObjectStore.put({
-                path: "resourcepacks/AsyncSinkLib/pack.mcmeta",
-                data: enc.encode(JSON.stringify({
-                    "pack": {
-                        "pack_format": 1,
-                        "description": "AsyncSink Library Resources"
-                    }
-                })).buffer
-            }));
-
-            var icon = {
-                path: "resourcepacks/AsyncSinkLib/pack.png",
-                data: await (await fetch(asyncSinkIcon)).arrayBuffer()
-            };
-
-            const imageTransaction = db.transaction(["filesystem"], "readwrite");
-            const imageObjectStore = imageTransaction.objectStore("filesystem");
-
-            await promisifyIDBRequest(imageObjectStore.put(icon));
+        var pack = {
+            domains: ["minecraft", "eagler"],
+            folder: "AsyncSinkLib",
+            name: "AsyncSinkLib",
+            timestamp: Date.now()
+        };
+        if (!Array.isArray(resourcePackList.resourcePacks)) {
+            resourcePackList.resourcePacks = [];
         }
+        if (resourcePackList.resourcePacks.find(x => x.name === "AsyncSinkLib")) {
+            var idx = resourcePackList.resourcePacks.indexOf(resourcePackList.resourcePacks.find(x => x.name === "AsyncSinkLib"));
+            resourcePackList.resourcePacks[idx] = pack;
+        } else {
+            resourcePackList.resourcePacks.push(pack);
+        }
+        
+        const writeableTransaction = db.transaction(["filesystem"], "readwrite");
+        const writeableObjectStore = writeableTransaction.objectStore("filesystem");
+        await promisifyIDBRequest(writeableObjectStore.put({
+            path: "resourcepacks/manifest.json",
+            data: enc.encode(JSON.stringify(resourcePackList)).buffer
+        }));
+        await promisifyIDBRequest(writeableObjectStore.put({
+            path: "resourcepacks/AsyncSinkLib/pack.mcmeta",
+            data: enc.encode(JSON.stringify({
+                "pack": {
+                    "pack_format": 1,
+                    "description": "AsyncSink Library Resources"
+                }
+            })).buffer
+        }));
+
+        var icon = {
+            path: "resourcepacks/AsyncSinkLib/pack.png",
+            data: await (await fetch(asyncSinkIcon)).arrayBuffer()
+        };
+
+        const imageTransaction = db.transaction(["filesystem"], "readwrite");
+        const imageObjectStore = imageTransaction.objectStore("filesystem");
+
+        await promisifyIDBRequest(imageObjectStore.put(icon));
     }
 
     // Client side reminders to enable the AsyncSink Resource Pack
@@ -235,7 +243,7 @@ ModAPI.meta.credits("By ZXMushroom63");
         var resourcePackEntries = ModAPI.mc.mcResourcePackRepository.getRepositoryEntries().getCorrective();
         var array = resourcePackEntries.array || [resourcePackEntries.element];
         asyncSinkInstallStatus = array.find(x => ModAPI.util.ustr(x.reResourcePack.resourcePackFile.getRef()) === "AsyncSinkLib") ? true : false;
-        assureAsyncSinkResources();
+        //assureAsyncSinkResources();
         if (asyncSinkInstallStatus) {
             installMessage.style.display = "none";
         } else {

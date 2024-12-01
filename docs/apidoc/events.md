@@ -42,8 +42,10 @@ Events broadcast data for use in mods.
 - `frame`:
     - Called just when a frame is rendered on the client.
     - Event object is blank.
-
-
+- `render`:
+    - Called when 3D is rendered.
+    - Event object is has one property:
+        - `partialTicks`: number representing the fraction of ticks passed at this frame.
 ### Server Side Events
 Can only be used in the context of the dedicated server. More: [DedicatedServerDocumentation](dedicatedserver.md)
 - `serverstart`:
