@@ -56,7 +56,7 @@
                 ModAPI.util.str("unluckiness")
             );
             blockClass.staticMethods.registerBlock0.method(
-                544,  //use blockid 544. MAKE SURE TO CHANGE IF YOU ARE MAKING A MOD USING THIS, MAXIMUM BLOCK ID IS 4095.
+                ModAPI.keygen.block("unluckiness"),
                 ModAPI.util.str("unluckiness"),
                 block_of_unluckiness
             );
