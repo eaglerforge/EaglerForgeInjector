@@ -65,13 +65,16 @@ The global object has the following properties:
     - Once the dedicated server worker has started, it is unuseable.
     - More: [DedicatedServerDocumentation](dedicatedserver.md)
 - `ModAPI.meta`
-    - This object is used to register metadata for mods such as their title, credits, icon and description.
+    - This module is used to register metadata for mods such as their title, credits, icon and description.
     - More: [MetaDocumentation](meta.md)
 - `ModAPI.array`
-    - This object is used to interact and create arrays easily.
+    - This module is used to interact and create arrays easily.
     - More: [ArrayDocumentation](array.md)
+- `ModAPI.keygen`
+    - This module is used to get IDs for registering blocks and items without hardcoding an ID.
+    - More: [KeygenDocumentation](keygen.md)
 - `ModAPI.resolution`
-    - This object is used to query information about GUI dimensions, to make drawing to the screen easier, generated when the `frame` event is fired.
+    - This module is used to query information about GUI dimensions, to make drawing to the screen easier, generated when the `frame` event is fired.
     - Deprecated alias (please do not use): `ModAPI.ScaledResolution`
     - More: [ArrayDocumentation](array.md)
  - `ModAPI.version: String`
