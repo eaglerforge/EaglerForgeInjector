@@ -15,7 +15,7 @@ Tutorials:
 
 ### Intermediate
 Prerequisites:
- - Intermediate knowledge of JavaScript (functions, arrays, promises and callbacks)
+ - Intermediate knowledge of JavaScript (functions, arrays, promises, callbacks, keys and values in objects)
  - A good code editor (recommended: https://vscode.dev)
  - A copy of the eaglercraft workspace (optional, get it at: https://git.eaglercraft.rip/eaglercraft/eaglercraft-1.8-workspace)
 
