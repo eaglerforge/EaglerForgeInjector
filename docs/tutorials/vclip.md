@@ -15,7 +15,7 @@ Example of the issue: if mod A and mod B both use `var myVariable = 0`, the valu
 This allows us to use variables without worrying about mod compatibility, as variables are scoped to the function.
 
 \
-Then, we'll add some basic metadata for the mod loader (note that this is optional, but makes the mod look a lot better in the GUI once the game is loaded.)\
+Then, we'll add some basic [metadata](../apidoc/meta.md) for the mod loader (note that this is optional, but makes the mod look a lot better in the GUI once the game is loaded.)\
 We'll also require the player, so the `ModAPI.player` global is generated.
 
 ```javascript

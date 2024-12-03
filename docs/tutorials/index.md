@@ -20,7 +20,7 @@ Prerequisites:
  - A copy of the eaglercraft workspace (optional, get it at: https://git.eaglercraft.rip/eaglercraft/eaglercraft-1.8-workspace)
 
 Tutorials:
-- [Disable All Particles](comingsoon)
+- [Disable All Particles](disable_all_particles.md)
 - [/hat mod](comingsoon)
 - [/spawnxp command](comingsoon)
 - [Slippery Mod](comingsoon)
