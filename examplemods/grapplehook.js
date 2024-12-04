@@ -8,8 +8,8 @@
         lift: 0.4, //Base vertical motion
         crouchToCancel: true //Whether or not crouching should disable the grappling hook.
     };
-    var player = ModAPI.player.getCorrective(); //Gets the corrective version of the player object. This removes broken proerty suffixes. You usually don't need this, but in my case, I do.
     PluginAPI.addEventListener("update", () => { //Every client tick
+        var player = ModAPI.player.getCorrective(); //Gets the corrective version of the player object. This removes broken proerty suffixes. You usually don't need this, but in my case, I do.
         if (!player.fishEntity) { //If the fish hook does not exist.
             if (GrappleHookPlugin.prev === "GROUND" && (!GrappleHookPlugin.crouchToCancel || !player.isSneaking())) { //If the old state was ground
                 GrappleHookPlugin.prev = "NONE"; //Update the state
