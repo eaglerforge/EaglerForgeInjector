@@ -9,9 +9,6 @@ ModAPI.dedicatedServer.appendCode(function () {
     // This will be used to notify the client that their hotbar has been updated.
     var makePacketItemChange = ModAPI.reflect.getClassByName("S09PacketHeldItemChange").constructors.find(x => x.length === 1);
 
-    // Find the method for sending packets.
-    var sendPacket = ModAPI.reflect.getClassByName("NetHandlerPlayServer").methods.sendPacket.method;
-
     // When the server is processing a command
     ModAPI.addEventListener("processcommand", (event) => {
         // If the command starts with /hat
@@ -35,7 +32,7 @@ ModAPI.dedicatedServer.appendCode(function () {
             event.sender.inventory.mainInventory[hotbarIdx] = armorItem ? armorItem.getRef() : null;
 
             // Use the sendPacket method to send a item change packet to the client.
-            sendPacket(event.sender.playerNetServerHandler.getRef(), makePacketItemChange(hotbarIdx));
+            event.sender.playerNetServerHandler.sendPacket(makePacketItemChange(hotbarIdx));
 
             event.preventDefault = true;
         }
