@@ -9,7 +9,6 @@ ModAPI.dedicatedServer.appendCode(()=>{ //Add version of the code to the dedicat
       blockKeys.forEach(key=>{ //Loop through all the identifiers
          if(ModAPI?.blocks?.[key]?.slipperiness) {// TeaVM likes to add metadata properties which are `null` or `undefined`
             ModAPI.blocks[key].slipperiness = 0.98; //Ice slipperiness value.
-            ModAPI.blocks[key].reload();// load the value
          }
       });
    });
@@ -18,6 +17,5 @@ var blockKeys = Object.keys(ModAPI.blocks); //Get keys (identifiers) of all the 
 blockKeys.forEach(key=>{ //Loop through all the identifiers
    if(ModAPI?.blocks?.[key]?.slipperiness) {// TeaVM likes to add metadata properties which are `null` or `undefined`
       ModAPI.blocks[key].slipperiness = 0.98; //Ice slipperiness value.
-      ModAPI.blocks[key].reload();// load the value
    }
 });
