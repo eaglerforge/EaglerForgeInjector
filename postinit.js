@@ -22,7 +22,7 @@ globalThis.modapi_postinit = "(" + (() => {
     ModAPI.meta._versionMap = {};
     ModAPI.array = {};
 
-    ModAPI.version = "v2.3";
+    ModAPI.version = "v2.3.1";
     ModAPI.flavour = "injector";
     ModAPI.GNU = "terry pratchett";
     ModAPI.credits = ["ZXMushroom63", "radmanplays", "Murturtle", "OtterCodes101", "TheIdiotPlays", "OeildeLynx31", "Stpv22"];
@@ -955,6 +955,10 @@ globalThis.modapi_postinit = "(" + (() => {
 
     function qhash(txt, arr) {
         var interval = 4095 - arr.length;
+        if (interval < 1) {
+            console.error("[ModAPI.keygen] Ran out of IDs while generating for " + txt);
+            return -1;
+        }
         var x = 1;
         for (let i = 0; i < txt.length; i++) {
             x += txt.charCodeAt(i);
@@ -962,7 +966,7 @@ globalThis.modapi_postinit = "(" + (() => {
             x = Math.abs(x);
             x = x % interval;
         }
-        var hash = x + arr.length;
+        var hash = x;
         while (arr.includes(hash)) {
             hash = (hash + 1) % (interval + arr.length);
         }

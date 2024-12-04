@@ -1,6 +1,7 @@
-// ModAPI GUI made by TheIdiotPlays
-// https://github.com/TheIdiotPlays
-(() => {
+
+globalThis.modapi_guikit = "(" + (() => {
+  // ModAPI GUI made by TheIdiotPlays
+  // https://github.com/TheIdiotPlays
   var splashes = [
     "Now with A.I.D.S (automatically injected dedicated server)",
     "Only causes death 90% of the time!",
@@ -297,4 +298,4 @@
     });
     f.click();
   }
-})();
+}).toString() + ")();";
