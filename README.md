@@ -1,5 +1,10 @@
 # EaglerForgeInjector
-A modding API injector for vanilla eaglercraft builds.
+An advanced modding API injector for vanilla eaglercraft builds.
+Current features:
+- Method hooking/monkey patching
+- Reflection
+- Custom classes
+- Modify the dedicated server
 
 ### How to use:
 #### Online
