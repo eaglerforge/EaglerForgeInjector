@@ -36,18 +36,19 @@ async function shronk(input) {
     const parser = new DOMParser();
     const doc = parser.parseFromString(inputHtml, 'text/html');
     const scriptTags = doc.querySelectorAll('script');
-
+    await wait(100); //trying to get chrome to gc
     for (let i = 0; i < scriptTags.length; i++) {
         const scriptTag = scriptTags[i];
         const code = scriptTag.textContent;
         _status("[ASYNC_PLUGIN_1] Transpiling script #" + (i + 1) + " of length " + Math.round(code.length / 1000) + "k...");
-        await wait(50);
+        await wait(150);
 
 
         const output = Babel.transform(code, {
             plugins: []
         });
         scriptTag.textContent = output.code;
+        await wait(10);
     }
 
     _status("[ASYNC_PLUGIN_1] Job complete!");

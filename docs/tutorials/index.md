@@ -23,7 +23,7 @@ Tutorials:
 - [Disable All Particles](disable_all_particles.md)
 - [Slippery Mod](slippery.md)
 - [/hat mod](hat.md)
-- [/spawnxp command](comingsoon)
+- [/spawnxp command](spawnxp.md)
 
 ### Advanced
 Prerequisites:
