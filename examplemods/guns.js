@@ -13,26 +13,30 @@
             itemSuper(this); //Use super function to get block properties on this class.
             this.$setCreativeTab(creativeMiscTab);
         }
-        function entityraycast(player, world, range){
-            var eyePosition = player.getPositionEyes(1.0);
-            var lookVector = player.getLook(1.0);
+        function entityRayCast(player, world, range){
+            var eyePosition = player.getPositionEyes(0.0);
+            var lookVector = player.getLook(0.0);
             var targetPosition = eyePosition.addVector(lookVector.xCoord * range, lookVector.yCoord * range, lookVector.zCoord * range);
             var entities = world.getEntitiesWithinAABBExcludingEntity(
-                player,
-                player.getEntityBoundingBox().expand(range, range, range)
-            );
+                player.getRef(),
+                player.getEntityBoundingBox().expand(range, range, range).getRef()
+            ).getCorrective().array;
             var closestEntity = null;
             var closestDistance = range;
 
             // Iterate through all entities to find the one the player is looking at
             for (var i = 0; i < entities.length; i++) {
+                if (!entities[i]) {
+                    continue;
+                }
                 var entity = entities[i];
+
                 // Check if the entity's bounding box intersects with the player's ray
                 var entityBB = entity.getEntityBoundingBox().expand(0.3, 0.3, 0.3);
-                var intercept = entityBB.calculateIntercept(eyePosition, targetPosition);
+                var intercept = entityBB.calculateIntercept(eyePosition.getRef(), targetPosition.getRef());
 
                 if (intercept != null) {
-                    var distance = eyePosition.distanceTo(intercept.hitVec);
+                    var distance = eyePosition.distanceTo(intercept.hitVec.getRef());
                     if (distance < closestDistance) {
                         closestDistance = distance;
                         closestEntity = entity;
@@ -40,7 +44,7 @@
                 }
             }
 
-            var rayTraceResult = closestEntity
+            var rayTraceResult = closestEntity;
             if (rayTraceResult != null){
                 return rayTraceResult;
             } else{
@@ -51,12 +55,10 @@
         nmi_ItemPistol.prototype.$onItemRightClick = function ($itemstack, $world, $player) {
             var world = ModAPI.util.wrap($world);
             var entityplayer = ModAPI.util.wrap($player);
-            var shotentity = entityraycast(entityplayer, world, 10.0)
+            var shotentity = entityRayCast(entityplayer, world, 12.0)
             if (shotentity != null){
-                var entityName = shotentity.getName();
-                entityplayer.sendMessage(ModAPI.reflect.getClassById("net.minecraft.util.ChatComponentText").constructors[0](ModAPI.util.str(entityName)))
-                console.log(entityName)
-                world.playSoundAtEntity(entityplayer, "tile.piston.out", 1.0, 1.8);
+                shotentity.heal(-10);
+                world.playSoundAtEntity(entityplayer.getRef(), ModAPI.util.str("tile.piston.out"), 1.0, 1.8);
             }
             return $itemstack;
         }
