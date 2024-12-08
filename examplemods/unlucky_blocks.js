@@ -24,8 +24,6 @@
         }
         var itemClass = ModAPI.reflect.getClassById("net.minecraft.item.Item");
         var blockClass = ModAPI.reflect.getClassById("net.minecraft.block.Block");
-        var iproperty = ModAPI.reflect.getClassById("net.minecraft.block.properties.IProperty").class;
-        var makeBlockState = ModAPI.reflect.getClassById("net.minecraft.block.state.BlockState").constructors.find(x => x.length === 2);
         var blockSuper = ModAPI.reflect.getSuper(blockClass, (x) => x.length === 2); //Get super function from the block class with a target length of two. ($this (mandatory), material (optional))
         var creativeBlockTab = ModAPI.reflect.getClassById("net.minecraft.creativetab.CreativeTabs").staticVariables.tabBlock;
         var breakBlockMethod = blockClass.methods.breakBlock.method;
