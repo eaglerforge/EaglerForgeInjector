@@ -23,7 +23,7 @@ function makeSteveBlock() {
     var makeBlockState = ModAPI.reflect.getClassById("net.minecraft.block.state.BlockState").constructors.find(x => x.length === 2);
     var blockSuper = ModAPI.reflect.getSuper(blockClass, (x) => x.length === 2);
     var creativeBlockTab = ModAPI.reflect.getClassById("net.minecraft.creativetab.CreativeTabs").staticVariables.tabBlock;
-    var nmb_BlockSteve = function nmb_BlockSteve() {
+    function nmb_BlockSteve() {
         blockSuper(this, ModAPI.materials.rock.getRef());
         this.$defaultBlockState = this.$blockState.$getBaseState();
 		this.$setCreativeTab(creativeBlockTab);

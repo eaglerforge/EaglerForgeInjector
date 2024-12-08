@@ -29,18 +29,12 @@
         var blockSuper = ModAPI.reflect.getSuper(blockClass, (x) => x.length === 2); //Get super function from the block class with a target length of two. ($this (mandatory), material (optional))
         var creativeBlockTab = ModAPI.reflect.getClassById("net.minecraft.creativetab.CreativeTabs").staticVariables.tabBlock;
         var breakBlockMethod = blockClass.methods.breakBlock.method;
-        var nmb_BlockUnlucky = function nmb_BlockUnlucky() {
+        function nmb_BlockUnlucky() {
             blockSuper(this, ModAPI.materials.rock.getRef()); //Use super function to get block properties on this class.
             this.$defaultBlockState = this.$blockState.$getBaseState();
             this.$setCreativeTab(creativeBlockTab);
         }
         ModAPI.reflect.prototypeStack(blockClass, nmb_BlockUnlucky);
-        nmb_BlockUnlucky.prototype.$isOpaqueCube = function () {
-            return 1;
-        }
-        nmb_BlockUnlucky.prototype.$createBlockState = function () {
-            return makeBlockState(this, ModAPI.array.object(iproperty, 0));
-        }
         nmb_BlockUnlucky.prototype.$breakBlock = function ($world, $blockpos, $blockstate) {
             var world = ModAPI.util.wrap($world);
             var blockpos = ModAPI.util.wrap($blockpos);

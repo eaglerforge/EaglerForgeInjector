@@ -33,6 +33,6 @@ Prerequisites:
  - Your EaglerForgeInjector processed.html opened in an editor (optional)
 
 Tutorials:
-- [Custom Blocks](comingsoon)
+- [Custom Blocks](custom_block.md)
 - [Custom Items](comingsoon)
 - [Timescale Command](comingsoon)
