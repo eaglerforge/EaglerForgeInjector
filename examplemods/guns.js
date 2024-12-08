@@ -99,7 +99,7 @@
                     "thirdperson": {
                         "rotation": [ 5, 80, -45 ],
                         "translation": [ 0, 1, -3 ],
-                        "scale": [ 0.1, 0.1, 0.1 ]
+                        "scale": [ 1.0, 1.0, 1.0 ]
                     },
                     "firstperson": {
                         "rotation": [ 0, -135, 25 ],
