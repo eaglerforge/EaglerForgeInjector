@@ -53,11 +53,12 @@
         }
         ModAPI.reflect.prototypeStack(itemClass, nmi_ItemPistol);
         nmi_ItemPistol.prototype.$onItemRightClick = function ($itemstack, $world, $player) {
+            var magic = ModAPI.reflect.getClassByName("DamageSource").staticVariables.magic;
             var world = ModAPI.util.wrap($world);
             var entityplayer = ModAPI.util.wrap($player);
             var shotentity = entityRayCast(entityplayer, world, 12.0)
             if (shotentity != null){
-                shotentity.heal(-10);
+                shotentity.attackEntityFrom(magic, 10);
                 world.playSoundAtEntity(entityplayer.getRef(), ModAPI.util.str("tile.piston.out"), 1.0, 1.8);
             }
             return $itemstack;
@@ -98,12 +99,12 @@
                     "thirdperson": {
                         "rotation": [ 5, 80, -45 ],
                         "translation": [ 0, 1, -3 ],
-                        "scale": [ 0.55, 0.55, 0.55 ]
+                        "scale": [ 0.1, 0.1, 0.1 ]
                     },
                     "firstperson": {
                         "rotation": [ 0, -135, 25 ],
                         "translation": [ 0, 4, 2 ],
-                        "scale": [ 1.7, 1.7, 1.7 ]
+                        "scale": [ 1.8, 1.8, 1.8 ]
                     }
                 }
             }

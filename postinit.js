@@ -955,8 +955,8 @@ globalThis.modapi_postinit = "(" + (() => {
     }
 
     function qhash(txt, arr) {
-        var interval = 4095 - arr.length;
-        if (interval < 1) {
+        var interval = 4095; //used to be 4095 - arr.length, but that increases incompatibility based on load order and otehr circumstances
+        if (arr.length >= 4095) {
             console.error("[ModAPI.keygen] Ran out of IDs while generating for " + txt);
             return -1;
         }
@@ -969,7 +969,7 @@ globalThis.modapi_postinit = "(" + (() => {
         }
         var hash = x;
         while (arr.includes(hash)) {
-            hash = (hash + 1) % (interval + arr.length);
+            hash = (hash + 1) % interval;
         }
         return hash;
     }
