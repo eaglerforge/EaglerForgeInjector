@@ -29,7 +29,7 @@ globalThis.modapi_modloader = "(" + (() => {
         const transaction = db.transaction(["filesystem"], "readonly");
         const objectStore = transaction.objectStore("filesystem");
         const object = await promisifyIDBRequest(objectStore.get("mods.txt"));
-        var out = object ? (await object.text()).split("|") : [];
+        var out = object ? (await object.text()).split("|").toSorted() : [];
         db.close();
         return out;
     }
@@ -49,7 +49,7 @@ globalThis.modapi_modloader = "(" + (() => {
         const transaction = db.transaction(["filesystem"], "readwrite");
         const objectStore = transaction.objectStore("filesystem");
         const encoder = new TextEncoder();
-        const modsData = encoder.encode(mods.join("|"));
+        const modsData = encoder.encode(mods.toSorted().join("|"));
         const modsBlob = new Blob([modsData], { type: "text/plain" });
         await promisifyIDBRequest(objectStore.put(modsBlob, "mods.txt"));
         db.close();
@@ -199,6 +199,7 @@ globalThis.modapi_modloader = "(" + (() => {
         window.ModGracePeriod = true;
         var totalLoaded = 0;
         var loaderCheckInterval = null;
+        modsArr.sort();
         for (let i = 0; i < modsArr.length; i++) {
             let currentMod = modsArr[i];
             var isIDBMod = !currentMod.startsWith("web@");
