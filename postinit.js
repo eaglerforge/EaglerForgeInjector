@@ -1,3 +1,4 @@
+globalThis.ModAPIVersion = "v2.3.3";
 globalThis.modapi_postinit = "(" + (() => {
     //EaglerForge post initialization code.
     //This script cannot contain backticks, escape characters, or backslashes in order to inject into the dedicated server code.
@@ -22,7 +23,7 @@ globalThis.modapi_postinit = "(" + (() => {
     ModAPI.meta._versionMap = {};
     ModAPI.array = {};
 
-    ModAPI.version = "v2.3.1";
+    ModAPI.version = "__modapi_version_code__";
     ModAPI.flavour = "injector";
     ModAPI.GNU = "terry pratchett";
     ModAPI.credits = ["ZXMushroom63", "radmanplays", "Murturtle", "OtterCodes101", "TheIdiotPlays", "OeildeLynx31", "Stpv22"];
@@ -889,12 +890,16 @@ globalThis.modapi_postinit = "(" + (() => {
     }
 
     ModAPI.events.newEvent("bootstrap", "server");
+    const bootstrapClass = ModAPI.reflect.getClassById("net.minecraft.init.Bootstrap");
     const originalBootstrap = ModAPI.hooks.methods[ModAPI.util.getMethodFromPackage("net.minecraft.init.Bootstrap", "register")];
     ModAPI.hooks.methods[ModAPI.util.getMethodFromPackage("net.minecraft.init.Bootstrap", "register")] = function (...args) {
+        if (bootstrapClass.staticVariables.alreadyRegistered) {
+            return;
+        }
         var x = originalBootstrap.apply(this, args);
         ModAPI.util.bootstrap();
-        ModAPI.events.callEvent("bootstrap", {});
         console.log("[ModAPI] Hooked into bootstrap. .blocks, .items, .materials and .enchantments are now accessible.");
+        ModAPI.events.callEvent("bootstrap", {});
         return x;
     }
 
@@ -954,8 +959,8 @@ globalThis.modapi_postinit = "(" + (() => {
     }
 
     function qhash(txt, arr) {
-        var interval = 4095 - arr.length;
-        if (interval < 1) {
+        var interval = 4095; //used to be 4095 - arr.length, but that increases incompatibility based on load order and otehr circumstances
+        if (arr.length >= 4095) {
             console.error("[ModAPI.keygen] Ran out of IDs while generating for " + txt);
             return -1;
         }
@@ -968,7 +973,7 @@ globalThis.modapi_postinit = "(" + (() => {
         }
         var hash = x;
         while (arr.includes(hash)) {
-            hash = (hash + 1) % (interval + arr.length);
+            hash = (hash + 1) % interval;
         }
         return hash;
     }
@@ -989,4 +994,4 @@ globalThis.modapi_postinit = "(" + (() => {
         var values = [...ModAPI.reflect.getClassById("net.minecraft.block.Block").staticVariables.blockRegistry.$modapi_specmap.values()];
         return qhash(block, values);
     }
-}).toString() + ")();";
+}).toString().replace("__modapi_version_code__", ModAPIVersion) + ")();";

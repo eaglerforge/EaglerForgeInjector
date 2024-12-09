@@ -23,7 +23,7 @@ Tutorials:
 - [Disable All Particles](disable_all_particles.md)
 - [Slippery Mod](slippery.md)
 - [/hat mod](hat.md)
-- [/spawnxp command](comingsoon)
+- [/spawnxp command](spawnxp.md)
 
 ### Advanced
 Prerequisites:
@@ -33,6 +33,6 @@ Prerequisites:
  - Your EaglerForgeInjector processed.html opened in an editor (optional)
 
 Tutorials:
-- [Custom Blocks](comingsoon)
+- [Custom Blocks](custom_block.md)
 - [Custom Items](comingsoon)
 - [Timescale Command](comingsoon)

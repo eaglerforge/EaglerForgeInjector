@@ -19,22 +19,14 @@ function fixupBlockIds() {
 }
 function makeSteveBlock() {
     var blockClass = ModAPI.reflect.getClassById("net.minecraft.block.Block");
-    var iproperty = ModAPI.reflect.getClassById("net.minecraft.block.properties.IProperty").class;
-    var makeBlockState = ModAPI.reflect.getClassById("net.minecraft.block.state.BlockState").constructors.find(x => x.length === 2);
     var blockSuper = ModAPI.reflect.getSuper(blockClass, (x) => x.length === 2);
     var creativeBlockTab = ModAPI.reflect.getClassById("net.minecraft.creativetab.CreativeTabs").staticVariables.tabBlock;
-    var nmb_BlockSteve = function nmb_BlockSteve() {
+    function nmb_BlockSteve() {
         blockSuper(this, ModAPI.materials.rock.getRef());
         this.$defaultBlockState = this.$blockState.$getBaseState();
 		this.$setCreativeTab(creativeBlockTab);
     }
     ModAPI.reflect.prototypeStack(blockClass, nmb_BlockSteve);
-    nmb_BlockSteve.prototype.$isOpaqueCube = function () {
-        return 1;
-    }
-    nmb_BlockSteve.prototype.$createBlockState = function (t) {
-        return makeBlockState(this, ModAPI.array.object(iproperty, 0));
-    }
     globalThis.nmb_BlockSteve = nmb_BlockSteve;
 }
 function registerSteveClientSide() {

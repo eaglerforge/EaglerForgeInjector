@@ -24,7 +24,7 @@ globalThis.modapi_guikit = "(" + (() => {
         </h5>
       </header>
 
-      <table class="modTable">
+      <table id="modapi_gui_modTable">
         <thead>
           <tr>
             <td>
@@ -162,15 +162,18 @@ globalThis.modapi_guikit = "(" + (() => {
           font-size: 1.25rem;
           box-shadow: 0 -4px 6px rgba(0, 0, 0, 0.1);
         }
+        #modapi_gui_modTable {
+          min-width: 40vw;
+        }
       </style>
     </div>`;
     
-  async function fileToDataURI(file) {
+  async function fileToText(file) {
     return new Promise((res, rej) => {
       var fr = new FileReader();
       fr.addEventListener("error", (e) => { rej(e); });
       fr.addEventListener("load", (e) => { res(fr.result); });
-      fr.readAsDataURL(file);
+      fr.readAsText(file);
     });
   }
   window.modapi_displayModGui = async function (cb) {
@@ -191,7 +194,7 @@ globalThis.modapi_guikit = "(" + (() => {
     document.querySelector("#modapi_gui_container")._cb = cb;
 
     var modsList = await getMods();
-    var tbody = document.querySelector("#modapi_gui_container .modTable tbody");
+    var tbody = document.querySelector("#modapi_gui_container #modapi_gui_modTable tbody");
     tbody.innerHTML = "";
     modsList.forEach((modtxt, i) => {
       if (!modtxt) { return }
@@ -245,7 +248,6 @@ globalThis.modapi_guikit = "(" + (() => {
       var button = document.createElement("button");
       button.innerText = "Delete";
       button.style.height = "3rem";
-      button.style.marginTop = "calc(50% - 1.5rem)";
       button.addEventListener("click", async () => {
         await removeMod(i);
         window.modapi_displayModGui();
@@ -254,7 +256,7 @@ globalThis.modapi_guikit = "(" + (() => {
       controls.appendChild(button);
       tr.appendChild(mod);
       tr.appendChild(spacer);
-      tr.appendChild(button);
+      tr.appendChild(controls);
       tbody.appendChild(tr);
     });
     var once = false;
@@ -279,7 +281,7 @@ globalThis.modapi_guikit = "(" + (() => {
     if (!mod || mod.length === 0) {
       return;
     }
-    await addMod("web@" + mod);
+    await addMod(mod);
     window.modapi_displayModGui();
   }
   window.modapi_uploadmod = async () => {
@@ -292,7 +294,7 @@ globalThis.modapi_guikit = "(" + (() => {
         return;
       }
       for (let i = 0; i < f.files.length; i++) {
-        await addMod("web@" + (await fileToDataURI(f.files[i])).replaceAll(";base64", ";fs=" + f.files[i].name + ";base64"));
+        await addFileMod(f.files[i].name, (await fileToText(f.files[i])));
       }
       window.modapi_displayModGui();
     });
