@@ -891,13 +891,17 @@ globalThis.modapi_postinit = "(" + (() => {
 
     ModAPI.events.newEvent("bootstrap", "server");
     ModAPI.events.newEvent("prebootstrap", "server");
+    const bootstrapClass = ModAPI.reflect.getClassById("net.minecraft.init.Bootstrap");
     const originalBootstrap = ModAPI.hooks.methods[ModAPI.util.getMethodFromPackage("net.minecraft.init.Bootstrap", "register")];
     ModAPI.hooks.methods[ModAPI.util.getMethodFromPackage("net.minecraft.init.Bootstrap", "register")] = function (...args) {
+        if (bootstrapClass.staticVariables.alreadyRegistered) {
+            return;
+        }
         ModAPI.events.callEvent("prebootstrap", {});
         var x = originalBootstrap.apply(this, args);
         ModAPI.util.bootstrap();
-        ModAPI.events.callEvent("bootstrap", {});
         console.log("[ModAPI] Hooked into bootstrap. .blocks, .items, .materials and .enchantments are now accessible.");
+        ModAPI.events.callEvent("bootstrap", {});
         return x;
     }
 
