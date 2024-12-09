@@ -14,10 +14,10 @@
                     var movingObjectPosition = event.sender.rayTrace(6, 0).getCorrective();
                     console.log(movingObjectPosition);
 
-                    var hitVec = movingObjectPosition.hitVec;
+                    //var hitVec = movingObjectPosition.hitVec;
 
                     event.sender.addChatMessage(ModAPI.reflect.getClassById("net.minecraft.util.ChatComponentText").constructors[0](
-                        movingObjectPosition.toString() //This is a java string, but that's ok since it goes into a java method.
+                        movingObjectPosition.toString().getRef() //This is a java string, but that's ok since it goes into a java method.
                     ));
                 }
                 event.preventDefault = true;

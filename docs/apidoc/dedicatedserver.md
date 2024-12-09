@@ -27,4 +27,13 @@ function myServerSideModCode() {
 ModAPI.dedicatedServer.appendCode(myServerSideModCode);
 ```
 
-Once serverside, you can only access server side events, like `serverstart` or `tick`.
+You can check if a mod if running serverside using this:
+```javascript
+function myServerSideModCode(isServerSide) {
+  console.log(isServerSide);
+}
+myServerSideModCode(); //logs undefined
+ModAPI.dedicatedServer.appendCode(myServerSideModCode); //when server starts, will log `true`
+```
+
+Once serverside, you can only access server side events, like `serverstart` or `tick`. [See serverside events](events.md#server-side-events)
