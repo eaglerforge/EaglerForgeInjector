@@ -890,12 +890,31 @@ globalThis.modapi_postinit = "(" + (() => {
     }
 
     ModAPI.events.newEvent("bootstrap", "server");
+    ModAPI.events.newEvent("prebootstrap", "server");
     const originalBootstrap = ModAPI.hooks.methods[ModAPI.util.getMethodFromPackage("net.minecraft.init.Bootstrap", "register")];
     ModAPI.hooks.methods[ModAPI.util.getMethodFromPackage("net.minecraft.init.Bootstrap", "register")] = function (...args) {
+        ModAPI.events.callEvent("prebootstrap", {});
         var x = originalBootstrap.apply(this, args);
         ModAPI.util.bootstrap();
         ModAPI.events.callEvent("bootstrap", {});
         console.log("[ModAPI] Hooked into bootstrap. .blocks, .items, .materials and .enchantments are now accessible.");
+        return x;
+    }
+
+
+    ModAPI.events.newEvent("registeritems", "server");
+    const originalItemRegister = ModAPI.hooks.methods[ModAPI.util.getMethodFromPackage("net.minecraft.item.Item", "registerItems")];
+    ModAPI.hooks.methods[ModAPI.util.getMethodFromPackage("net.minecraft.item.Item", "registerItems")] = function (...args) {
+        var x = originalItemRegister.apply(this, args);
+        ModAPI.events.callEvent("registeritems", {});
+        return x;
+    }
+
+    ModAPI.events.newEvent("registerblocks", "server");
+    const originalBlockRegister = ModAPI.hooks.methods[ModAPI.util.getMethodFromPackage("net.minecraft.block.Block", "registerBlocks")];
+    ModAPI.hooks.methods[ModAPI.util.getMethodFromPackage("net.minecraft.block.Block")] = function (...args) {
+        var x = originalBlockRegister.apply(this, args);
+        ModAPI.events.callEvent("registerblocks", {});
         return x;
     }
 

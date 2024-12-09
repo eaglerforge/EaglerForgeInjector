@@ -68,7 +68,7 @@
             var pistol_item = (new nmi_ItemPistol()).$setUnlocalizedName(
                 ModAPI.util.str("pistol")
             );
-            itemClass.staticMethods.registerItem0.method(ModAPI.keygen.item("pistol"), ModAPI.util.str("pistol"), pistol_item);
+            itemClass.staticMethods.registerItem.method(ModAPI.keygen.item("pistol"), ModAPI.util.str("pistol"), pistol_item);
             ModAPI.items["pistol"] = pistol_item;
             
             return pistol_item;
