@@ -6,6 +6,7 @@
     ModAPI.meta.description("Requires AsyncSink.");
 
     function PistolItem() {
+        var DamageSourceClass = ModAPI.reflect.getClassByName("DamageSource");
         var creativeMiscTab = ModAPI.reflect.getClassById("net.minecraft.creativetab.CreativeTabs").staticVariables.tabMisc;
         var itemClass = ModAPI.reflect.getClassById("net.minecraft.item.Item");
         var itemSuper = ModAPI.reflect.getSuper(itemClass, (x) => x.length === 1);
@@ -53,7 +54,11 @@
         }
         ModAPI.reflect.prototypeStack(itemClass, nmi_ItemPistol);
         nmi_ItemPistol.prototype.$onItemRightClick = function ($itemstack, $world, $player) {
-            var cactus = ModAPI.reflect.getClassByName("DamageSource").staticVariables.cactus;
+            DamageSourceClass.staticMethods.$callClinit.method();
+            //Noticed that the gun only worked after an entity in the world takes damage XD
+            //TeaVM is very optimised. Using $callClinit tells it to hurry up pretty much lol
+            
+            var cactus = DamageSourceClassstaticVariables.cactus;
             var world = ModAPI.util.wrap($world);
             var entityplayer = ModAPI.util.wrap($player);
             var shotentity = entityRayCast(entityplayer, world, 12.0)

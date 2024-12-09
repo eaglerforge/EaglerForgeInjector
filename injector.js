@@ -18,24 +18,17 @@ function entriesToStaticVariableProxy(entries, prefix) {
     var getComponents = "";
     entries.forEach((entry) => {
         getComponents += `
-             case \`${entry.name}\`:
-                 return ${entry.variable};
-                 break;`;
+             case \`${entry.name}\`: return ${entry.variable};`;
     });
     getComponents += `
-            default:
-                return Reflect.get(a,b,c);`
+            default: return Reflect.get(a,b,c);`
 
     var setComponents = "";
     entries.forEach((entry) => {
         setComponents += `
-            case \`${entry.name}\`:
-                ${entry.variable} = c;
-                break;`;
+            case \`${entry.name}\`: ${entry.variable} = c; break;`;
     });
-    setComponents += `
-            default:
-                a[b]=c;`
+    setComponents += ` default: a[b]=c;`
     /*/
 
         ModAPI.hooks._rippedStaticIndexer[\`${prefix.replace(
@@ -196,8 +189,7 @@ var main;(function(){`
         (match) => {
             if (
                 match.includes("__init_") ||
-                match.includes("__clinit_") ||
-                match.includes("_$callClinit")
+                match.includes("__clinit_")
             ) {
                 return match;
             }
@@ -212,13 +204,14 @@ var main;(function(){`
             ModAPI.hooks.methods[\`${fullName}\`]=` +
                 match.replace(fullName + "(", "(")
             );
-            return match;
         }
     );
     var staticVariables = [
-        ...patchedFile.matchAll(/var \S+?_\S+?_\S+? = null;/gm),
+        ...patchedFile.matchAll(/var \S+?_\S+?_\S+? = /gm),
     ].flatMap((x) => {
         return x[0];
+    }).filter(x => {
+        return (!x.includes("$_clinit_$")) && (!x.includes("$lambda$"))
     });
     patchedFile = patchedFile.replaceAll(
         /var \S+?_\S+? = \$rt_classWithoutFields\(\S*?\);/gm,
@@ -232,7 +225,7 @@ var main;(function(){`
                 if (entry.startsWith(prefix)) {
                     var variableName = entry
                         .replace("var ", "")
-                        .replace(" = null;", "");
+                        .replace(" = ", "");
                     var segments = variableName.split("_");
                     segments.splice(0, 2);
                     var name = segments.join("_");
@@ -262,7 +255,7 @@ var main;(function(){`
                 if (entry.startsWith(prefix)) {
                     var variableName = entry
                         .replace("var ", "")
-                        .replace(" = null;", "");
+                        .replace(" = ", "");
                     var segments = variableName.split("_");
                     segments.splice(0, 2);
                     var name = segments.join("_");
