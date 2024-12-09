@@ -90,7 +90,7 @@ globalThis.modapi_postinit = "(" + (() => {
             return console.warn("The dedicated server has already launched, ModAPI.dedicatedServer.appendCode() is useless.");
         }
         if (typeof code === "function") {
-            ModAPI.dedicatedServer._data.push("(" + code.toString() + ")()");
+            ModAPI.dedicatedServer._data.push("(" + code.toString() + ")(true)");
         } else if (typeof code === "string") {
             ModAPI.dedicatedServer._data.push(code);
         }

@@ -6,6 +6,7 @@
     ModAPI.meta.description("Requires AsyncSink.");
 
     function PistolItem() {
+        var recoilSpeed = 0; //recoil controller
         var DamageSourceClass = ModAPI.reflect.getClassByName("DamageSource");
         var creativeMiscTab = ModAPI.reflect.getClassById("net.minecraft.creativetab.CreativeTabs").staticVariables.tabMisc;
         var itemClass = ModAPI.reflect.getClassById("net.minecraft.item.Item");
@@ -14,15 +15,22 @@
             itemSuper(this); //Use super function to get block properties on this class.
             this.$setCreativeTab(creativeMiscTab);
         }
-        function entityRayCast(player, world, range){
+
+        ModAPI.addEventListener("update", ()=>{ //recoil update loop (client)
+            ModAPI.player.rotationPitch -= recoilSpeed;
+            recoilSpeed *= 0.7;
+        });
+
+        function entityRayCast(player, world, range) {
+            const HEADSHOT_MAX_DISTANCE_FROM_HEAD = 0.72;
             var eyePosition = player.getPositionEyes(0.0);
-            var lookVector = player.getLook(0.0);
-            var targetPosition = eyePosition.addVector(lookVector.xCoord * range, lookVector.yCoord * range, lookVector.zCoord * range);
+            var targetPosition = player.rayTrace(range, 0).hitVec;
             var entities = world.getEntitiesWithinAABBExcludingEntity(
                 player.getRef(),
                 player.getEntityBoundingBox().expand(range, range, range).getRef()
             ).getCorrective().array;
             var closestEntity = null;
+            var isHeadshot = false;
             var closestDistance = range;
 
             // Iterate through all entities to find the one the player is looking at
@@ -41,13 +49,14 @@
                     if (distance < closestDistance) {
                         closestDistance = distance;
                         closestEntity = entity;
+                        isHeadshot = entity.getPositionEyes(0.0).distanceTo(intercept.hitVec.getRef()) < HEADSHOT_MAX_DISTANCE_FROM_HEAD;
                     }
                 }
             }
 
             var rayTraceResult = closestEntity;
             if (rayTraceResult != null){
-                return rayTraceResult;
+                return {entity: rayTraceResult, headshot: isHeadshot};
             } else{
                 return null;
             }
@@ -57,14 +66,22 @@
             DamageSourceClass.staticMethods.$callClinit.method();
             //Noticed that the gun only worked after an entity in the world takes damage XD
             //TeaVM is very optimised. Using $callClinit tells it to hurry up pretty much lol
-            
-            var cactus = DamageSourceClassstaticVariables.cactus;
+            var cactus = DamageSourceClass.staticVariables.cactus;
             var world = ModAPI.util.wrap($world);
             var entityplayer = ModAPI.util.wrap($player);
-            var shotentity = entityRayCast(entityplayer, world, 12.0)
-            if (shotentity != null){
-                shotentity.attackEntityFrom(cactus, 10);
-                world.playSoundAtEntity(entityplayer.getRef(), ModAPI.util.str("tile.piston.out"), 1.0, 1.8);
+            var shotentitydata = entityRayCast(entityplayer, world, 16.0);
+            if (shotentitydata != null){
+                if (world.isRemote) {
+                    recoilSpeed += 4;
+                } else {
+                    shotentitydata.entity.attackEntityFrom(cactus, 10 + (16 * shotentitydata.headshot));
+                    if (shotentitydata.headshot) {
+                        console.log("H E A D S H O T");
+                    }
+                    world.playSoundAtEntity(entityplayer.getRef(), ModAPI.util.str("tile.piston.out"), 1.0, 1.8);
+                }
+            } else if (!world.isRemote) {
+                world.playSoundAtEntity(entityplayer.getRef(), ModAPI.util.str("random.click"), 1.0, 1.8);
             }
             return $itemstack;
         }
@@ -72,7 +89,7 @@
         function internal_reg() {
             var pistol_item = (new nmi_ItemPistol()).$setUnlocalizedName(
                 ModAPI.util.str("pistol")
-            );
+            ).$setMaxStackSize(1);
             itemClass.staticMethods.registerItem.method(ModAPI.keygen.item("pistol"), ModAPI.util.str("pistol"), pistol_item);
             ModAPI.items["pistol"] = pistol_item;
             

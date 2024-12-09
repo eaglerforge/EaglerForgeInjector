@@ -3,7 +3,13 @@
     ModAPI.meta.description("Adds a crafting recipe to create diamond blocks from dirt.");
 
     async function addDiamondRecipe() {
-        await new Promise((res,rej)=>{var x = setInterval(()=>{if(ModAPI.blocks){clearInterval(x);res();}}, 100);})
+        await new Promise((res, rej) => {
+            if (ModAPI.blocks) {
+                res()
+            } else {
+                ModAPI.addEventListener("bootstrap", res);
+            }
+        });
         var ObjectClass = ModAPI.reflect.getClassById("java.lang.Object").class;
         function ToChar(char) {
             return ModAPI.reflect.getClassById("java.lang.Character").staticMethods.valueOf.method(char[0].charCodeAt(0));
