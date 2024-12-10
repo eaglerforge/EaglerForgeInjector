@@ -1,7 +1,7 @@
 (() => {
-    ModAPI.title("Timescale Command");
-    ModAPI.description("/timescale 0.5 to halve the speed of time");
-    ModAPI.credits("By ZXMushroom63");
+    ModAPI.meta.title("Timescale Command");
+    ModAPI.meta.description("/timescale 0.5 to halve the speed of time");
+    ModAPI.meta.credits("By ZXMushroom63");
     PluginAPI.addEventListener("sendchatmessage", (event) => {
         if (event.message.toLowerCase().startsWith("/timescale")) {
             var speed = parseFloat(event.message.split(" ")[1]);
