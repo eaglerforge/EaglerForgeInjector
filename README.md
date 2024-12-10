@@ -12,3 +12,6 @@ Go to https://eaglerforge.github.io/EaglerForgeInjector/ and upload an unminifie
 
 #### Portable Offline
 Download this repository as a .zip, and extract it. Open index.html with your preferred browser (use `ctrl` + `O` on a new tab) and upload an unminified, unobfuscated, unsigned EaglercraftX offline download.
+
+## Discord server
+[https://discord.gg/rbxN7kby5W](https://discord.gg/rbxN7kby5W)
