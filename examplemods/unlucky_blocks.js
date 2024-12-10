@@ -38,7 +38,7 @@
             var blockpos = ModAPI.util.wrap($blockpos);
             if (Math.random() < 1) { //was gonna add random events but couldn't be bothered. Enjoy exploding!
                 world.newExplosion(null, blockpos.getX() + 0.5, blockpos.getY() + 0.5,
-					blockpos.getZ() + 0.5, 9, 1, 0);
+					blockpos.getZ() + 0.5, 9, 1, 1);
             }
             return breakBlockMethod(this, $world, $blockpos, $blockstate);
         }
