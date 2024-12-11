@@ -6,6 +6,7 @@
         if (event.message.toLowerCase().startsWith("/timescale")) {
             var speed = parseFloat(event.message.split(" ")[1]);
             if (!speed) {
+                speed = 1;
                 PluginAPI.mc.timer.timerSpeed = 1;
             } else {
                 if (speed < 1) {
