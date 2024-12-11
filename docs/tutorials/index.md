@@ -35,4 +35,4 @@ Prerequisites:
 Tutorials:
 - [Custom Blocks](custom_block.md)
 - [Custom Items](custom_item.md)
-- [Timescale Command](comingsoon.md)
+- [Timescale Command](timescale.md)
