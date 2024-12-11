@@ -1,6 +1,6 @@
-## Custom Blocks Tutorial With ModAPI
+## Custom Block Tutorial With ModAPI
 This tutorial will show you how to make custom blocks with ModAPI. It will use my AsyncSink library to load the resources for the block.
-This tutorial will be making a block with the durability of dirt that explodes when broken.
+We'll be making a block with the durability of dirt that explodes when broken.
 
 As always, we'll start with the default boilerplate starter code:
 ```javascript
@@ -8,7 +8,7 @@ As always, we'll start with the default boilerplate starter code:
     ModAPI.meta.title("Custom Block Demo");
     ModAPI.meta.version("v1.0");
     ModAPI.meta.description("Adds a block that blows up when used.");
-    ModAPI.meta.credits("By ZXMushroom63");
+    ModAPI.meta.credits("By <author_name>");
 })();
 ```
 Let's get our blocks texture done ahead of time.
@@ -20,7 +20,7 @@ Store this at the beginning of the function using a constant. Also use that cons
     ModAPI.meta.title("Custom Block Demo");
     ModAPI.meta.version("v1.0");
     ModAPI.meta.description("Adds a block that blows up when used.");
-    ModAPI.meta.credits("By ZXMushroom63");
+    ModAPI.meta.credits("By <author_name>");
 
     ModAPI.meta.icon(texture);
 })();
@@ -188,7 +188,7 @@ When it's loaded, we'll:
         });
         AsyncSink.L10N.set("tile.custom_block.name", "My Custom Block"); //Set the name of the block
 
-        //Required boilerplate for block and item models.
+        //Make an in-memory resource pack for the block. This is standard between, EaglerForge, Forge, Fabric, and NeoForge (pretty much any modding API)
         AsyncSink.setFile("resourcepacks/AsyncSinkLib/assets/minecraft/models/block/custom_block.json", JSON.stringify(
             {
                 "parent": "block/cube_all",

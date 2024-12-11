@@ -3,7 +3,7 @@
     ModAPI.meta.title("Custom Block Demo");
     ModAPI.meta.version("v1.0");
     ModAPI.meta.description("Adds a block that blows up when used.");
-    ModAPI.meta.credits("By ZXMushroom63");
+    ModAPI.meta.credits("By <author_name>");
 
     ModAPI.meta.icon(texture);
 

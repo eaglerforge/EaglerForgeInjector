@@ -34,7 +34,7 @@
         var recipeInternal = [];
         Object.keys(recipeLegend).forEach((key) => {
             recipeInternal.push(ToChar(key));
-            var ingredient = ModAPI.blocks[recipeLegend[key].id].getRef();
+            var ingredient = (recipeLegend[key].type === "block" ? ModAPI.blocks : ModAPI.items)[recipeLegend[key].id].getRef();
             recipeInternal.push(ingredient);
         });
 

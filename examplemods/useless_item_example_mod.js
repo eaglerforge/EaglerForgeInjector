@@ -1,7 +1,7 @@
 // This is an example mod on how to register an item.
 (()=>{
     const itemTexture = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAKZJREFUOE9j/P//PxMDBIBoEP6HREOl4PLIciA2AyPIgMcM//7KgvWSDJjBBpx9/+YvJzc3Sbq12DhB6sEGsJ19/+YnmQawYhigzc7FcPXnN4KugbqAHWQAy9n3b34T4wJkw6EGYLqAoNVQBWS5ANlwZBfAvUCs/0EGkW0AzBKqGoCSDgh5A80F2KMRpAgfAKUT6kcjsfEPUycmKMQgy8AETkgUZWcAS3CPIf4oSPsAAAAASUVORK5CYII=";
-    //this texture is really baad, so the item appears 2d in game.
+    //this texture is REALLY bad, so the item appears 2d in game. (it uses partially transparent pixels around the edges in some spots ;-;)
     ModAPI.meta.title("Adding items demo.");
     ModAPI.meta.version("v1.0");
     ModAPI.meta.icon(itemTexture);
@@ -11,7 +11,7 @@
         var creativeMiscTab = ModAPI.reflect.getClassById("net.minecraft.creativetab.CreativeTabs").staticVariables.tabMisc;
         var itemClass = ModAPI.reflect.getClassById("net.minecraft.item.Item");
         var itemSuper = ModAPI.reflect.getSuper(itemClass, (x) => x.length === 1);
-        var nmi_ItemExample = function nmi_ItemExample() {
+        function nmi_ItemExample() {
             itemSuper(this); //Use super function to get block properties on this class.
             this.$setCreativeTab(creativeMiscTab);
         }

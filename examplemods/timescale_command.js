@@ -1,16 +1,20 @@
 (() => {
+    ModAPI.meta.title("Timescale Command");
+    ModAPI.meta.description("/timescale 0.5 to halve the speed of time");
+    ModAPI.meta.credits("By ZXMushroom63");
     PluginAPI.addEventListener("sendchatmessage", (event) => {
         if (event.message.toLowerCase().startsWith("/timescale")) {
             var speed = parseFloat(event.message.split(" ")[1]);
             if (!speed) {
-                PluginAPI.javaClient.$timer.$timerSpeed = 1;
+                speed = 1;
+                PluginAPI.mc.timer.timerSpeed = 1;
             } else {
                 if (speed < 1) {
                     speed = 1 / Math.round(1 / speed);
                 } else {
                     speed = Math.round(speed);
                 }
-                PluginAPI.javaClient.$timer.$timerSpeed = speed;
+                PluginAPI.mc.timer.timerSpeed = speed;
             }
             PluginAPI.displayToChat("[Timescale] Set world timescale to " + speed.toFixed(2) + ".");
         }
@@ -34,13 +38,13 @@
                     }
                 }
                 if (ModAPI.server) {
-                    ModAPI.server.currentTime = PluginAPI.hooks.methods.nms_MinecraftServer_getCurrentTimeMillis();
+                    ModAPI.server.currentTime = PluginAPI.hooks.methods[ModAPI.util.getMethodFromPackage("net.minecraft.server.MinecraftServer", "getCurrentTimeMillis")]();
                 }
                 event.preventDefault = true;
             }
         });
-        const original_getCurrentTime = ModAPI.hooks.methods.nms_MinecraftServer_getCurrentTimeMillis;
-        PluginAPI.hooks.methods.nms_MinecraftServer_getCurrentTimeMillis = function () {
+        const original_getCurrentTime = ModAPI.hooks.methods[ModAPI.util.getMethodFromPackage("net.minecraft.server.MinecraftServer", "getCurrentTimeMillis")];
+        PluginAPI.hooks.methods[ModAPI.util.getMethodFromPackage("net.minecraft.server.MinecraftServer", "getCurrentTimeMillis")] = function () {
             if (globalThis.timeScaleDividing) {
                 return original_getCurrentTime() / globalThis.timeScale;
             } else {
