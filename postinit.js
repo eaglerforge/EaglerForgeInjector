@@ -42,7 +42,7 @@ globalThis.modapi_postinit = "(" + (() => {
         if (!document.currentScript.hasAttribute("data-hash")) {
             return console.log("[ModAPIMeta] Script does not have a hashcode.");
         }
-        ModAPI.meta._titleMap[document.currentScript.getAttribute("data-hash")] = limitSize(title, 16);
+        ModAPI.meta._titleMap[document.currentScript.getAttribute("data-hash")] = limitSize(title, 36);
     }
     ModAPI.meta.icon = function (iconSrc) {
         if (!document.currentScript || document.currentScript.getAttribute("data-isMod") !== "true") {
@@ -60,7 +60,7 @@ globalThis.modapi_postinit = "(" + (() => {
         if (!document.currentScript.hasAttribute("data-hash")) {
             return console.log("[ModAPIMeta] Script does not have a hashcode.");
         }
-        ModAPI.meta._developerMap[document.currentScript.getAttribute("data-hash")] = limitSize(cd, 36);
+        ModAPI.meta._developerMap[document.currentScript.getAttribute("data-hash")] = limitSize(cd, 128);
     }
     ModAPI.meta.description = function (desc) {
         if (!document.currentScript || document.currentScript.getAttribute("data-isMod") !== "true") {
@@ -78,7 +78,7 @@ globalThis.modapi_postinit = "(" + (() => {
         if (!document.currentScript.hasAttribute("data-hash")) {
             return console.log("[ModAPIMeta] Script does not have a hashcode.");
         }
-        ModAPI.meta._versionMap[document.currentScript.getAttribute("data-hash")] = limitSize(ver, 6);
+        ModAPI.meta._versionMap[document.currentScript.getAttribute("data-hash")] = limitSize(ver, 7);
     }
     ModAPI.reflect ||= {};
     ModAPI.server = ModAPI.serverInstance = null;
@@ -471,7 +471,7 @@ globalThis.modapi_postinit = "(" + (() => {
                 }
                 ModAPI.events.listeners[name].push(callback);
             }
-            console.log("[ModAPI] Added new library listener.");
+            console.log("[ModAPI] Added new library listener: " + name);
             return;
         }
         if (!callback || typeof callback !== "function") {
@@ -482,7 +482,7 @@ globalThis.modapi_postinit = "(" + (() => {
                 ModAPI.events.listeners[name] = [];
             }
             ModAPI.events.listeners[name].push(callback);
-            console.log("[ModAPI] Added new event listener.");
+            console.log("[ModAPI] Added new event listener: " + name);
         } else {
             throw new Error("[ModAPI] This event does not exist!");
         }
