@@ -92,7 +92,7 @@
                 if (!data[name]) {
                     data[name] = {};
                 }
-                data[name][waypointId] = [pos.x,pos.y,pos.z];
+                data[name][waypointId] = [pos.x,pos.y,pos.z,e.sender.dimension];
                 saveData();
                 e.sender.addChatMessage(ModAPI.reflect.getClassById("net.minecraft.util.ChatComponentText").constructors[0](ModAPI.util.str("Set waypoint "+waypointId+".")));
             }
@@ -103,6 +103,10 @@
                 if (waypointId && Array.isArray(data?.[name]?.[waypointId])) {
 
                     // Wildly important! regular setPosition triggers minecraft's built in anti-cheat and teleports you back in the same tick.
+                    if (data?.[name]?.[waypointId]?.[3] && (data?.[name]?.[waypointId]?.[3] !== e.sender.dimension)) {
+                        e.sender.travelToDimension(data?.[name]?.[waypointId]?.[3]);
+                    }
+                    
                     e.sender.setPositionAndUpdate(...data?.[name]?.[waypointId]);
 
                     e.sender.addChatMessage(ModAPI.reflect.getClassById("net.minecraft.util.ChatComponentText").constructors[0](ModAPI.util.str("Teleported to waypoint " + waypointId + ".")));
