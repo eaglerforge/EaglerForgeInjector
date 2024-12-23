@@ -63,7 +63,11 @@ globalThis.modapi_modloader = "(" + (() => {
 
     globalThis.addFileMod = async function addFileMod(mod, textContents) {
         const mods = await getMods();
-        mods.push(mod);
+        if (mods.includes(mod)) {
+            await removeMod(mods.indexOf(mod));
+        } else {
+            mods.push(mod);
+        }
         await saveMods(mods);
 
         const db = await getDatabase();

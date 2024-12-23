@@ -265,7 +265,11 @@ globalThis.modapi_postinit = "(" + (() => {
                     "class": item || null,
                     "hasMeta": !!item,
                     "instanceOf": function (object) {
-                        return ModAPI.hooks._teavm.$rt_isInstance(object, item || null);
+                        try {
+                            return ModAPI.hooks._teavm.$rt_isInstance(object, item || null);
+                        } catch {
+                            return false;
+                        }
                     },
                     "compiledName": compiledName
                 }
