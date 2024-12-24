@@ -1,4 +1,4 @@
-globalThis.ModAPIVersion = "v2.3.3";
+globalThis.ModAPIVersion = "v2.3.4";
 globalThis.modapi_postinit = "(" + (() => {
     //EaglerForge post initialization code.
     //This script cannot contain backticks, escape characters, or backslashes in order to inject into the dedicated server code.
@@ -207,7 +207,17 @@ globalThis.modapi_postinit = "(" + (() => {
         }
         return ModAPI.hooks._teavm.$rt_createDoubleArray(size);
     }
-    
+
+    //Proxy to make sure static variables are initialized before access.
+    function makeClinitProxy(staticVariables, clinit) {
+        return new Proxy(staticVariables, {
+            get: function (a, b, c) {
+                clinit();
+                return Reflect.get(a, b, c);
+            }
+        });
+    }
+
     ModAPI.hooks.regenerateClassMap = function () {
         ModAPI.hooks._rippedConstructorKeys = Object.keys(ModAPI.hooks._rippedConstructors);
         ModAPI.hooks._rippedInternalConstructorKeys = Object.keys(ModAPI.hooks._rippedInternalConstructors);
@@ -233,7 +243,7 @@ globalThis.modapi_postinit = "(" + (() => {
                 }
             });
         });
-        
+
 
         ModAPI.hooks._rippedConstructorKeys.forEach(constructor => {
             if (typeof constructor === "string" && constructor.length > 0) {
@@ -281,9 +291,6 @@ globalThis.modapi_postinit = "(" + (() => {
                 ModAPI.hooks._classMap[compiledName].superclass = null;
                 ModAPI.hooks._classMap[compiledName].superclassName = null;
             }
-            
-            ModAPI.hooks._classMap[compiledName].staticVariables = ModAPI.hooks._rippedStaticProperties[compiledName];
-            ModAPI.hooks._classMap[compiledName].staticVariableNames = Object.keys(ModAPI.hooks._classMap[compiledName].staticVariables || {});
 
             if (item?.["$$constructor$$"]) {
                 //Class does not have any hand written constructors
@@ -324,6 +331,9 @@ globalThis.modapi_postinit = "(" + (() => {
                     }
                 }
             });
+            ModAPI.hooks._classMap[compiledName].init = ModAPI.hooks._classMap[compiledName].staticMethods?.$callClinit?.method || (()=>{});
+            ModAPI.hooks._classMap[compiledName].staticVariables = makeClinitProxy(ModAPI.hooks._rippedStaticProperties[compiledName] || {}, ModAPI.hooks._classMap[compiledName].init);
+            ModAPI.hooks._classMap[compiledName].staticVariableNames = Object.keys(ModAPI.hooks._classMap[compiledName].staticVariables);
         });
         ModAPI.reflect.classes = Object.values(ModAPI.hooks._classMap);
         console.log("[ModAPI] Regenerated hook classmap.");
@@ -340,7 +350,7 @@ globalThis.modapi_postinit = "(" + (() => {
 
     //Magical function for making a subclass with a custom constructor that you can easily use super(...) on.
     ModAPI.reflect.getSuper = function getSuper(reflectClass, filter) {
-        filter ||= ()=>true;
+        filter ||= () => true;
         var initialiser = reflectClass.internalConstructors.find(filter);
         return function superFunction(thisArg, ...extra_args) {
             reflectClass.class.call(thisArg);
@@ -981,7 +991,7 @@ globalThis.modapi_postinit = "(" + (() => {
         }
         return hash;
     }
-    
+
 
     ModAPI.keygen = {};
     var registryNamespaceMethod = ModAPI.hooks.methods[ModAPI.util.getMethodFromPackage("net.minecraft.util.RegistryNamespaced", "register")];

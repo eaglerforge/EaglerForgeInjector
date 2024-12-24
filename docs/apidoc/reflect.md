@@ -59,6 +59,8 @@ Each `ReflectClass` has the following methods:
 
 - `instanceOf(object: Object)`
   - Checks if the `object` is an instance of the class.
+- `init()`
+  - Initializes static variables. Not needed, as static variables already prepare themselves before being accessed, this is mostly used for debugging.
 
 ### ReflectMethod Definition
 
