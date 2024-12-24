@@ -331,8 +331,9 @@ globalThis.modapi_postinit = "(" + (() => {
                     }
                 }
             });
-            ModAPI.hooks._classMap[compiledName].init = ModAPI.hooks._classMap[compiledName].staticMethods?.$callClinit?.method || (()=>{});
-            ModAPI.hooks._classMap[compiledName].staticVariables = makeClinitProxy(ModAPI.hooks._rippedStaticProperties[compiledName] || {}, ModAPI.hooks._classMap[compiledName].init);
+            ModAPI.hooks._classMap[compiledName].staticVariables = makeClinitProxy(ModAPI.hooks._rippedStaticProperties[compiledName] || {}, (()=>{
+                (ModAPI.hooks._rippedStaticProperties[compiledName].$callClinit ?? (()=>{}))();
+            }));
             ModAPI.hooks._classMap[compiledName].staticVariableNames = Object.keys(ModAPI.hooks._classMap[compiledName].staticVariables);
         });
         ModAPI.reflect.classes = Object.values(ModAPI.hooks._classMap);

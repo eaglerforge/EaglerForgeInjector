@@ -1,5 +1,4 @@
 globalThis.doEaglerforge = true;
-globalThis.optimizePi = true;
 function wait(ms) {
     return new Promise((resolve, reject) => {
         setTimeout(() => { resolve(); }, ms);
@@ -8,12 +7,19 @@ function wait(ms) {
 function _status(x) {
     document.querySelector("#status").innerText = x;
 }
-function entriesToStaticVariableProxy(entries, prefix) {
+function entriesToStaticVariableProxy(entries, prefix, clinitList) {
+    prefix = prefix.replace(
+        "var ",
+        ""
+    );
     if (entries.length === 0) {
-        return `ModAPI.hooks._rippedStaticProperties[\`${prefix.replace(
-            "var ",
-            ""
-        )}\`]={};`;
+        return `ModAPI.hooks._rippedStaticProperties[\`${prefix}\`]={};`;
+    }
+    if (clinitList.includes(prefix + "_$callClinit")) {
+        entries.push({
+            name: "$callClinit",
+            variable: prefix + "_$callClinit"
+        });
     }
     var getComponents = "";
     entries.forEach((entry) => {
@@ -126,6 +132,10 @@ var main;(function(){`
 
     patchedFile = patchedFile.replaceAll("function TeaVMThread(", "globalThis.ModAPI.hooks.TeaVMThread = TeaVMThread;\nfunction TeaVMThread(");
 
+    _status("Getting clinit list...");
+    var clinitList = [...patchedFile.matchAll(/^[\t ]*function \S+?_\S+?_\$callClinit\(/gm)].map(x=>x[0].replaceAll("function ", "").replaceAll("(", "").trim());
+    console.log(clinitList);
+
     _status("Extracting constructors and methods...");
     await wait(50);
 
@@ -159,28 +169,6 @@ var main;(function(){`
         }
     );
     
-    if(globalThis.optimizePi){
-        patchedFile = patchedFile.replaceAll(
-            "3.1415927410125732 / 180.0",
-            "0.01745"
-        );
-
-        patchedFile = patchedFile.replaceAll(
-            "180.0 / 3.1415927410125732",
-            "57.2958"
-        );
-    
-        patchedFile = patchedFile.replaceAll(
-            "3.1415927410125732",
-            "3.14159"
-        );
-
-        patchedFile = patchedFile.replaceAll(
-            "0.01745329238474369",
-            "0.01745"
-        );
-    }
-    
     const extractInstanceMethodRegex =
         /^[\t ]*function \S+?_\S+?_\S+?\((\$this)?/gm; // /^[\t ]*function \S+?_\S+?_\S+?\(\$this/gm
     const extractInstanceMethodFullNameRegex = /function (\S*?)\(/gm; // /function (\S*?)\(\$this/gm
@@ -189,7 +177,8 @@ var main;(function(){`
         (match) => {
             if (
                 match.includes("__init_") ||
-                match.includes("__clinit_")
+                match.includes("__clinit_") ||
+                match.includes("_$callClinit")
             ) {
                 return match;
             }
@@ -236,7 +225,7 @@ var main;(function(){`
                 }
             });
 
-            var proxy = entriesToStaticVariableProxy(entries, prefix);
+            var proxy = entriesToStaticVariableProxy(entries, prefix, clinitList);
 
             return match + proxy;
         }
@@ -266,7 +255,7 @@ var main;(function(){`
                 }
             });
 
-            var proxy = entriesToStaticVariableProxy(entries, prefix);
+            var proxy = entriesToStaticVariableProxy(entries, prefix, clinitList);
 
             return proxy + "\n" + match;
         }
