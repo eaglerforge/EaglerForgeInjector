@@ -1,4 +1,4 @@
-globalThis.ModAPIVersion = "v2.3.3";
+globalThis.ModAPIVersion = "v2.3.4";
 globalThis.modapi_postinit = "(" + (() => {
     //EaglerForge post initialization code.
     //This script cannot contain backticks, escape characters, or backslashes in order to inject into the dedicated server code.
@@ -42,7 +42,7 @@ globalThis.modapi_postinit = "(" + (() => {
         if (!document.currentScript.hasAttribute("data-hash")) {
             return console.log("[ModAPIMeta] Script does not have a hashcode.");
         }
-        ModAPI.meta._titleMap[document.currentScript.getAttribute("data-hash")] = limitSize(title, 16);
+        ModAPI.meta._titleMap[document.currentScript.getAttribute("data-hash")] = limitSize(title, 36);
     }
     ModAPI.meta.icon = function (iconSrc) {
         if (!document.currentScript || document.currentScript.getAttribute("data-isMod") !== "true") {
@@ -60,7 +60,7 @@ globalThis.modapi_postinit = "(" + (() => {
         if (!document.currentScript.hasAttribute("data-hash")) {
             return console.log("[ModAPIMeta] Script does not have a hashcode.");
         }
-        ModAPI.meta._developerMap[document.currentScript.getAttribute("data-hash")] = limitSize(cd, 36);
+        ModAPI.meta._developerMap[document.currentScript.getAttribute("data-hash")] = limitSize(cd, 128);
     }
     ModAPI.meta.description = function (desc) {
         if (!document.currentScript || document.currentScript.getAttribute("data-isMod") !== "true") {
@@ -78,7 +78,7 @@ globalThis.modapi_postinit = "(" + (() => {
         if (!document.currentScript.hasAttribute("data-hash")) {
             return console.log("[ModAPIMeta] Script does not have a hashcode.");
         }
-        ModAPI.meta._versionMap[document.currentScript.getAttribute("data-hash")] = limitSize(ver, 6);
+        ModAPI.meta._versionMap[document.currentScript.getAttribute("data-hash")] = limitSize(ver, 7);
     }
     ModAPI.reflect ||= {};
     ModAPI.server = ModAPI.serverInstance = null;
@@ -207,7 +207,17 @@ globalThis.modapi_postinit = "(" + (() => {
         }
         return ModAPI.hooks._teavm.$rt_createDoubleArray(size);
     }
-    
+
+    //Proxy to make sure static variables are initialized before access.
+    function makeClinitProxy(staticVariables, clinit) {
+        return new Proxy(staticVariables, {
+            get: function (a, b, c) {
+                clinit();
+                return Reflect.get(a, b, c);
+            }
+        });
+    }
+
     ModAPI.hooks.regenerateClassMap = function () {
         ModAPI.hooks._rippedConstructorKeys = Object.keys(ModAPI.hooks._rippedConstructors);
         ModAPI.hooks._rippedInternalConstructorKeys = Object.keys(ModAPI.hooks._rippedInternalConstructors);
@@ -233,7 +243,7 @@ globalThis.modapi_postinit = "(" + (() => {
                 }
             });
         });
-        
+
 
         ModAPI.hooks._rippedConstructorKeys.forEach(constructor => {
             if (typeof constructor === "string" && constructor.length > 0) {
@@ -265,7 +275,11 @@ globalThis.modapi_postinit = "(" + (() => {
                     "class": item || null,
                     "hasMeta": !!item,
                     "instanceOf": function (object) {
-                        return ModAPI.hooks._teavm.$rt_isInstance(object, item || null);
+                        try {
+                            return ModAPI.hooks._teavm.$rt_isInstance(object, item || null);
+                        } catch {
+                            return false;
+                        }
                     },
                     "compiledName": compiledName
                 }
@@ -277,9 +291,6 @@ globalThis.modapi_postinit = "(" + (() => {
                 ModAPI.hooks._classMap[compiledName].superclass = null;
                 ModAPI.hooks._classMap[compiledName].superclassName = null;
             }
-            
-            ModAPI.hooks._classMap[compiledName].staticVariables = ModAPI.hooks._rippedStaticProperties[compiledName];
-            ModAPI.hooks._classMap[compiledName].staticVariableNames = Object.keys(ModAPI.hooks._classMap[compiledName].staticVariables || {});
 
             if (item?.["$$constructor$$"]) {
                 //Class does not have any hand written constructors
@@ -320,6 +331,10 @@ globalThis.modapi_postinit = "(" + (() => {
                     }
                 }
             });
+            ModAPI.hooks._classMap[compiledName].staticVariables = makeClinitProxy(ModAPI.hooks._rippedStaticProperties[compiledName] || {}, (()=>{
+                (ModAPI.hooks._rippedStaticProperties[compiledName].$callClinit ?? (()=>{}))();
+            }));
+            ModAPI.hooks._classMap[compiledName].staticVariableNames = Object.keys(ModAPI.hooks._classMap[compiledName].staticVariables);
         });
         ModAPI.reflect.classes = Object.values(ModAPI.hooks._classMap);
         console.log("[ModAPI] Regenerated hook classmap.");
@@ -336,7 +351,7 @@ globalThis.modapi_postinit = "(" + (() => {
 
     //Magical function for making a subclass with a custom constructor that you can easily use super(...) on.
     ModAPI.reflect.getSuper = function getSuper(reflectClass, filter) {
-        filter ||= ()=>true;
+        filter ||= () => true;
         var initialiser = reflectClass.internalConstructors.find(filter);
         return function superFunction(thisArg, ...extra_args) {
             reflectClass.class.call(thisArg);
@@ -471,7 +486,7 @@ globalThis.modapi_postinit = "(" + (() => {
                 }
                 ModAPI.events.listeners[name].push(callback);
             }
-            console.log("[ModAPI] Added new library listener.");
+            console.log("[ModAPI] Added new library listener: " + name);
             return;
         }
         if (!callback || typeof callback !== "function") {
@@ -482,7 +497,7 @@ globalThis.modapi_postinit = "(" + (() => {
                 ModAPI.events.listeners[name] = [];
             }
             ModAPI.events.listeners[name].push(callback);
-            console.log("[ModAPI] Added new event listener.");
+            console.log("[ModAPI] Added new event listener: " + name);
         } else {
             throw new Error("[ModAPI] This event does not exist!");
         }
@@ -977,7 +992,7 @@ globalThis.modapi_postinit = "(" + (() => {
         }
         return hash;
     }
-    
+
 
     ModAPI.keygen = {};
     var registryNamespaceMethod = ModAPI.hooks.methods[ModAPI.util.getMethodFromPackage("net.minecraft.util.RegistryNamespaced", "register")];
