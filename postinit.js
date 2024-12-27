@@ -1,4 +1,3 @@
-globalThis.ModAPIVersion = "v2.4";
 globalThis.modapi_postinit = "(" + (() => {
     //EaglerForge post initialization code.
     //This script cannot contain backticks, escape characters, or backslashes in order to inject into the dedicated server code.
@@ -1031,4 +1030,4 @@ globalThis.modapi_postinit = "(" + (() => {
         var values = [...ModAPI.reflect.getClassById("net.minecraft.block.Block").staticVariables.blockRegistry.$modapi_specmap.values()];
         return qhash(block, values);
     }
-}).toString().replace("__modapi_version_code__", ModAPIVersion) + ")();";
+}).toString() + ")();";
