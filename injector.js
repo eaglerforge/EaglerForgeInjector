@@ -1,4 +1,7 @@
+globalThis.ModAPIVersion = "v2.4";
 globalThis.doEaglerforge = true;
+document.querySelector("title").innerText = `EaglerForge Injector ${ModAPIVersion}`;
+document.querySelector("h1").innerText = `EaglerForge Injector ${ModAPIVersion}`;
 function wait(ms) {
     return new Promise((resolve, reject) => {
         setTimeout(() => { resolve(); }, ms);
@@ -292,7 +295,7 @@ var main;(function(){`
         ` id="game_frame">`,
         ` id="game_frame">
     \<script id="modapi_patchesreg_events"\>${PatchesRegistry.getEventInjectorCode()};\<\/script\>
-    \<script id="modapi_postinit"\>${globalThis.modapi_postinit}\<\/script\>
+    \<script id="modapi_postinit"\>${globalThis.modapi_postinit.replace("__modapi_version_code__", ModAPIVersion)}\<\/script\>
     \<script id="modapi_postinitasync"\>${globalThis.modapi_postinitasync}\<\/script\>
     \<script id="modapi_modloader"\>${globalThis.modapi_modloader}\<\/script\>
     \<script id="modapi_guikit"\>${globalThis.modapi_guikit}\<\/script\>

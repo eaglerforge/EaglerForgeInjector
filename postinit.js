@@ -1,4 +1,3 @@
-globalThis.ModAPIVersion = "v2.3.4";
 globalThis.modapi_postinit = "(" + (() => {
     //EaglerForge post initialization code.
     //This script cannot contain backticks, escape characters, or backslashes in order to inject into the dedicated server code.
@@ -33,6 +32,17 @@ globalThis.modapi_postinit = "(" + (() => {
             return x.substring(0, n) + "…";
         } else {
             return x;
+        }
+    }
+    function easyStaticMethod(classId, methodName, autoUnpack) {
+        var method = ModAPI.reflect.getClassById(classId).staticMethods[methodName].method;
+        return function easyImpl(...args) {
+            return method(...(autoUnpack ? args.map(x=>{
+                if ((typeof x === "object") && (x.isModProxy === true)) {
+                    return x.getRef();
+                }
+                return x;
+            }) : args))
         }
     }
     ModAPI.meta.title = function (title) {
@@ -121,6 +131,14 @@ globalThis.modapi_postinit = "(" + (() => {
         });
         return name;
     }
+
+    ModAPI.util.getIdFromItem = easyStaticMethod("net.minecraft.item.Item", "getIdFromItem", true);
+    ModAPI.util.getItemById = easyStaticMethod("net.minecraft.item.Item", "getItemById", false);
+    ModAPI.util.getItemFromBlock = easyStaticMethod("net.minecraft.item.Item", "getItemFromBlock", true);
+    ModAPI.util.getBlockById = easyStaticMethod("net.minecraft.block.Block", "getBlockById", false);
+    ModAPI.util.getBlockFromItem = easyStaticMethod("net.minecraft.block.Block", "getBlockFromItem", true);
+    ModAPI.util.getIdFromBlock = easyStaticMethod("net.minecraft.block.Block", "getIdFromBlock", true);
+
     ModAPI.util.wrap = function (outputValue, target, corrective, disableFunctions) {
         target ||= {};
         corrective ||= false;
@@ -426,6 +444,9 @@ globalThis.modapi_postinit = "(" + (() => {
                         reloadDeprecationWarnings++;
                     }
                 }
+            }
+            if (prop === "isModProxy") {
+                return true
             }
 
             var outProp = "$" + prop;
@@ -1009,4 +1030,4 @@ globalThis.modapi_postinit = "(" + (() => {
         var values = [...ModAPI.reflect.getClassById("net.minecraft.block.Block").staticVariables.blockRegistry.$modapi_specmap.values()];
         return qhash(block, values);
     }
-}).toString().replace("__modapi_version_code__", ModAPIVersion) + ")();";
+}).toString() + ")();";
