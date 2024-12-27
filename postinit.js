@@ -132,13 +132,6 @@ globalThis.modapi_postinit = "(" + (() => {
         return name;
     }
 
-    ModAPI.util.getIdFromItem = easyStaticMethod("net.minecraft.item.Item", "getIdFromItem", true);
-    ModAPI.util.getItemById = easyStaticMethod("net.minecraft.item.Item", "getItemById", false);
-    ModAPI.util.getItemFromBlock = easyStaticMethod("net.minecraft.item.Item", "getItemFromBlock", true);
-    ModAPI.util.getBlockById = easyStaticMethod("net.minecraft.block.Block", "getBlockById", false);
-    ModAPI.util.getBlockFromItem = easyStaticMethod("net.minecraft.block.Block", "getBlockFromItem", true);
-    ModAPI.util.getIdFromBlock = easyStaticMethod("net.minecraft.block.Block", "getIdFromBlock", true);
-
     ModAPI.util.wrap = function (outputValue, target, corrective, disableFunctions) {
         target ||= {};
         corrective ||= false;
@@ -993,6 +986,13 @@ globalThis.modapi_postinit = "(" + (() => {
             ModAPI.events.newEvent(eventName, "patcher");
         });
     }
+
+    ModAPI.util.getIdFromItem = easyStaticMethod("net.minecraft.item.Item", "getIdFromItem", true);
+    ModAPI.util.getItemById = easyStaticMethod("net.minecraft.item.Item", "getItemById", false);
+    ModAPI.util.getItemFromBlock = easyStaticMethod("net.minecraft.item.Item", "getItemFromBlock", true);
+    ModAPI.util.getBlockById = easyStaticMethod("net.minecraft.block.Block", "getBlockById", false);
+    ModAPI.util.getBlockFromItem = easyStaticMethod("net.minecraft.block.Block", "getBlockFromItem", true);
+    ModAPI.util.getIdFromBlock = easyStaticMethod("net.minecraft.block.Block", "getIdFromBlock", true);
 
     function qhash(txt, arr) {
         var interval = 4095; //used to be 4095 - arr.length, but that increases incompatibility based on load order and otehr circumstances
