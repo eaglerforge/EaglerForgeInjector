@@ -58,3 +58,27 @@ Methods:
     console.log(multiply(2, 3));
     //Logs 6
   ```
+- `ModAPI.util.modifyFunction(fn: Function, patcherFunction: Function) : string`
+  - Returns a modifies version of a function, where the patcher function can be used to modify the contents of a function. Example:
+  ```javascript
+    function add(a, b) {
+      return a + b;
+    }
+    var multiply = ModAPI.util.modifyFunction(add, (code)=>{
+      return code.replaceAll("a + b", "a * b");
+    });
+    console.log(multiply(2, 3));
+    //Logs 6
+  ```
+- `ModAPI.util.getIdFromItem(item: Item) : number`
+  - Gets the ID of an item
+- `ModAPI.util.getItemById(id: number) : Item`
+  - Gets an item by it's ID
+- `ModAPI.util.getItemFromBlock(block: Block) : ItemBlock`
+  - Gets an item from a block.
+- `ModAPI.util.getIdFromBlock(block: Block) : number`
+  - Gets the ID of a block
+- `ModAPI.util.getBlockById(id: number) : Block`
+  - Gets a block by it's ID
+- `ModAPI.util.getBlockFromItem(item: Item) : Block`
+  - Gets a block from an ItemBlock instance.

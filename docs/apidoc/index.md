@@ -148,6 +148,10 @@ For example, take the method `setRenderViewEntity()` on `ModAPI.mcinstance`. Ins
 var entityIndex = 1; //Index of the entity to look for. 0 means first, which is usually the player, so 1 is usually a natural entity.
 ModAPI.mc.setRenderViewEntity(ModAPI.world.loadedEntityList.get(entityIndex).getRef());
 ```
+Note that an entry for `getRef` will not appear from `Object.keys` and similar web APIs.
+
+## Checking if an object is a proxy
+All proxied objects have a property `isModProxy` which is equal to true. Note that an entry for `isModProxy` will not appear from `Object.keys` and similar web APIs.
 
 ## Corrective Proxies
 By default, accessing a global like `ModAPI.player` will return a proxy to the original player that removes $ prefixes, as well as making instance methods callable. TeaVM has a quirk where it adds numerical suffixes to some properties. For example `ModAPI.player.inGround0` instead of `ModAPI.player.inGround`. As this is a large issue due to these suffixes changing for every eaglercraft update, you can now bypass this by obtaining a corrective version of `ModAPI.player`, using `ModAPI.player.getCorrective()`.
