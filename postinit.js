@@ -34,6 +34,10 @@ globalThis.modapi_postinit = "(" + (() => {
             return x;
         }
     }
+    function getEaglerConfigFlag(key) {
+        var searchParams = new URLSearchParams(location.search);
+        return (globalThis.eaglercraftXOpts?.[key] || searchParams.get(key)) ? true : false
+    }
     function easyStaticMethod(classId, methodName, autoUnpack) {
         var method = ModAPI.reflect.getClassById(classId).staticMethods[methodName].method;
         return function easyImpl(...args) {
@@ -797,26 +801,6 @@ globalThis.modapi_postinit = "(" + (() => {
         return sendChatMessage.apply(this, [$this, $message]);
     }
 
-    // ModAPI.events.newEvent("render", "client");
-    // const renderMethodName = ModAPI.util.getMethodFromPackage("net.minecraft.client.renderer.EntityRenderer", "renderWorldPass");
-    // const renderMethod = ModAPI.hooks.methods[renderMethodName];
-    // ModAPI.hooks.methods[renderMethodName] = function ($this, $int_pass, $float_partialTicks, $long_finishTimeNano) {
-    //     var shouldRenderHand = $this.$renderHand;
-    //     $this.$renderHand = 0; //Rendering the hand clears the depth bit, which we don't want to do.
-    //     var out = renderMethod.apply(this, [$this, $int_pass, $float_partialTicks, $long_finishTimeNano]);
-    //     var data = {
-    //         partialTicks: $float_partialTicks
-    //     }
-    //     ModAPI.events.callEvent("render", data);
-    //     if (shouldRenderHand) {
-    //         ModAPI.hooks.methods.nlevo_GlStateManager_clear(256); //GL_DEPTH_BUFFER_BIT, found in class RealOpenGLEnums
-    //         ModAPI.hooks.methods.nmcr_EntityRenderer_renderHand($this, $float_partialTicks, $int_pass);
-    //         ModAPI.hooks.methods.nmcr_EntityRenderer_renderWorldDirections($this, $float_partialTicks);
-    //     }
-    //     $this.$renderHand = shouldRenderHand;
-    //     return out;
-    // }
-
     const ScaledResolutionConstructor = ModAPI.reflect.getClassByName("ScaledResolution").constructors[0];
     ModAPI.events.newEvent("frame", "client");
     const frameMethodName = ModAPI.util.getMethodFromPackage("net.minecraft.client.Minecraft", "runTick");
@@ -970,7 +954,7 @@ globalThis.modapi_postinit = "(" + (() => {
         var x = originalCrashMethod.apply(this, args);
         return x;
     }
-    var inited = false;
+    var inited = getEaglerConfigFlag("noInitialModGui");
     const originalMainMethod = ModAPI.hooks.methods[ModAPI.util.getMethodFromPackage("net.lax1dude.eaglercraft.v1_8.internal.teavm.ClientMain", "_main")];
     ModAPI.hooks.methods[ModAPI.util.getMethodFromPackage("net.lax1dude.eaglercraft.v1_8.internal.teavm.ClientMain", "_main")] = function (...args) {
         if (!inited) {
