@@ -1,14 +1,14 @@
-## eaglercraftXopts and search parameters
+## eaglercraftXOpts and search parameters
 
 ### noInitialModGui
 - `processed.html?noInitialModGui=true`
-or inside eaglercraftXopts
+or inside eaglercraftXOpts
 
 disables the mod gui display on startup
 
 
 ### Adding mods
-Set eaglercraftXopts.Mods to an array of mod urls.
+Set eaglercraftXOpts.Mods to an array of mod urls.
 
 You can also use search parameters, eg:
 - `processed.html?mod=https://example.com/mod.js`
