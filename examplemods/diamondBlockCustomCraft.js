@@ -38,7 +38,7 @@
             recipeInternal.push(ingredient);
         });
 
-        var recipeContents = recipePattern.flatMap(row => ModAPI.util.str(row));
+        var recipeContents = recipePattern.map(row => ModAPI.util.str(row));
         var recipe = ModAPI.util.makeArray(ObjectClass, recipeContents.concat(recipeInternal));
 
         // Define the output item as diamond_block
