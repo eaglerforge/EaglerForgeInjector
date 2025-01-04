@@ -59,6 +59,9 @@ Each `ReflectClass` has the following methods:
 
 - `instanceOf(object: Object)`
   - Checks if the `object` is an instance of the class.
+- `getConstructorByArgs(...argumentNames) : Function`
+  - Finds a constructor that matches the specified argument names. Eg:
+  - `ModAPI.reflect.getClassByName("ItemStack").getConstructorByArgs("blockIn", "amount")`
 
 ### ReflectMethod Definition
 
