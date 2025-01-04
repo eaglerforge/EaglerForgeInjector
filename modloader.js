@@ -130,7 +130,7 @@ globalThis.modapi_modloader = "(" + (() => {
                         "[EaglerML] Adding mod to loadlist from eaglercraftXOpts: " +
                         modToAdd
                     );
-                    modsArr.push(modToAdd);
+                    modsArr.push("web@" + modToAdd);
                 });
             }
 

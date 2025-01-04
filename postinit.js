@@ -2,6 +2,9 @@ globalThis.modapi_postinit = "(" + (() => {
     //EaglerForge post initialization code.
     //This script cannot contain backticks, escape characters, or backslashes in order to inject into the dedicated server code.
     var startedModLoader = false;
+    var STRIP_COMMENTS = /((\/\/.*$)|(\/\*[\s\S]*?\*\/))/mg;
+    var ARGUMENT_NAMES = /([^\s,]+)/g;
+
 
     function startModLoader() {
         if (!startedModLoader) {
@@ -34,10 +37,40 @@ globalThis.modapi_postinit = "(" + (() => {
             return x;
         }
     }
+    function arraysAreSame(arr1, arr2) {
+        if (!arr1 || !arr2)
+            return false;
+        if(arr1 === arr2)
+            return true;
+        if (arr1.length !== arr2.length)
+            return false;
+
+        for (var i = 0, l=arr1.length; i < l; i++) {
+            if (arr1[i] instanceof Array && arr2[i] instanceof Array) {
+                if (!arr1[i].equals(arr2[i]))
+                    return false;       
+            }
+            else if (arr1[i] !== arr2[i]) {
+                return false;   
+            }           
+        }       
+        return true;
+    }
+    function getParamNames(func) {
+        var fnStr = func.toString().replace(STRIP_COMMENTS, '');
+        var result = fnStr.slice(fnStr.indexOf('(') + 1, fnStr.indexOf(')')).match(ARGUMENT_NAMES);
+        if (result === null)
+            result = [];
+        return result;
+    }
+    function getEaglerConfigFlag(key) {
+        var searchParams = new URLSearchParams(location.search);
+        return (globalThis.eaglercraftXOpts?.[key] || searchParams.get(key)) ? true : false
+    }
     function easyStaticMethod(classId, methodName, autoUnpack) {
         var method = ModAPI.reflect.getClassById(classId).staticMethods[methodName].method;
         return function easyImpl(...args) {
-            return method(...(autoUnpack ? args.map(x=>{
+            return method(...(autoUnpack ? args.map(x => {
                 if ((typeof x === "object") && (x.isModProxy === true)) {
                     return x.getRef();
                 }
@@ -273,6 +306,7 @@ globalThis.modapi_postinit = "(" + (() => {
             var classId = item?.$meta?.name || null;
 
             if (!ModAPI.hooks._classMap[compiledName]) {
+                var argumentCache = null;
                 ModAPI.hooks._classMap[compiledName] = {
                     "name": compiledName.split("_")[1],
                     "id": classId,
@@ -292,7 +326,21 @@ globalThis.modapi_postinit = "(" + (() => {
                             return false;
                         }
                     },
-                    "compiledName": compiledName
+                    "compiledName": compiledName,
+                    "getConstructorByArgs": function (...argNames) {
+                        if (!argumentCache) {
+                            argumentCache = [];
+                            this.internalConstructors.forEach(x=>{
+                                argumentCache.push(getParamNames(x).slice(1).map(y => y.substring(1)));
+                            });
+                        }
+                        for (let i = 0; i < argumentCache.length; i++) {
+                            const args = argumentCache[i];
+                            if (arraysAreSame(args, argNames)) {
+                                return this.constructors[i];
+                            }
+                        }
+                    }
                 }
             }
             if (typeof item?.$meta?.superclass === "function" && item?.$meta?.superclass?.$meta) {
@@ -342,8 +390,8 @@ globalThis.modapi_postinit = "(" + (() => {
                     }
                 }
             });
-            ModAPI.hooks._classMap[compiledName].staticVariables = makeClinitProxy(ModAPI.hooks._rippedStaticProperties[compiledName] || {}, (()=>{
-                (ModAPI.hooks._rippedStaticProperties[compiledName].$callClinit ?? (()=>{}))();
+            ModAPI.hooks._classMap[compiledName].staticVariables = makeClinitProxy(ModAPI.hooks._rippedStaticProperties[compiledName] || {}, (() => {
+                (ModAPI.hooks._rippedStaticProperties[compiledName].$callClinit ?? (() => { }))();
             }));
             ModAPI.hooks._classMap[compiledName].staticVariableNames = Object.keys(ModAPI.hooks._classMap[compiledName].staticVariables);
         });
@@ -370,18 +418,14 @@ globalThis.modapi_postinit = "(" + (() => {
         }
     }
 
-    //Iteratively load the superclasses' prototype methods.
+    //Make it extend the parent. Used to iteratively load the superclasses' prototype methods.
     ModAPI.reflect.prototypeStack = function prototypeStack(reflectClass, classFn) {
-        var stack = [reflectClass.class.prototype];
-        var currentSuperclass = reflectClass.superclass;
-        while (currentSuperclass) {
-            stack.push(currentSuperclass.prototype);
-            currentSuperclass = currentSuperclass?.$meta?.superclass;
-        }
-        stack.reverse();
-        stack.forEach(proto => {
-            Object.assign(classFn.prototype, proto);
-        });
+        classFn.prototype = Object.create(reflectClass.class.prototype);
+        classFn.prototype.constructor = classFn;
+        classFn.$meta = {
+            item: null,
+            supertypes: [reflectClass.class]
+        };
     }
 
     var reloadDeprecationWarnings = 0;
@@ -406,7 +450,7 @@ globalThis.modapi_postinit = "(" + (() => {
     }
     const TeaVM_to_Recursive_BaseData_ProxyConf = {
         ownKeys(target) {
-            return Reflect.ownKeys(target).flatMap(x => x.substring(1));
+            return Reflect.ownKeys(target).map(x => x.substring(1));
         },
         getOwnPropertyDescriptor(target, prop) {
             return Object.getOwnPropertyDescriptor(target, "$" + prop);
@@ -797,26 +841,6 @@ globalThis.modapi_postinit = "(" + (() => {
         return sendChatMessage.apply(this, [$this, $message]);
     }
 
-    // ModAPI.events.newEvent("render", "client");
-    // const renderMethodName = ModAPI.util.getMethodFromPackage("net.minecraft.client.renderer.EntityRenderer", "renderWorldPass");
-    // const renderMethod = ModAPI.hooks.methods[renderMethodName];
-    // ModAPI.hooks.methods[renderMethodName] = function ($this, $int_pass, $float_partialTicks, $long_finishTimeNano) {
-    //     var shouldRenderHand = $this.$renderHand;
-    //     $this.$renderHand = 0; //Rendering the hand clears the depth bit, which we don't want to do.
-    //     var out = renderMethod.apply(this, [$this, $int_pass, $float_partialTicks, $long_finishTimeNano]);
-    //     var data = {
-    //         partialTicks: $float_partialTicks
-    //     }
-    //     ModAPI.events.callEvent("render", data);
-    //     if (shouldRenderHand) {
-    //         ModAPI.hooks.methods.nlevo_GlStateManager_clear(256); //GL_DEPTH_BUFFER_BIT, found in class RealOpenGLEnums
-    //         ModAPI.hooks.methods.nmcr_EntityRenderer_renderHand($this, $float_partialTicks, $int_pass);
-    //         ModAPI.hooks.methods.nmcr_EntityRenderer_renderWorldDirections($this, $float_partialTicks);
-    //     }
-    //     $this.$renderHand = shouldRenderHand;
-    //     return out;
-    // }
-
     const ScaledResolutionConstructor = ModAPI.reflect.getClassByName("ScaledResolution").constructors[0];
     ModAPI.events.newEvent("frame", "client");
     const frameMethodName = ModAPI.util.getMethodFromPackage("net.minecraft.client.Minecraft", "runTick");
@@ -973,7 +997,7 @@ globalThis.modapi_postinit = "(" + (() => {
     var inited = false;
     const originalMainMethod = ModAPI.hooks.methods[ModAPI.util.getMethodFromPackage("net.lax1dude.eaglercraft.v1_8.internal.teavm.ClientMain", "_main")];
     ModAPI.hooks.methods[ModAPI.util.getMethodFromPackage("net.lax1dude.eaglercraft.v1_8.internal.teavm.ClientMain", "_main")] = function (...args) {
-        if (!inited) {
+        if ((!inited) && (!getEaglerConfigFlag("noInitialModGui"))) {
             inited = true;
             return modapi_displayModGui(globalThis.main);
         } else {

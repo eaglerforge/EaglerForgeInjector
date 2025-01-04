@@ -11,3 +11,5 @@ EaglerForge Injector is a tool that uses regular expressions to attach itself to
 [Modding API documentation](apidoc/index.md)
 
 [Compiling the client for EaglerForgeInjector](compiling_client.md)
+
+[eaglercraftXopts and search parameters](config.md)
