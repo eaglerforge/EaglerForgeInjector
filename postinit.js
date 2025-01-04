@@ -2,8 +2,9 @@ globalThis.modapi_postinit = "(" + (() => {
     //EaglerForge post initialization code.
     //This script cannot contain backticks, escape characters, or backslashes in order to inject into the dedicated server code.
     var startedModLoader = false;
-    var STRIP_COMMENTS = /((\/\/.*$)|(\/\*[\s\S]*?\*\/))/mg;
-    var ARGUMENT_NAMES = /([^\s,]+)/g;
+    var BACKSLASH = String.fromCharCode(92);
+    var STRIP_COMMENTS = new RegExp(atob("KChcL1wvLiokKXwoXC9cKltcc1xTXSo/XCpcLykp"), "gm");
+    var ARGUMENT_NAMES = new RegExp(atob("KFteXHMsXSsp"), "g");
 
 
     function startModLoader() {

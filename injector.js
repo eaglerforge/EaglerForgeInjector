@@ -298,7 +298,7 @@ var main;(function(){`
     \<script id="modapi_postinit"\>${globalThis.modapi_postinit.replace("__modapi_version_code__", ModAPIVersion)}\<\/script\>
     \<script id="modapi_modloader"\>${globalThis.modapi_modloader}\<\/script\>
     \<script id="modapi_guikit"\>${globalThis.modapi_guikit}\<\/script\>
-    \<script id="modapi_postinit_data"\>globalThis.modapi_postinit = \`${globalThis.modapi_postinit}\`;\<\/script\>
+    \<script id="modapi_postinit_data"\>globalThis.modapi_postinit = \`${globalThis.modapi_postinit.replaceAll("\\", "\\\\")}\`\<\/script\>
     \<script id="libserverside"\>{"._|_libserverside_|_."}\<\/script\>
     \<script id="__eaglerforgeinjector_installation_flag__"\>console.log("Thank you for using EaglerForge!");\<\/script\>`
     );
