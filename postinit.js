@@ -374,18 +374,14 @@ globalThis.modapi_postinit = "(" + (() => {
         }
     }
 
-    //Iteratively load the superclasses' prototype methods.
+    //Make it extend the parent. Used to iteratively load the superclasses' prototype methods.
     ModAPI.reflect.prototypeStack = function prototypeStack(reflectClass, classFn) {
-        var stack = [reflectClass.class.prototype];
-        var currentSuperclass = reflectClass.superclass;
-        while (currentSuperclass) {
-            stack.push(currentSuperclass.prototype);
-            currentSuperclass = currentSuperclass?.$meta?.superclass;
-        }
-        stack.reverse();
-        stack.forEach(proto => {
-            Object.assign(classFn.prototype, proto);
-        });
+        classFn.prototype = Object.create(reflectClass.class.prototype);
+        classFn.prototype.constructor = classFn;
+        classFn.$meta = {
+            item: null,
+            supertypes: [reflectClass.class]
+        };
     }
 
     var reloadDeprecationWarnings = 0;
