@@ -328,6 +328,9 @@ document.querySelector("#giveme").addEventListener("click", () => {
         var patchedFile = string;
 
         if (globalThis.doEaglerforge) {
+            if (string.includes("__eaglerforgeinjector_installation_flag__")) {
+                return alert("this file already has eaglerforge injected in it, you nonce.\nif you're trying to update, you need a vanilla file.");
+            }
             patchedFile = await processClasses(patchedFile);
         } else if (globalThis.doShronk) {
             patchedFile = await shronk(patchedFile);
