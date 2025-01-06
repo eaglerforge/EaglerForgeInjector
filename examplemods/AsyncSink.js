@@ -161,7 +161,7 @@ ModAPI.meta.credits("By ZXMushroom63");
         };
 
         const L10NCheck = ModAPI.util.getMethodFromPackage("net.minecraft.util.StatCollector", "canTranslate");
-        const originalL10NCheck = ModAPI.hooks.methods[L10NRead];
+        const originalL10NCheck = ModAPI.hooks.methods[L10NCheck];
         ModAPI.hooks.methods[L10NCheck] = function (...args) {
             if (AsyncSink.L10N.has(ModAPI.util.ustr(args[0]))) {
                 return 1;
