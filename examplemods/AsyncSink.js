@@ -264,7 +264,6 @@ ModAPI.meta.credits("By ZXMushroom63");
     const regItemsName = ModAPI.util.getMethodFromPackage("net.minecraft.client.renderer.entity.RenderItem", "registerItems");
     const oldRegisterItems = ModAPI.hooks.methods[regItemsName];
     ModAPI.hooks.methods[regItemsName] = function (...args) {
-        debugger;
         oldRegisterItems.apply(this, args);
         ModAPI.events.callEvent("lib:asyncsink:registeritems", ModAPI.util.wrap(args[0]));
     }
