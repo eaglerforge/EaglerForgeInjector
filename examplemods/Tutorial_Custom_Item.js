@@ -63,8 +63,8 @@
     var custom_item = CustomItem();
 
     ModAPI.addEventListener("lib:asyncsink", async () => {
-        ModAPI.addEventListener("custom:asyncsink_reloaded", ()=>{
-            ModAPI.mc.renderItem.registerItem(custom_item, ModAPI.util.str("custom_item"));
+        ModAPI.addEventListener("lib:asyncsink:registeritems", (renderItem)=>{
+            renderItem.registerItem(custom_item, ModAPI.util.str("custom_item"));
         });
         AsyncSink.L10N.set("item.custom_item.name", "Cool Custom Item");
         AsyncSink.setFile("resourcepacks/AsyncSinkLib/assets/minecraft/models/item/custom_item.json", JSON.stringify(

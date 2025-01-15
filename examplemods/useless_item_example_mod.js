@@ -41,8 +41,8 @@
     var example_item = ExampleItem();
 
     ModAPI.addEventListener("lib:asyncsink", async () => {
-        ModAPI.addEventListener("custom:asyncsink_reloaded", ()=>{
-            ModAPI.mc.renderItem.registerItem(example_item, ModAPI.util.str("exampleitem"));
+        ModAPI.addEventListener("lib:asyncsink:registeritems", (renderItem)=>{
+            renderItem.registerItem(example_item, ModAPI.util.str("exampleitem"));
         });
         AsyncSink.L10N.set("item.exampleitem.name", "Example Item");
         AsyncSink.setFile("resourcepacks/AsyncSinkLib/assets/minecraft/models/item/exampleitem.json", JSON.stringify(

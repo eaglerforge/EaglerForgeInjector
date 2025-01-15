@@ -86,8 +86,8 @@
     ModAPI.dedicatedServer.appendCode(UnluckyBlocks);
     var block_of_unluckiness = UnluckyBlocks();
     ModAPI.addEventListener("lib:asyncsink", async () => {
-        ModAPI.addEventListener("custom:asyncsink_reloaded", ()=>{
-            ModAPI.mc.renderItem.registerBlock(block_of_unluckiness, ModAPI.util.str("unluckiness"));
+        ModAPI.addEventListener("lib:asyncsink:registeritems", (renderItem)=>{
+            renderItem.registerItem(block_of_unluckiness, ModAPI.util.str("unluckiness"));
         });
         AsyncSink.L10N.set("tile.unluckiness.name", "Unlucky Block");
         AsyncSink.setFile("resourcepacks/AsyncSinkLib/assets/minecraft/models/block/unluckiness.json", JSON.stringify(
