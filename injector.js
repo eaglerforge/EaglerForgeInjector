@@ -1,4 +1,4 @@
-globalThis.ModAPIVersion = "v2.5.1";
+globalThis.ModAPIVersion = "v2.6";
 globalThis.doEaglerforge = true;
 document.querySelector("title").innerText = `EaglerForge Injector ${ModAPIVersion}`;
 document.querySelector("h1").innerText = `EaglerForge Injector ${ModAPIVersion}`;
@@ -328,6 +328,9 @@ document.querySelector("#giveme").addEventListener("click", () => {
         var patchedFile = string;
 
         if (globalThis.doEaglerforge) {
+            if (string.includes("__eaglerforgeinjector_installation_flag__")) {
+                return alert("this file already has eaglerforge injected in it, you nonce.\nif you're trying to update, you need a vanilla file.");
+            }
             patchedFile = await processClasses(patchedFile);
         } else if (globalThis.doShronk) {
             patchedFile = await shronk(patchedFile);

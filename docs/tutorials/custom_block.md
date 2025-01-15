@@ -183,8 +183,9 @@ When it's loaded, we'll:
     var custom_block = BlockRegistrationFunction(); //Get the registered block instance
 
     ModAPI.addEventListener("lib:asyncsink", async () => { //Add an asyncronous listener to AsyncSink loading.
-        ModAPI.addEventListener("custom:asyncsink_reloaded", ()=>{
-            ModAPI.mc.renderItem.registerBlock(custom_block, ModAPI.util.str("custom_block"));
+        ModAPI.addEventListener("lib:asyncsink:registeritems", (renderItem)=>{
+            //when asyncsink yells at us to register the custom block, register it
+            renderItem.registerItem(custom_block, ModAPI.util.str("custom_block"));
         });
         AsyncSink.L10N.set("tile.custom_block.name", "My Custom Block"); //Set the name of the block
 

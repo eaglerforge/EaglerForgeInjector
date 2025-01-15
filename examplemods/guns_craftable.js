@@ -151,8 +151,8 @@
     var pistol_item = PistolItem();
 
     ModAPI.addEventListener("lib:asyncsink", async () => {
-        ModAPI.addEventListener("custom:asyncsink_reloaded", ()=>{
-            ModAPI.mc.renderItem.registerItem(pistol_item, ModAPI.util.str("pistol"));
+        ModAPI.addEventListener("lib:asyncsink:registeritems", (renderItem)=>{
+            renderItem.registerItem(pistol_item, ModAPI.util.str("pistol"));
         });
         AsyncSink.L10N.set("item.pistol.name", "Pistol");
         AsyncSink.setFile("resourcepacks/AsyncSinkLib/assets/minecraft/models/item/pistol.json", JSON.stringify(

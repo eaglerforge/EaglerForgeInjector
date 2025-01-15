@@ -537,8 +537,8 @@ globalThis.modapi_postinit = "(" + (() => {
     ModAPI.events.listeners = { "event": [] };
     ModAPI.addEventListener = function addEventListener(name, callback) {
         if (name.startsWith("lib:")) {
-            if (ModAPI.events.lib_map[name]) {
-                callback({});
+            if (Object.keys(ModAPI.events.lib_map).includes(name)) {
+                callback(ModAPI.events.lib_map[name]);
             } else {
                 if (!Array.isArray(ModAPI.events.listeners[name])) {
                     ModAPI.events.listeners[name] = [];
@@ -596,10 +596,10 @@ globalThis.modapi_postinit = "(" + (() => {
         if (ModAPI.events.types.includes(name) && name.startsWith("lib:")) {
             if (Array.isArray(ModAPI.events.listeners[name])) {
                 ModAPI.events.listeners[name].forEach((func) => {
-                    func({});
+                    func(data);
                 });
             }
-            ModAPI.events.lib_map[name] = true;
+            ModAPI.events.lib_map[name] = data;
             return;
         }
         if (

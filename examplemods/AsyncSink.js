@@ -161,7 +161,7 @@ ModAPI.meta.credits("By ZXMushroom63");
         };
 
         const L10NCheck = ModAPI.util.getMethodFromPackage("net.minecraft.util.StatCollector", "canTranslate");
-        const originalL10NCheck = ModAPI.hooks.methods[L10NRead];
+        const originalL10NCheck = ModAPI.hooks.methods[L10NCheck];
         ModAPI.hooks.methods[L10NCheck] = function (...args) {
             if (AsyncSink.L10N.has(ModAPI.util.ustr(args[0]))) {
                 return 1;
@@ -260,4 +260,13 @@ ModAPI.meta.credits("By ZXMushroom63");
             });
         }
     });
+    ModAPI.events.newEvent("lib:asyncsink:registeritems");
+    const regItemsName = ModAPI.util.getMethodFromPackage("net.minecraft.client.renderer.entity.RenderItem", "registerItems");
+    const oldRegisterItems = ModAPI.hooks.methods[regItemsName];
+    ModAPI.hooks.methods[regItemsName] = function (...args) {
+        debugger;
+        oldRegisterItems.apply(this, args);
+        ModAPI.events.callEvent("lib:asyncsink:registeritems", ModAPI.util.wrap(args[0]));
+    }
+
 })();
