@@ -16,11 +16,11 @@
         if (e.message.toLowerCase() === ".afk") {
             if (active === null) {
                 queueJump();
-                ModAPI.displayToChat("Deactivated anti-afk mod");
+                ModAPI.displayToChat("Activated anti-afk mod!\nI recommend using the sliders mod to decrease your max fps to save battery.");
             } else {
                 clearTimeout(active);
                 active = null;
-                ModAPI.displayToChat("Activated anti-afk mod");
+                ModAPI.displayToChat("Deactivated anti-afk mod.");
             }
             e.preventDefault = true;
         }
