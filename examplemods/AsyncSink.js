@@ -160,6 +160,16 @@ ModAPI.meta.credits("By ZXMushroom63");
             return originalL10NRead.apply(this, args);
         };
 
+        const L18NFormat = ModAPI.util.getMethodFromPackage("net.minecraft.client.resources.I18n", "format");
+        const originalL18NFormat = ModAPI.hooks.methods[L18NFormat];
+        ModAPI.hooks.methods[L18NFormat] = function (...args) {
+            var key = ModAPI.util.ustr(args[0]);
+            if (AsyncSink.L10N.has(key)) {
+                args[0] = ModAPI.util.str(AsyncSink.L10N.get(key));
+            }
+            return originalL18NFormat.apply(this, args);
+        };
+
         const L10NCheck = ModAPI.util.getMethodFromPackage("net.minecraft.util.StatCollector", "canTranslate");
         const originalL10NCheck = ModAPI.hooks.methods[L10NCheck];
         ModAPI.hooks.methods[L10NCheck] = function (...args) {
@@ -203,7 +213,7 @@ ModAPI.meta.credits("By ZXMushroom63");
         } else {
             resourcePackList.resourcePacks.push(pack);
         }
-        
+
         const writeableTransaction = db.transaction(["filesystem"], "readwrite");
         const writeableObjectStore = writeableTransaction.objectStore("filesystem");
         await promisifyIDBRequest(writeableObjectStore.put({
@@ -255,7 +265,7 @@ ModAPI.meta.credits("By ZXMushroom63");
         if (e.message.toLowerCase().startsWith(".reload_tex")) {
             e.preventDefault = true;
             ModAPI.mc.renderItem.itemModelMesher.simpleShapesCache.clear();
-            ModAPI.promisify(ModAPI.mc.refreshResources)().then(()=>{
+            ModAPI.promisify(ModAPI.mc.refreshResources)().then(() => {
                 ModAPI.events.callEvent("custom:asyncsink_reloaded", {});
             });
         }
