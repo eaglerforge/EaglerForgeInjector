@@ -267,6 +267,7 @@ ModAPI.meta.credits("By ZXMushroom63");
             ModAPI.mc.renderItem.itemModelMesher.simpleShapesCache.clear();
             ModAPI.promisify(ModAPI.mc.refreshResources)().then(() => {
                 ModAPI.events.callEvent("custom:asyncsink_reloaded", {});
+                ModAPI.events.callEvent("lib:asyncsink:registeritems", ModAPI.mc.renderItem);
             });
         }
     });
