@@ -5,6 +5,8 @@
     ModAPI.meta.icon(itemTexture);
     ModAPI.meta.description("Requires AsyncSink.");
 
+    ModAPI.require("player");
+
     function PistolItem() {
         var recoilSpeed = 0; //recoil controller
         var DamageSourceClass = ModAPI.reflect.getClassByName("DamageSource");

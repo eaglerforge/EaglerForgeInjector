@@ -34,7 +34,7 @@ function registerSteveClientSide() {
     
     ModAPI.addEventListener("lib:asyncsink", async () => {
         ModAPI.addEventListener("lib:asyncsink:registeritems", (renderItem)=>{
-            renderItem.registerItem(block_of_steve, ModAPI.util.str("steve"));
+            renderItem.registerBlock(block_of_steve, ModAPI.util.str("steve"));
         });
         AsyncSink.L10N.set("tile.steve.name", "Block Of Steve");
         AsyncSink.setFile("resourcepacks/AsyncSinkLib/assets/minecraft/models/block/steve.json", JSON.stringify(
