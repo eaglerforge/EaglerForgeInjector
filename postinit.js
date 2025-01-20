@@ -166,6 +166,8 @@ globalThis.modapi_postinit = "(" + (() => {
         return name;
     }
 
+    ModAPI.util.asClass = ModAPI.util.asClass = ModAPI.hooks._teavm.$rt_cls;
+
     ModAPI.util.wrap = function (outputValue, target, corrective, disableFunctions) {
         target ||= {};
         corrective ||= false;

@@ -82,3 +82,6 @@ Methods:
   - Gets a block by it's ID
 - `ModAPI.util.getBlockFromItem(item: Item) : Block`
   - Gets a block from an ItemBlock instance.
+- `ModAPI.util.asClass(class: Class) : Class`
+  - Converts a javascript class to a java class.
+  - Equivalent of using `MyClass.class` in java.
