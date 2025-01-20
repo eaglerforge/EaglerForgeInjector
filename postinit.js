@@ -1020,7 +1020,7 @@ globalThis.modapi_postinit = "(" + (() => {
     ModAPI.util.getIdFromBlock = easyStaticMethod("net.minecraft.block.Block", "getIdFromBlock", true);
 
     function qhash(txt, arr) {
-        var interval = 4095; //used to be 4095 - arr.length, but that increases incompatibility based on load order and otehr circumstances
+        var interval = 4095; //used to be 4095 - arr.length, but that increases incompatibility based on load order and other circumstances
         if (arr.length >= 4095) {
             console.error("[ModAPI.keygen] Ran out of IDs while generating for " + txt);
             return -1;
