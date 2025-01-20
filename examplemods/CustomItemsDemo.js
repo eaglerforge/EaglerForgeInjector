@@ -1,4 +1,4 @@
-//This mod also requires lib.customitems.js
+//Demo mod showing how to use lib.customitems.js
 ModAPI.addEventListener("lib:libcustomitems:loaded", () => {
     console.log("Registered my cool custom item.");
     LibCustomItems.registerItem({
