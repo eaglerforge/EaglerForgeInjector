@@ -429,6 +429,7 @@ globalThis.modapi_postinit = "(" + (() => {
             item: null,
             supertypes: [reflectClass.class]
         };
+        classFn.classObject = null;
     }
 
     var reloadDeprecationWarnings = 0;

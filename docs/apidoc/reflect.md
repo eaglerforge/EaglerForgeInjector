@@ -22,6 +22,7 @@ Methods:
   - When called without a filter function, the filter defaults to `(fn)=>fn.length === 1`
 - `ModAPI.reflect.prototypeStack(rClass: ReflectClass, target: Class/ConstructorFunction) : void`
   - Copies methods from a reflect class and it's parents onto a target native JavaScript class. This allows TeaVM to use these objects normally, without you having to manually reimplement every method. In other words, this is the equivalent of extending a class.
+  - Also adds some metadata to make the class work with `ModAPI.util.asClass`
   - [Example usage](https://github.com/eaglerforge/EaglerForgeInjector/blob/6e8598c180f96a65c0c101be72e6d0fa53195404/examplemods/unlucky_blocks.js#L37)
 ### ReflectClass Definition
 
