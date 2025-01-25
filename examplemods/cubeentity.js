@@ -23,6 +23,7 @@
         nme_EntityCube.prototype.$canBePushed = function () { return 0 };
         nme_EntityCube.prototype.$getCollisionBox = function () { return this.$getEntityBoundingBox() };
         nme_EntityCube.prototype.$getCollisionBoundingBox = function () { return this.$getEntityBoundingBox() };
+        nme_EntityCube.prototype.$entityInit = function () { console.log("Cube entity created!") }; // Needed, is an abstract method in parent class
         // END CUSTOM ENTITY
 
 
@@ -99,6 +100,7 @@
         AsyncSink.setFile("resourcepacks/AsyncSinkLib/assets/minecraft/textures/entity/cube.png", await (await fetch(
             "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAAAXNSR0IArs4c6QAAAQBJREFUeF7l0BFzAmAAgOGvKxgMgiAYDIJgEARBEASDQTAIgiAYBEEQBN0NBkEQBEEQBIMgCAZBEAwGgyAIgiAIgiConxE88PJ790RCCNdYCOGeRe/4j4SYDvCgAzzqAHEdIKEDJHWAJx3gWQdI6QBpHeBFB8joAFkdIKcD5HWAgg5Q1AFedYA3HaCkA7zrAGUdoKIDVHWAmg7woQPUdYCGDtDUAVo6QFsH6OgAnzrAlw7Q1QF6OkBfBxjoAEMdYKQDjHWAiQ7wrQNMdYCZDjDXAX50gIUOsNQBVjrArw7wpwP86wBrHWCjA2x1gJ0OsNcBDjrAUQc46QBnHeBiA9wALSueIjTE4PwAAAAASUVORK5CYII="
         )).arrayBuffer());
-        ModAPI.mc.renderManager.entityRenderMap.put(ModAPI.util.asClass(nme_EntityCube), new nmcre_RenderCube(ModAPI.mc.renderManager.getRef()));
+        
+        ModAPI.mc.renderManager.entityRenderMap.put(ModAPI.util.asClass(data.EntityCube), new data.RenderCube(ModAPI.mc.renderManager.getRef()));
     });
 })();
