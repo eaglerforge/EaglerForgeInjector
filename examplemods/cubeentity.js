@@ -29,7 +29,7 @@
         // START CUSTOM MODEL
         var ModelRenderer = ModAPI.reflect.getClassById("net.minecraft.client.model.ModelRenderer").constructors.find(x => x.length === 1);
         var modelBaseClass = ModAPI.reflect.getClassById("net.minecraft.client.model.ModelBase");
-        var modelBaseSuper = ModAPI.reflect.getSuper(entityClass); //while super isn't used when extending this class, java implies the call.
+        var modelBaseSuper = ModAPI.reflect.getSuper(modelBaseClass); //while super isn't used when extending this class, java implies the call.
         var nmcm_ModelCube = function nmcm_ModelCube() {
             modelBaseSuper(this);
             this.$textureWidth = 64;
@@ -47,7 +47,7 @@
 
         // START CUSTOM RENDERER
         var renderClass = ModAPI.reflect.getClassById("net.minecraft.client.renderer.entity.Render");
-        var renderSuper = ModAPI.reflect.getSuper(entityClass, (x)=>x.length === 2);
+        var renderSuper = ModAPI.reflect.getSuper(renderClass, (x)=>x.length === 2);
         const cubeTextures = ResourceLocation(ModAPI.util.str("textures/entity/cube.png"));
         var nmcre_RenderCube = function nmcre_RenderCube(renderManager) {
             renderSuper(this, renderManager);
@@ -69,7 +69,7 @@
             parentDoRender.apply(this, [entity, x, y, z, yaw, pitch]);
         }
 
-        ModAPI.reflect.getClassById("net.minecraft.entity.EntityList").staticMethods.addMapping0(
+        ModAPI.reflect.getClassById("net.minecraft.entity.EntityList").staticMethods.addMapping0.method(
             ModAPI.util.asClass(nme_EntityCube),
             {
                 $createEntity: nme_EntityCube
@@ -79,7 +79,7 @@
             0x000000, //egg base
             0x00FF00 //egg spots
         );
-        ModAPI.mc.renderManager.entityRenderMap.put(ModAPI.util.asClass(nme_EntityCube), new nmcre_RenderCube(ModAPI.mc.renderManager.getRef()));
+        
 
         return {
             EntityCube: nme_EntityCube,
@@ -93,6 +93,7 @@
     var data = registerEntity();
 
     ModAPI.addEventListener("lib:asyncsink", async () => {
+        ModAPI.mc.renderManager.entityRenderMap.put(ModAPI.util.asClass(nme_EntityCube), new nmcre_RenderCube(ModAPI.mc.renderManager.getRef()));
         AsyncSink.L10N.set("entity.Cube.name", "Cube (TM)");
         AsyncSink.setFile("resourcepacks/AsyncSinkLib/assets/minecraft/textures/entity/cube.png", await (await fetch(
             "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAAAXNSR0IArs4c6QAAAQBJREFUeF7l0BFzAmAAgOGvKxgMgiAYDIJgEARBEASDQTAIgiAYBEEQBN0NBkEQBEEQBIMgCAZBEAwGgyAIgiAIgiConxE88PJ790RCCNdYCOGeRe/4j4SYDvCgAzzqAHEdIKEDJHWAJx3gWQdI6QBpHeBFB8joAFkdIKcD5HWAgg5Q1AFedYA3HaCkA7zrAGUdoKIDVHWAmg7woQPUdYCGDtDUAVo6QFsH6OgAnzrAlw7Q1QF6OkBfBxjoAEMdYKQDjHWAiQ7wrQNMdYCZDjDXAX50gIUOsNQBVjrArw7wpwP86wBrHWCjA2x1gJ0OsNcBDjrAUQc46QBnHeBiA9wALSueIjTE4PwAAAAASUVORK5CYII="
