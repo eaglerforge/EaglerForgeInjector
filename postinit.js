@@ -166,7 +166,7 @@ globalThis.modapi_postinit = "(" + (() => {
         return name;
     }
 
-    ModAPI.util.asClass = ModAPI.util.asClass = ModAPI.hooks._teavm.$rt_cls;
+    ModAPI.util.asClass = ModAPI.hooks._teavm.$rt_cls;
 
     ModAPI.util.wrap = function (outputValue, target, corrective, disableFunctions) {
         target ||= {};
@@ -413,7 +413,7 @@ globalThis.modapi_postinit = "(" + (() => {
 
     //Magical function for making a subclass with a custom constructor that you can easily use super(...) on.
     ModAPI.reflect.getSuper = function getSuper(reflectClass, filter) {
-        filter ||= () => true;
+        filter ||= (x) => x.length === 1;
         var initialiser = reflectClass.internalConstructors.find(filter);
         return function superFunction(thisArg, ...extra_args) {
             reflectClass.class.call(thisArg);
