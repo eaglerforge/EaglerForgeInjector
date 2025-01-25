@@ -72,7 +72,9 @@
         ModAPI.reflect.getClassById("net.minecraft.entity.EntityList").staticMethods.addMapping0.method(
             ModAPI.util.asClass(nme_EntityCube),
             {
-                $createEntity: nme_EntityCube
+                $createEntity: function ($worldIn) {
+                    return new nme_EntityCube($worldIn);
+                }
             },
             ModAPI.util.str("Cube"),
             ModAPI.keygen.entity("cube"),
@@ -93,10 +95,10 @@
     var data = registerEntity();
 
     ModAPI.addEventListener("lib:asyncsink", async () => {
-        ModAPI.mc.renderManager.entityRenderMap.put(ModAPI.util.asClass(nme_EntityCube), new nmcre_RenderCube(ModAPI.mc.renderManager.getRef()));
         AsyncSink.L10N.set("entity.Cube.name", "Cube (TM)");
         AsyncSink.setFile("resourcepacks/AsyncSinkLib/assets/minecraft/textures/entity/cube.png", await (await fetch(
             "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAAAXNSR0IArs4c6QAAAQBJREFUeF7l0BFzAmAAgOGvKxgMgiAYDIJgEARBEASDQTAIgiAYBEEQBN0NBkEQBEEQBIMgCAZBEAwGgyAIgiAIgiConxE88PJ790RCCNdYCOGeRe/4j4SYDvCgAzzqAHEdIKEDJHWAJx3gWQdI6QBpHeBFB8joAFkdIKcD5HWAgg5Q1AFedYA3HaCkA7zrAGUdoKIDVHWAmg7woQPUdYCGDtDUAVo6QFsH6OgAnzrAlw7Q1QF6OkBfBxjoAEMdYKQDjHWAiQ7wrQNMdYCZDjDXAX50gIUOsNQBVjrArw7wpwP86wBrHWCjA2x1gJ0OsNcBDjrAUQc46QBnHeBiA9wALSueIjTE4PwAAAAASUVORK5CYII="
         )).arrayBuffer());
+        ModAPI.mc.renderManager.entityRenderMap.put(ModAPI.util.asClass(nme_EntityCube), new nmcre_RenderCube(ModAPI.mc.renderManager.getRef()));
     });
 })();
