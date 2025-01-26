@@ -2,22 +2,28 @@
     ModAPI.meta.title("Cube Entity");
     ModAPI.meta.version("v0");
     ModAPI.meta.description("testing custom entities");
-    ModAPI.meta.credits("By ZXMushroom64");
+    ModAPI.meta.credits("By ZXMushroom63");
 
     function registerEntity() {
         // Utils
         const ResourceLocation = ModAPI.reflect.getClassByName("ResourceLocation").constructors.find(x => x.length === 1);
         const GlStateManager = Object.fromEntries(Object.values(ModAPI.reflect.getClassByName("GlStateManager").staticMethods).map(x => [x.methodNameShort, x.method]));
+        const IAnimals = ModAPI.reflect.getClassById("net.minecraft.entity.passive.IAnimals");
 
         // START CUSTOM ENTITY
         var entityClass = ModAPI.reflect.getClassById("net.minecraft.entity.Entity");
         var entitySuper = ModAPI.reflect.getSuper(entityClass, (x) => x.length === 2);
         var nme_EntityCube = function nme_EntityCube($worldIn) {
             entitySuper(this, $worldIn);
-            //this.$preventEntitySpawning = 1;
+            this.$preventEntitySpawning = 1;
             this.$setSize(1, 1);
         }
         ModAPI.reflect.prototypeStack(entityClass, nme_EntityCube);
+
+        //Turns out that minecraft 1.8's networking code is really stupid. Notch hardcoded every entity except for ones that implement the IAnimals interface.
+        //I don't know why, and I don't really care either. As long as it works (been working on this for too long, losing sanity)
+        ModAPI.reflect.implements(nme_EntityCube, IAnimals);
+
         nme_EntityCube.prototype.$canTriggerWalking = function () { return 0 };
         nme_EntityCube.prototype.$canBePushed = function () { return 0 };
         nme_EntityCube.prototype.$getCollisionBox = function () { return this.$getEntityBoundingBox() };
@@ -27,9 +33,10 @@
         };
         nme_EntityCube.prototype.$writeEntityToNBT = function (nbtTagCompount) { // Needed, is an abstract method in parent class
             nbtTagCompount = ModAPI.util.wrap(nbtTagCompount);
-        }; 
-        nme_EntityCube.prototype.$getCollisionBoundingBox = function () { return this.$getEntityBoundingBox() }; // Needed, is an abstract method in parent class
-        nme_EntityCube.prototype.$entityInit = function () { console.log("Cube entity created!") }; // Needed, is an abstract method in parent class
+        };
+        nme_EntityCube.prototype.$entityInit = function () {
+            console.log("Cube entity created!");
+        };
         // END CUSTOM ENTITY
 
 

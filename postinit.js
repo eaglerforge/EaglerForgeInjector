@@ -452,13 +452,14 @@ globalThis.modapi_postinit = "(" + (() => {
     var reloadDeprecationWarnings = 0;
     const TeaVMArray_To_Recursive_BaseData_ProxyConf = {
         get(target, prop, receiver) {
+            var corrective = !!this._corrective;
             if (prop === "getRef") {
                 return function () {
                     return target;
                 }
             }
             var outputValue = Reflect.get(target, prop, receiver);
-            var wrapped = ModAPI.util.wrap(outputValue, target, this._corrective, true);
+            var wrapped = ModAPI.util.wrap(outputValue, target, corrective, true);
             if (wrapped) {
                 return wrapped;
             }
@@ -480,6 +481,7 @@ globalThis.modapi_postinit = "(" + (() => {
             return ("$" + prop) in target;
         },
         get(target, prop, receiver) {
+            var corrective = !!this._corrective;
             if (prop === "getCorrective") {
                 return function () {
                     return new Proxy(target, patchProxyConfToCorrective(TeaVM_to_Recursive_BaseData_ProxyConf));
@@ -487,7 +489,7 @@ globalThis.modapi_postinit = "(" + (() => {
             }
             if (prop === "isCorrective") {
                 return function () {
-                    return !!this._corrective;
+                    return corrective;
                 }
             }
             if (prop === "getRef") {
@@ -504,15 +506,15 @@ globalThis.modapi_postinit = "(" + (() => {
                 }
             }
             if (prop === "isModProxy") {
-                return true
+                return true;
             }
 
             var outProp = "$" + prop;
-            if (this._corrective) {
+            if (corrective) {
                 outProp = ModAPI.util.getNearestProperty(target, outProp);
             }
             var outputValue = Reflect.get(target, outProp, receiver);
-            var wrapped = ModAPI.util.wrap(outputValue, target, this._corrective, false);
+            var wrapped = ModAPI.util.wrap(outputValue, target, corrective, false);
             if (wrapped) {
                 return wrapped;
             }
@@ -1076,7 +1078,8 @@ globalThis.modapi_postinit = "(" + (() => {
         return qhash(block, values);
     }
     ModAPI.keygen.entity = function (entity) {
-        var values = ModAPI.reflect.getClassById("net.minecraft.entity.EntityList").staticVariables.idToClassMapping.$elementData.data.filter(x=>x).map(x=>x.$key.$value);
+        var hashMap = ModAPI.util.wrap(ModAPI.reflect.getClassById("net.minecraft.entity.EntityList").staticVariables.idToClassMapping).getCorrective();
+        var values = hashMap.keys.getRef().data.filter(x=>hashMap.get(x));
         return qhash(entity, values);
     }
 }).toString() + ")();";
