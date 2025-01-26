@@ -441,7 +441,7 @@ globalThis.modapi_postinit = "(" + (() => {
         };
         classFn.classObject = null;
     }
-    ModAPI.reflect.implements = function implements(classFn, reflectClass) {
+    ModAPI.reflect.implements = function impl(classFn, reflectClass) {
         classFn.$meta ||= {};
         classFn.$meta.supertypes ||= [];
         if (reflectClass && reflectClass.class) {
