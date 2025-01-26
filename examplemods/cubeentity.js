@@ -6,16 +6,15 @@
 
     function registerEntity() {
         // Utils
-        const ResourceLocation = ModAPI.reflect.getClassByName("ResourceLocation").constructors.find(x=>x.length===1);
-        const GlStateManager = Object.fromEntries(Object.values(ModAPI.reflect.getClassByName("GlStateManager").staticMethods).map(x=>[x.methodNameShort, x.method]));
+        const ResourceLocation = ModAPI.reflect.getClassByName("ResourceLocation").constructors.find(x => x.length === 1);
+        const GlStateManager = Object.fromEntries(Object.values(ModAPI.reflect.getClassByName("GlStateManager").staticMethods).map(x => [x.methodNameShort, x.method]));
 
         // START CUSTOM ENTITY
         var entityClass = ModAPI.reflect.getClassById("net.minecraft.entity.Entity");
         var entitySuper = ModAPI.reflect.getSuper(entityClass, (x) => x.length === 2);
         var nme_EntityCube = function nme_EntityCube($worldIn) {
             entitySuper(this, $worldIn);
-            this.$setCreativeTab(creativeMiscTab);
-            this.$preventEntitySpawning = 1;
+            //this.$preventEntitySpawning = 1;
             this.$setSize(1, 1);
         }
         ModAPI.reflect.prototypeStack(entityClass, nme_EntityCube);
@@ -23,6 +22,13 @@
         nme_EntityCube.prototype.$canBePushed = function () { return 0 };
         nme_EntityCube.prototype.$getCollisionBox = function () { return this.$getEntityBoundingBox() };
         nme_EntityCube.prototype.$getCollisionBoundingBox = function () { return this.$getEntityBoundingBox() };
+        nme_EntityCube.prototype.$readEntityFromNBT = function (nbtTagCompount) { // Needed, is an abstract method in parent class
+            nbtTagCompount = ModAPI.util.wrap(nbtTagCompount);
+        };
+        nme_EntityCube.prototype.$writeEntityToNBT = function (nbtTagCompount) { // Needed, is an abstract method in parent class
+            nbtTagCompount = ModAPI.util.wrap(nbtTagCompount);
+        }; 
+        nme_EntityCube.prototype.$getCollisionBoundingBox = function () { return this.$getEntityBoundingBox() }; // Needed, is an abstract method in parent class
         nme_EntityCube.prototype.$entityInit = function () { console.log("Cube entity created!") }; // Needed, is an abstract method in parent class
         // END CUSTOM ENTITY
 
@@ -48,7 +54,7 @@
 
         // START CUSTOM RENDERER
         var renderClass = ModAPI.reflect.getClassById("net.minecraft.client.renderer.entity.Render");
-        var renderSuper = ModAPI.reflect.getSuper(renderClass, (x)=>x.length === 2);
+        var renderSuper = ModAPI.reflect.getSuper(renderClass, (x) => x.length === 2);
         const cubeTextures = ResourceLocation(ModAPI.util.str("textures/entity/cube.png"));
         var nmcre_RenderCube = function nmcre_RenderCube(renderManager) {
             renderSuper(this, renderManager);
@@ -82,7 +88,7 @@
             0x000000, //egg base
             0x00FF00 //egg spots
         );
-        
+
 
         return {
             EntityCube: nme_EntityCube,
@@ -100,7 +106,8 @@
         AsyncSink.setFile("resourcepacks/AsyncSinkLib/assets/minecraft/textures/entity/cube.png", await (await fetch(
             "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAAAXNSR0IArs4c6QAAAQBJREFUeF7l0BFzAmAAgOGvKxgMgiAYDIJgEARBEASDQTAIgiAYBEEQBN0NBkEQBEEQBIMgCAZBEAwGgyAIgiAIgiConxE88PJ790RCCNdYCOGeRe/4j4SYDvCgAzzqAHEdIKEDJHWAJx3gWQdI6QBpHeBFB8joAFkdIKcD5HWAgg5Q1AFedYA3HaCkA7zrAGUdoKIDVHWAmg7woQPUdYCGDtDUAVo6QFsH6OgAnzrAlw7Q1QF6OkBfBxjoAEMdYKQDjHWAiQ7wrQNMdYCZDjDXAX50gIUOsNQBVjrArw7wpwP86wBrHWCjA2x1gJ0OsNcBDjrAUQc46QBnHeBiA9wALSueIjTE4PwAAAAASUVORK5CYII="
         )).arrayBuffer());
-        
+
         ModAPI.mc.renderManager.entityRenderMap.put(ModAPI.util.asClass(data.EntityCube), new data.RenderCube(ModAPI.mc.renderManager.getRef()));
     });
+    console.log(data);
 })();
