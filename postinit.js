@@ -269,6 +269,7 @@ globalThis.modapi_postinit = "(" + (() => {
         ModAPI.hooks._rippedConstructorKeys = Object.keys(ModAPI.hooks._rippedConstructors);
         ModAPI.hooks._rippedInternalConstructorKeys = Object.keys(ModAPI.hooks._rippedInternalConstructors);
         ModAPI.hooks._rippedMethodKeys = Object.keys(ModAPI.hooks._rippedMethodTypeMap);
+        ModAPI.hooks._rippedInterfaceKeys = Object.keys(ModAPI.hooks._rippedInterfaceMap);
 
         var compiledNames = new Set();
         var metaMap = {};
@@ -302,10 +303,19 @@ globalThis.modapi_postinit = "(" + (() => {
             }
         });
 
+        ModAPI.hooks._rippedInterfaceKeys.forEach(className => {
+            if (typeof className === "string" && className.length > 0) {
+                //Interfaces using $rt_classWithoutFields(0) and no constructors.
+                if (className && className.includes("_")) {
+                    compiledNames.add(className);
+                }
+            }
+        });
+
 
         //Initialise all compiled names into the class map
         compiledNames.forEach(compiledName => {
-            var item = metaMap[compiledName];
+            var item = metaMap[compiledName] || ModAPI.hooks._rippedInterfaceMap[compiledName];
             var classId = item?.$meta?.name || null;
 
             if (!ModAPI.hooks._classMap[compiledName]) {
@@ -321,7 +331,7 @@ globalThis.modapi_postinit = "(" + (() => {
                     "staticVariables": {},
                     "staticVariableNames": [],
                     "class": item || null,
-                    "hasMeta": !!item,
+                    "hasMeta": !!(item?.$meta),
                     "instanceOf": function (object) {
                         try {
                             return ModAPI.hooks._teavm.$rt_isInstance(object, item || null);
@@ -430,6 +440,13 @@ globalThis.modapi_postinit = "(" + (() => {
             supertypes: [reflectClass.class]
         };
         classFn.classObject = null;
+    }
+    ModAPI.reflect.implements = function implements(classFn, reflectClass) {
+        classFn.$meta ||= {};
+        classFn.$meta.supertypes ||= [];
+        if (reflectClass && reflectClass.class) {
+            classFn.$meta.supertypes.push(reflectClass.class);
+        }
     }
 
     var reloadDeprecationWarnings = 0;

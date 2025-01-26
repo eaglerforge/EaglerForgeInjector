@@ -50,13 +50,13 @@ function entriesToStaticVariableProxy(entries, prefix, clinitList) {
         .join(",")}];
     /*/
     var proxy = `ModAPI.hooks._rippedStaticProperties[\`${prefix.replace(
-            "var ",
-            ""
-        )}\`] = new Proxy({${entries
-            .flatMap((x) => {
-                return '"' + x.name + '"';
-            })
-            .join(":null,") + (entries.length > 0 ? ":null" : "")
+        "var ",
+        ""
+    )}\`] = new Proxy({${entries
+        .flatMap((x) => {
+            return '"' + x.name + '"';
+        })
+        .join(":null,") + (entries.length > 0 ? ":null" : "")
         }}, {
             get: function (a,b,c) {
                 switch (b) {
@@ -136,7 +136,7 @@ var main;(function(){`
     patchedFile = patchedFile.replaceAll("function TeaVMThread(", "globalThis.ModAPI.hooks.TeaVMThread = TeaVMThread;\nfunction TeaVMThread(");
 
     _status("Getting clinit list...");
-    var clinitList = [...patchedFile.matchAll(/^[\t ]*function \S+?_\S+?_\$callClinit\(/gm)].map(x=>x[0].replaceAll("function ", "").replaceAll("(", "").trim());
+    var clinitList = [...patchedFile.matchAll(/^[\t ]*function \S+?_\S+?_\$callClinit\(/gm)].map(x => x[0].replaceAll("function ", "").replaceAll("(", "").trim());
     console.log(clinitList);
 
     _status("Extracting constructors and methods...");
@@ -171,7 +171,7 @@ var main;(function(){`
             );
         }
     );
-    
+
     const extractInstanceMethodRegex =
         /^[\t ]*function \S+?_\S+?_\S+?\((\$this)?/gm; // /^[\t ]*function \S+?_\S+?_\S+?\(\$this/gm
     const extractInstanceMethodFullNameRegex = /function (\S*?)\(/gm; // /function (\S*?)\(\$this/gm
@@ -205,6 +205,7 @@ var main;(function(){`
     }).filter(x => {
         return (!x.includes("$_clinit_$")) && (!x.includes("$lambda$"))
     });
+    //Also stores classes from $rt_classWithoutFields(0)
     patchedFile = patchedFile.replaceAll(
         /var \S+?_\S+? = \$rt_classWithoutFields\(\S*?\);/gm,
         function (match) {
@@ -213,6 +214,7 @@ var main;(function(){`
                 ""
             );
             var entries = [];
+
             staticVariables.forEach((entry) => {
                 if (entry.startsWith(prefix)) {
                     var variableName = entry
@@ -229,14 +231,17 @@ var main;(function(){`
             });
 
             var proxy = entriesToStaticVariableProxy(entries, prefix, clinitList);
-
-            return match + proxy;
+            var shortPrefix = prefix.replace(
+                "var ",
+                ""
+            );
+            return match + `ModAPI.hooks._rippedInterfaceMap[\`${shortPrefix}\`]=${shortPrefix};` + proxy;
         }
     );
     //Edge cases. sigh
     //Done: add support for static properties on classes with constructors like this: function nmcg_GuiMainMenu() {
 
-    
+
     patchedFile = patchedFile.replaceAll(
         /function [a-z]+?_([a-zA-Z0-9\$]+?)\(\) \{/gm,
         (match) => {
@@ -335,7 +340,7 @@ document.querySelector("#giveme").addEventListener("click", () => {
         } else if (globalThis.doShronk) {
             patchedFile = await shronk(patchedFile);
         }
-        
+
         patchedFile.replace(`{"._|_libserverside_|_."}`, "");
         var blob = new Blob([patchedFile], { type: file.type });
         saveAs(blob, "processed." + fileType);
@@ -356,13 +361,13 @@ document.querySelector("#givemeserver").addEventListener("click", () => {
 
     file.text().then(async (string) => {
         var patchedFile = string;
-        
+
         if (globalThis.doEaglerforge) {
             patchedFile = await processClasses(patchedFile);
         } else if (globalThis.doShronk) {
             patchedFile = await shronk(patchedFile);
         }
-        
+
         patchedFile.replace(`{"._|_libserverside_|_."}`, `(${EFServer.toString()})()`);
         var blob = new Blob([patchedFile], { type: file.type });
         saveAs(blob, "efserver." + fileType);
