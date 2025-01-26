@@ -88,6 +88,7 @@
             0x000000, //egg base
             0x00FF00 //egg spots
         );
+        console.log(ID);
 
         ModAPI.addEventListener("lib:asyncsink", async () => {
             AsyncSink.L10N.set("entity.Cube.name", "Cube (TM)");
