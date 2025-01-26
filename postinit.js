@@ -189,9 +189,9 @@ globalThis.modapi_postinit = "(" + (() => {
         if (!disableFunctions && outputValue && typeof outputValue === "function" && target) {
             return function (...args) {
                 var xOut = outputValue.apply(target, args);
-                if (xOut && typeof xOut === "object" && Array.isArray(xOut.data) && typeof outputValue.type === "function") {
+                if (xOut && typeof xOut === "object" && Array.isArray(xOut.data) && typeof xOut.type === "function") {
                     if (corrective) {
-                        return new Proxy(outputValue.data, CorrectiveArray);
+                        return new Proxy(xOut.data, CorrectiveArray);
                     }
                     return new Proxy(xOut.data, ModAPI.util.TeaVMArray_To_Recursive_BaseData_ProxyConf);
                 }
