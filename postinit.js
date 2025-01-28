@@ -357,8 +357,14 @@ globalThis.modapi_postinit = "(" + (() => {
                 }
             }
             if (typeof item?.$meta?.superclass === "function" && item?.$meta?.superclass?.$meta) {
-                ModAPI.hooks._classMap[compiledName].superclassName = item.$meta.superclass.$meta.name;
                 ModAPI.hooks._classMap[compiledName].superclass = item.$meta.superclass;
+                ModAPI.hooks._classMap[compiledName].superclassName = item.$meta.superclass.$meta.name ?? (item.$meta.superclass ? item.$meta.superclass.name.split("_").map((x, i) => {
+                    if (i === 0) {
+                        return x.split("").join(".") + "."
+                    } else {
+                        return x;
+                    }
+                }).join("_").replace("._", ".") : null);
             } else {
                 ModAPI.hooks._classMap[compiledName].superclass = null;
                 ModAPI.hooks._classMap[compiledName].superclassName = null;
