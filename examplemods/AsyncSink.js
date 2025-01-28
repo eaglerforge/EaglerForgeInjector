@@ -58,6 +58,12 @@ ModAPI.meta.credits("By ZXMushroom63");
             return true;
         }
 
+        AsyncSink.hideFile = function hideFile(path) {
+            AsyncSink.FSOverride.add(path);
+            AsyncSink.FS.delete(path);
+            return true;
+        }
+
         AsyncSink.getFile = function getFile(path) {
             return AsyncSink.FS.get(path) || new ArrayBuffer(0);
         }

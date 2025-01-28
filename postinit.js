@@ -1041,9 +1041,9 @@ globalThis.modapi_postinit = "(" + (() => {
     ModAPI.util.getBlockFromItem = easyStaticMethod("net.minecraft.block.Block", "getBlockFromItem", true);
     ModAPI.util.getIdFromBlock = easyStaticMethod("net.minecraft.block.Block", "getIdFromBlock", true);
 
-    function qhash(txt, arr) {
-        var interval = 4095; //used to be 4095 - arr.length, but that increases incompatibility based on load order and other circumstances
-        if (arr.length >= 4095) {
+    function qhash(txt, arr, interval) {
+        // var interval = 4095; //used to be 4095 - arr.length, but that increases incompatibility based on load order and other circumstances
+        if (arr.length >= interval) {
             console.error("[ModAPI.keygen] Ran out of IDs while generating for " + txt);
             return -1;
         }
@@ -1071,15 +1071,15 @@ globalThis.modapi_postinit = "(" + (() => {
     }
     ModAPI.keygen.item = function (item) {
         var values = [...ModAPI.reflect.getClassById("net.minecraft.item.Item").staticVariables.itemRegistry.$modapi_specmap.values()];
-        return qhash(item, values);
+        return qhash(item, values, 4095);
     }
     ModAPI.keygen.block = function (block) {
         var values = [...ModAPI.reflect.getClassById("net.minecraft.block.Block").staticVariables.blockRegistry.$modapi_specmap.values()];
-        return qhash(block, values);
+        return qhash(block, values, 4095);
     }
     ModAPI.keygen.entity = function (entity) {
         var hashMap = ModAPI.util.wrap(ModAPI.reflect.getClassById("net.minecraft.entity.EntityList").staticVariables.idToClassMapping).getCorrective();
         var values = hashMap.keys.getRef().data.filter(x=>hashMap.get(x));
-        return qhash(entity, values);
+        return qhash(entity, values, 127);
     }
 }).toString() + ")();";

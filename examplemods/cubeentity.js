@@ -25,7 +25,7 @@
         ModAPI.reflect.implements(nme_EntityCube, IAnimals);
 
         nme_EntityCube.prototype.$canTriggerWalking = function () { return 0 };
-        nme_EntityCube.prototype.$canBePushed = function () { return 0 };
+        nme_EntityCube.prototype.$canBePushed = function () { return 1 };
         nme_EntityCube.prototype.$getCollisionBox = function () { return this.$getEntityBoundingBox() };
         nme_EntityCube.prototype.$getCollisionBoundingBox = function () { return this.$getEntityBoundingBox() };
         nme_EntityCube.prototype.$readEntityFromNBT = function (nbtTagCompount) { // Needed, is an abstract method in parent class
@@ -49,12 +49,12 @@
             this.$textureWidth = 64;
             this.$textureHeight = 64;
             this.$cubeRenderer = ModelRenderer(this).$setTextureOffset(0, 0);
-            this.$cubeRenderer.$addBox0(0, 0, 0, 1, 1, 1);
+            this.$cubeRenderer.$addBox0(0, 0, 0, 64, 64, 64);
             this.$cubeRenderer.$setRotationPoint(0, 0, 0);
         }
         ModAPI.reflect.prototypeStack(modelBaseClass, nmcm_ModelCube);
-        nmcm_ModelCube.prototype.$render = function ($entity, useless1, useless2, partialTicks, useless3, useless4, f) {
-            this.$cubeRenderer.$render(f);
+        nmcm_ModelCube.prototype.$render = function ($entity, useless1, useless2, partialTicks, useless3, useless4, degToRad) {
+            this.$cubeRenderer.$render(degToRad);
         }
         // END CUSTOM MODEL
 
@@ -75,12 +75,13 @@
         const parentDoRender = nmcre_RenderCube.prototype.$doRender;
         nmcre_RenderCube.prototype.$doRender = function (entity, x, y, z, yaw, pitch) {
             GlStateManager.pushMatrix();
-            GlStateManager.translate(x, y + 0.25, z);
-            GlStateManager.rotate(180 - yaw, 0, 1, 0);
-            this.$bindEntityTexture(entity);
-            this.$modelCube.$render(entity, 0, 0, -0.1, 0, 0, 0.0625);
-            GlStateManager.popMatrix();
-            parentDoRender.apply(this, [entity, x, y, z, yaw, pitch]);
+                GlStateManager.translate(x + 0.5, y, z + 0.5);
+                GlStateManager.rotate(180 - yaw, 0, 1, 0);
+                GlStateManager.scale(0.25, 0.25, 0.25);
+                this.$bindEntityTexture(entity);
+                this.$modelCube.$render(entity, 0, 0, -0.1, 0, 0, 0.0625);
+                GlStateManager.popMatrix();
+                parentDoRender.apply(this, [entity, x, y, z, yaw, pitch]);
         }
         const ID = ModAPI.keygen.entity("cube");
         ModAPI.reflect.getClassById("net.minecraft.entity.EntityList").staticMethods.addMapping0.method(
@@ -95,6 +96,7 @@
             0x000000, //egg base
             0x00FF00 //egg spots
         );
+        // Note that the spawn egg for this will not work, as spawn eggs only spawn entities that are a subclass of EntityLivingBase
         console.log(ID);
 
         ModAPI.addEventListener("lib:asyncsink", async () => {
@@ -117,8 +119,17 @@
         AsyncSink.setFile("resourcepacks/AsyncSinkLib/assets/minecraft/textures/entity/cube.png", await (await fetch(
             "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAAAXNSR0IArs4c6QAAAQBJREFUeF7l0BFzAmAAgOGvKxgMgiAYDIJgEARBEASDQTAIgiAYBEEQBN0NBkEQBEEQBIMgCAZBEAwGgyAIgiAIgiConxE88PJ790RCCNdYCOGeRe/4j4SYDvCgAzzqAHEdIKEDJHWAJx3gWQdI6QBpHeBFB8joAFkdIKcD5HWAgg5Q1AFedYA3HaCkA7zrAGUdoKIDVHWAmg7woQPUdYCGDtDUAVo6QFsH6OgAnzrAlw7Q1QF6OkBfBxjoAEMdYKQDjHWAiQ7wrQNMdYCZDjDXAX50gIUOsNQBVjrArw7wpwP86wBrHWCjA2x1gJ0OsNcBDjrAUQc46QBnHeBiA9wALSueIjTE4PwAAAAASUVORK5CYII="
         )).arrayBuffer());
-
+        AsyncSink.hideFile("resourcepacks/AsyncSinkLib/assets/minecraft/textures/entity/cube.png.mcmeta");
         ModAPI.mc.renderManager.entityRenderMap.put(ModAPI.util.asClass(data.EntityCube), new data.RenderCube(ModAPI.mc.renderManager.getRef()));
+        ModAPI.promisify(ModAPI.mc.renderEngine.bindTexture)(data.cubeTexture).then(() => {
+            console.log("Loaded cube texture into cache.");
+        });
     });
     console.log(data);
+    window.temp1 = data;
 })();
+//var cube_man = new temp1.EntityCube(ModAPI.mc.theWorld.getRef());
+//cube_man.$setPosition(-191, 74, 26);
+//AsyncSink.startDebugging();
+//AsyncSink.startDebuggingFS();
+//ModAPI.mc.theWorld.spawnEntityInWorld(cube_man);
