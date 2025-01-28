@@ -4,8 +4,10 @@ const asyncSinkIcon = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABIAAAASCAY
 ModAPI.meta.icon(asyncSinkIcon);
 ModAPI.meta.credits("By ZXMushroom63");
 (function AsyncSinkFn() {
+    const ResourceLocation = ModAPI.reflect.getClassByName("ResourceLocation").constructors.find(x => x.length === 1);
     //AsyncSink is a plugin to debug and override asynchronous methods in EaglercraftX
     async function runtimeComponent() {
+        const ResourceLocation = ModAPI.reflect.getClassByName("ResourceLocation").constructors.find(x => x.length === 1);
         const booleanResult = (b) => ModAPI.hooks.methods.nlevit_BooleanResult__new(b * 1);
         const wrap = ModAPI.hooks.methods.otji_JSWrapper_wrap;
         const unwrap = ModAPI.hooks.methods.otji_JSWrapper_unwrap;
@@ -285,4 +287,40 @@ ModAPI.meta.credits("By ZXMushroom63");
         ModAPI.events.callEvent("lib:asyncsink:registeritems", ModAPI.util.wrap(args[0]));
     }
 
+    AsyncSink.Audio = {};
+    AsyncSink.Audio.Category = ModAPI.reflect.getClassByName("SoundCategory").staticVariables;
+    AsyncSink.Audio.Objects = [];
+    const SoundHandler_onResourceManagerReload = ModAPI.hooks.methods[ModAPI.util.getMethodFromPackage("net.minecraft.client.audio.SoundHandler", "onResourceManagerReload")];
+    ModAPI.hooks.methods[ModAPI.util.getMethodFromPackage("net.minecraft.client.audio.SoundHandler", "onResourceManagerReload")] = function (...args) {
+        SoundHandler_onResourceManagerReload.apply(this, args);
+        var snd = ModAPI.mc.mcSoundHandler;
+        var registry = snd.sndRegistry.soundRegistry;
+        console.log("[AsyncSink] Populating sound registry hash map with " + AsyncSink.Audio.Objects.length + " sound effects.");
+    }
+
+    // key = "mob.entity.say"
+    // values = SoundEntry[]
+    // category: AsyncSink.Audio.Category.*
+    // SoundEntry = {path: String, pitch: 1, volume: 1, streaming: false}
+    const SoundPoolEntry = ModAPI.reflect.getClassByName("SoundPoolEntry").constructors.find(x => x.length === 4);
+    const SoundEventAccessor = ModAPI.reflect.getClassByName("SoundEventAccessor").constructors.find(x => x.length === 2);
+    const SoundEventAccessorComposite = ModAPI.reflect.getClassByName("SoundEventAccessorComposite").constructors.find(x => x.length === 4);
+    AsyncSink.Audio.register = function addSfx(key, category, values) {
+        var snd = ModAPI.mc.mcSoundHandler;
+        var registry = snd.sndRegistry.soundRegistry;
+        var rKey = ResourceLocation(ModAPI.util.str(key));
+        var soundPool = values.map(se => {
+            var path = ResourceLocation(ModAPI.util.str(path));
+            return SoundPoolEntry(path, se.pitch, se.volume, 1 * se.streaming);
+        }).map(spe => {
+            return SoundEventAccessor(spe, 1); // 1 = weight
+        });
+        var compositeSound = SoundEventAccessorComposite(rKey, 1, 1, category);
+        var compositeSoundWrapped = ModAPI.util.wrap(compositeSound);
+        soundPool.forEach(sound => {
+            compositeSoundWrapped.addSoundToEventPool(sound);
+        });
+        AsyncSink.Audio.Objects.push([rKey, compositeSound]);
+        registry.$put(rKey, compositeSound);
+    }
 })();
