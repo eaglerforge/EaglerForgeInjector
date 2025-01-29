@@ -317,8 +317,25 @@ ModAPI.meta.credits("By ZXMushroom63");
     // category: AsyncSink.Audio.Category.*
     // SoundEntry = {path: String, pitch: 1, volume: 1, streaming: false}
     const SoundPoolEntry = ModAPI.reflect.getClassByName("SoundPoolEntry").constructors.find(x => x.length === 4);
-    const SoundEventAccessor = ModAPI.reflect.getClassByName("SoundEventAccessor").constructors.find(x => x.length === 2);
-    const SoundEventAccessorComposite = ModAPI.reflect.getClassByName("SoundEventAccessorComposite").constructors.find(x => x.length === 4);
+    const SoundEventAccessorClass = ModAPI.reflect.getClassByName("SoundEventAccessor").class;
+    function makeSoundEventAccessor(soundpoolentry, weight) {
+        var object = new SoundEventAccessorClass;
+        var wrapped = ModAPI.util.wrap(object).getCorrective();
+        wrapped.entry = soundpoolentry;
+        wrapped.weight = weight;
+        return object;
+    }
+    const SoundEventAccessorCompositeClass = ModAPI.reflect.getClassByName("SoundEventAccessorComposite").class;
+    function makeSoundEventAccessorComposite(rKey, pitch, volume, category) {
+        var object = new SoundEventAccessorCompositeClass;
+        var wrapped = ModAPI.util.wrap(object).getCorrective();
+        wrapped.soundLocation = rKey;
+        wrapped.eventPitch = pitch;
+        wrapped.eventVolume = volume;
+        wrapped.category = category;
+        wrapped.soundPool = ModAPI.hooks.methods.cgcc_Lists_newArrayList1();
+        return object;
+    }
     AsyncSink.Audio.register = function addSfx(key, category, values) {
         var snd = ModAPI.mc.mcSoundHandler;
         var registry = snd.sndRegistry.soundRegistry;
@@ -327,14 +344,14 @@ ModAPI.meta.credits("By ZXMushroom63");
             var path = ResourceLocation(ModAPI.util.str(se.path));
             return SoundPoolEntry(path, se.pitch, se.volume, 1 * se.streaming);
         }).map(spe => {
-            return SoundEventAccessor(spe, 1); // 1 = weight
+            return makeSoundEventAccessor(spe, 1); // 1 = weight
         });
-        var compositeSound = SoundEventAccessorComposite(rKey, 1, 1, category);
+        var compositeSound = makeSoundEventAccessorComposite(rKey, 1, 1, category);
         var compositeSoundWrapped = ModAPI.util.wrap(compositeSound);
         soundPool.forEach(sound => {
-            compositeSoundWrapped.addSoundToEventPool(sound);
+            compositeSoundWrapped.soundPool.add(sound);
         });
         AsyncSink.Audio.Objects.push([rKey, compositeSound]);
-        registry.$put(rKey, compositeSound);
+        registry.put(rKey, compositeSound);
     }
 })();

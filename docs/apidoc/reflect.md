@@ -6,6 +6,7 @@ Properties:
 
 - `classes: ReflectClass[]`
   - `ModAPI.reflect.classes` is an array of ReflectClasses, representing (almost) every java class.
+- `classMap: Map<String, ReflectClass>` is a map of every class.
 
 Methods:
 
@@ -54,11 +55,8 @@ Each `ReflectClass` has the following properties:
   - List of all the static variable names for the class.
 - `staticVariables: Map<String, *>`
   - key-value dictionary of all the static variables in a class.
-- `superclass: Class?`
-  - The raw teavm class of the superclass.
-- `superclassName: String?`
-  - The class id of the class's superclass. Eg: `net.minecraft.client.entity.AbstractClientPlayer`
-  - Will be `null` if `hasMeta` is equal to `false`
+- `superclass: ReflectClass?`
+  - The superclass.
 
 Each `ReflectClass` has the following methods:
 

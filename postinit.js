@@ -353,21 +353,14 @@ globalThis.modapi_postinit = "(" + (() => {
                                 return this.constructors[i];
                             }
                         }
-                    }
+                    },
                 }
             }
+
             if (typeof item?.$meta?.superclass === "function" && item?.$meta?.superclass?.$meta) {
-                ModAPI.hooks._classMap[compiledName].superclass = item.$meta.superclass;
-                ModAPI.hooks._classMap[compiledName].superclassName = item.$meta.superclass.$meta.name ?? (item.$meta.superclass ? item.$meta.superclass.name.split("_").map((x, i) => {
-                    if (i === 0) {
-                        return x.split("").join(".") + "."
-                    } else {
-                        return x;
-                    }
-                }).join("_").replace("._", ".") : null);
+                ModAPI.hooks._classMap[compiledName].superclassRaw = item.$meta.superclass;
             } else {
-                ModAPI.hooks._classMap[compiledName].superclass = null;
-                ModAPI.hooks._classMap[compiledName].superclassName = null;
+                ModAPI.hooks._classMap[compiledName].superclassRaw = null;
             }
 
             if (item?.["$$constructor$$"]) {
@@ -414,7 +407,19 @@ globalThis.modapi_postinit = "(" + (() => {
             }));
             ModAPI.hooks._classMap[compiledName].staticVariableNames = Object.keys(ModAPI.hooks._classMap[compiledName].staticVariables);
         });
+
+        //populate superclasses
+        compiledNames.forEach(compiledName => {
+            var item = ModAPI.hooks._classMap[compiledName];
+            if (item.superclassRaw) {
+                item.superclass = ModAPI.hooks._classMap[item.superclassRaw.name];
+            } else {
+                item.superclass = null;
+            }
+        });
+
         ModAPI.reflect.classes = Object.values(ModAPI.hooks._classMap);
+        ModAPI.reflect.classMap = ModAPI.hooks._classMap;
         console.log("[ModAPI] Regenerated hook classmap.");
     }
     ModAPI.hooks.regenerateClassMap();
@@ -430,7 +435,13 @@ globalThis.modapi_postinit = "(" + (() => {
     //Magical function for making a subclass with a custom constructor that you can easily use super(...) on.
     ModAPI.reflect.getSuper = function getSuper(reflectClass, filter) {
         filter ||= (x) => x.length === 1;
+        while (!reflectClass.internalConstructors.find(filter) && reflectClass.superclass) {
+            reflectClass = reflectClass.superclass;
+        }
         var initialiser = reflectClass.internalConstructors.find(filter);
+        if (!initialiser) {
+            throw new Error("[ModAPI] Failed to find matching superclass constructor in tree.");
+        }
         return function superFunction(thisArg, ...extra_args) {
             reflectClass.class.call(thisArg);
             initialiser(thisArg, ...extra_args);
