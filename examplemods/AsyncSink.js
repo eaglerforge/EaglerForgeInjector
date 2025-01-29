@@ -45,6 +45,17 @@ ModAPI.meta.credits("By ZXMushroom63");
         AsyncSink.L10N = new Map();
         AsyncSink.FSOverride = new Set();
         AsyncSink.MIDDLEWARE = [];
+
+        //takes in a ResourceLocation and removes cached data. Use to only reload a specific texture if you know where it is stored.
+        AsyncSink.clearResourcePointer = function clearResourcePointer(resourceLocation) {
+            if (!resourceLocation) {
+                return;
+            }
+            var res = ModAPI.util.wrap((resourceLocation.isModProxy === true) ? resourceLocation.getRef() : resourceLocation);
+            res.cachedPointer = null;
+            res.cachedPointerType = 0;
+            ModAPI.mc.getTextureManager().mapTextureObjects.remove(res.getRef());
+        }
         AsyncSink.setFile = function setFile(path, data) {
             if (typeof data === "string") {
                 data = encoder.encode(data).buffer;
@@ -296,6 +307,9 @@ ModAPI.meta.credits("By ZXMushroom63");
         var snd = ModAPI.mc.mcSoundHandler;
         var registry = snd.sndRegistry.soundRegistry;
         console.log("[AsyncSink] Populating sound registry hash map with " + AsyncSink.Audio.Objects.length + " sound effects.");
+        AsyncSink.Audio.Objects.forEach(pair => {
+            registry.$put(pair[0], pair[1]);
+        });
     }
 
     // key = "mob.entity.say"
@@ -310,7 +324,7 @@ ModAPI.meta.credits("By ZXMushroom63");
         var registry = snd.sndRegistry.soundRegistry;
         var rKey = ResourceLocation(ModAPI.util.str(key));
         var soundPool = values.map(se => {
-            var path = ResourceLocation(ModAPI.util.str(path));
+            var path = ResourceLocation(ModAPI.util.str(se.path));
             return SoundPoolEntry(path, se.pitch, se.volume, 1 * se.streaming);
         }).map(spe => {
             return SoundEventAccessor(spe, 1); // 1 = weight
