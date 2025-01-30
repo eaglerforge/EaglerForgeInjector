@@ -310,7 +310,7 @@ ModAPI.meta.credits("By ZXMushroom63");
         var registry = snd.sndRegistry.soundRegistry;
         console.log("[AsyncSink] Populating sound registry hash map with " + AsyncSink.Audio.Objects.length + " sound effects.");
         AsyncSink.Audio.Objects.forEach(pair => {
-            registry.$put(pair[0], pair[1]);
+            registry.put(pair[0], pair[1]);
         });
     }
 
