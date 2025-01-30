@@ -7,7 +7,6 @@ ModAPI.meta.credits("By ZXMushroom63");
     const ResourceLocation = ModAPI.reflect.getClassByName("ResourceLocation").constructors.find(x => x.length === 1);
     //AsyncSink is a plugin to debug and override asynchronous methods in EaglercraftX
     async function runtimeComponent() {
-        const ResourceLocation = ModAPI.reflect.getClassByName("ResourceLocation").constructors.find(x => x.length === 1);
         const booleanResult = (b) => ModAPI.hooks.methods.nlevit_BooleanResult__new(b * 1);
         const wrap = ModAPI.hooks.methods.otji_JSWrapper_wrap;
         const unwrap = ModAPI.hooks.methods.otji_JSWrapper_unwrap;
@@ -317,6 +316,7 @@ ModAPI.meta.credits("By ZXMushroom63");
     // category: AsyncSink.Audio.Category.*
     // SoundEntry = {path: String, pitch: 1, volume: 1, streaming: false}
     const SoundPoolEntry = ModAPI.reflect.getClassByName("SoundPoolEntry").constructors.find(x => x.length === 4);
+    const EaglercraftRandom = ModAPI.reflect.getClassByName("EaglercraftRandom").constructors.find(x=>x.length===0);
     const SoundEventAccessorClass = ModAPI.reflect.getClassByName("SoundEventAccessor").class;
     function makeSoundEventAccessor(soundpoolentry, weight) {
         var object = new SoundEventAccessorClass;
@@ -334,9 +334,13 @@ ModAPI.meta.credits("By ZXMushroom63");
         wrapped.eventVolume = volume;
         wrapped.category = category;
         wrapped.soundPool = ModAPI.hooks.methods.cgcc_Lists_newArrayList1();
+        wrapped.rnd = EaglercraftRandom();
         return object;
     }
     AsyncSink.Audio.register = function addSfx(key, category, values) {
+        if (!category) {
+            throw new Error("[AsyncSink] Invalid audio category provided: "+category);
+        }
         var snd = ModAPI.mc.mcSoundHandler;
         var registry = snd.sndRegistry.soundRegistry;
         var rKey = ResourceLocation(ModAPI.util.str(key));
@@ -353,5 +357,6 @@ ModAPI.meta.credits("By ZXMushroom63");
         });
         AsyncSink.Audio.Objects.push([rKey, compositeSound]);
         registry.put(rKey, compositeSound);
+        values.map(x=>"resourcepacks/AsyncSinkLib/assets/minecraft/" + x.path + ".mcmeta").forEach(x=>AsyncSink.setFile(x, new ArrayBuffer(0)));
     }
 })();
