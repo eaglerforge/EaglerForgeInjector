@@ -541,7 +541,7 @@ globalThis.modapi_postinit = "(" + (() => {
             var corrective = !!this._corrective;
             var outProp = "$" + prop;
             if (corrective) {
-                outProp = ModAPI.util.getNearestProperty(target, outProp);
+                outProp = ModAPI.util.getNearestProperty(object, outProp);
             }
             object[outProp] = value;
             return true;
