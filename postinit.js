@@ -538,7 +538,11 @@ globalThis.modapi_postinit = "(" + (() => {
             return outputValue;
         },
         set(object, prop, value) {
+            var corrective = !!this._corrective;
             var outProp = "$" + prop;
+            if (corrective) {
+                outProp = ModAPI.util.getNearestProperty(target, outProp);
+            }
             object[outProp] = value;
             return true;
         },
