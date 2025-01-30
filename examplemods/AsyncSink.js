@@ -303,6 +303,9 @@ ModAPI.meta.credits("By ZXMushroom63");
     const SoundHandler_onResourceManagerReload = ModAPI.hooks.methods[ModAPI.util.getMethodFromPackage("net.minecraft.client.audio.SoundHandler", "onResourceManagerReload")];
     ModAPI.hooks.methods[ModAPI.util.getMethodFromPackage("net.minecraft.client.audio.SoundHandler", "onResourceManagerReload")] = function (...args) {
         SoundHandler_onResourceManagerReload.apply(this, args);
+        if (ModAPI.util.isCritical()) {
+            return;
+        }
         var snd = ModAPI.mc.mcSoundHandler;
         var registry = snd.sndRegistry.soundRegistry;
         console.log("[AsyncSink] Populating sound registry hash map with " + AsyncSink.Audio.Objects.length + " sound effects.");
