@@ -21,7 +21,6 @@
         var nme_EntityDuck = function nme_EntityDuck($worldIn) {
             entitySuper(this, $worldIn);
             this.wrapped ||= ModAPI.util.wrap(this).getCorrective();
-            console.log(this.$setSize);
             this.wrapped.setSize(0.4, 0.7);
             this.wrapped.tasks.addTask(0, AITask("EntityAISwimming", 1)(this));
             this.wrapped.tasks.addTask(1, AITask("EntityAIPanic", 2)(this, 1.9));
@@ -50,11 +49,11 @@
         nme_EntityDuck.prototype.$onLivingUpdate = function () {
             this.wrapped ||= ModAPI.util.wrap(this).getCorrective();
             originalLivingUpdate.apply(this, []);
-            // if (this.$isInWater()) {
-            //     this.$getEntityAttribute(SharedMonsterAttributes.movementSpeed).$setBaseValue(0.6);
-            // } else {
-            //     this.$getEntityAttribute(SharedMonsterAttributes.movementSpeed).$setBaseValue(0.25);
-            // }
+            if (this.wrapped.isInWater()) {
+                this.wrapped.getEntityAttribute(SharedMonsterAttributes.movementSpeed).setBaseValue(1.15);
+            } else {
+                this.wrapped.getEntityAttribute(SharedMonsterAttributes.movementSpeed).setBaseValue(0.25);
+            }
         }
 
         nme_EntityDuck.prototype.$getLivingSound = function () {
@@ -90,6 +89,14 @@
             modelChickenSuper(this);
         }
         ModAPI.reflect.prototypeStack(modelChickenClass, nmcm_ModelDuck);
+        var parentSetRotationAndAngles = nmcm_ModelDuck.$setRotationAngles;
+        nmcm_ModelDuck.$setRotationAngles = function (f, f1, f2, f3, f4, var6, entity) {
+            parentSetRotationAndAngles.apply(this, [f, f1, f2, f3, f4, var6, entity]);
+            var wrapped = ModAPI.util.wrap(this).getCorrective();
+            var wingPos = 0;
+            wrapped.rightWing.rotateAngleZ = wingPos;
+		    wrapped.leftWing.rotateAngleZ = -wingPos;
+        }
         // END CUSTOM MODEL
 
 
