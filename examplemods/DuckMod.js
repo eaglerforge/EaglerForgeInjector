@@ -21,6 +21,7 @@
         var nme_EntityDuck = function nme_EntityDuck($worldIn) {
             entitySuper(this, $worldIn);
             this.wrapped ||= ModAPI.util.wrap(this).getCorrective();
+            console.log(this.$setSize);
             this.wrapped.setSize(0.4, 0.7);
             this.wrapped.tasks.addTask(0, AITask("EntityAISwimming", 1)(this));
             this.wrapped.tasks.addTask(1, AITask("EntityAIPanic", 2)(this, 1.9));
@@ -67,7 +68,6 @@
         }
         nme_EntityDuck.prototype.$playStepSound = function () {
             this.wrapped ||= ModAPI.util.wrap(this).getCorrective();
-            debugger;
             this.wrapped.playSound(ModAPI.util.str("mob.duck.step"), 0.2, 1);
         }
         nme_EntityDuck.prototype.$getDropItem = function () {
@@ -75,7 +75,7 @@
         }
         nme_EntityDuck.prototype.$createChild = function (otherParent) {
             this.wrapped ||= ModAPI.util.wrap(this).getCorrective();
-            return new nme_EntityDuck(this.wrapped.worldObj);
+            return new nme_EntityDuck(this.wrapped.worldObj?.getRef() ?? null);
         }
         nme_EntityDuck.prototype.$isBreedingItem = function (itemstack) {
             return itemstack !== null && itemstack.$getItem() === ModAPI.items.bread.getRef();
