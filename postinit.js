@@ -396,8 +396,13 @@ globalThis.modapi_postinit = "(" + (() => {
 
                     //Prototype Injection, allows for far easier access to methods
                     if (typeof item === "function" && ModAPI.hooks._rippedMethodTypeMap[method] === "instance") {
-                        item.prototype["$" + method.replace(compiledName + "_", "")] = function (...args) {
+                        var prototypeInjectedMethod = function prototypeInjectedMethod(...args) {
                             return ModAPI.hooks.methods[method].apply(this, [this, ...args]);
+                        }
+                        if ((item.prototype["$" + method.replace(compiledName + "_", "")]?.name ?? "prototypeInjectedMethod") === "prototypeInjectedMethod") {
+                            item.prototype["$" + method.replace(compiledName + "_", "")] = prototypeInjectedMethod;
+                        } else {
+                            item.prototype["$" + method.replace(compiledName + "_", "")] ||= prototypeInjectedMethod;
                         }
                     }
                 }
