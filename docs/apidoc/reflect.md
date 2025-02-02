@@ -6,6 +6,7 @@ Properties:
 
 - `classes: ReflectClass[]`
   - `ModAPI.reflect.classes` is an array of ReflectClasses, representing (almost) every java class.
+- `classMap: Map<String, ReflectClass>` is a map of every class.
 
 Methods:
 
@@ -16,12 +17,17 @@ Methods:
   - This method is used to find a class by its id.
   - For example, to get the `Minecraft` class, you can use `ModAPI.reflect.getClassById("Minecraft")`
   - This runs slower than `getClassById` because it has to filter through all classes. Make sure to cache the result rather than calling it over and over again.
-- `ModAPI.reflect.getSuper(rClass: ReflectClass, filter: Function) : Function`
+- `ModAPI.reflect.getSuper(rClass: ReflectClass, filter: Function?) : Function`
   - Gets a super function from a reflect class. This is used to extend built in classes, like `Block`.
-  - For an example, see lines [29](https://github.com/eaglerforge/EaglerForgeInjector/blob/6e8598c180f96a65c0c101be72e6d0fa53195404/examplemods/unlucky_blocks.js#L29) and [33](https://github.com/eaglerforge/EaglerForgeInjector/blob/6e8598c180f96a65c0c101be72e6d0fa53195404/examplemods/unlucky_blocks.js#L33) in unlucky_blocks.js
+  - For an example, see lines [29](https://github.com/eaglerforge/EaglerForgeInjector/blob/6e8598c180f96a65c0c101be72e6d0fa53195404/examplemods/unlucky_blocks.js#L29) and [33](https://github.com/eaglerforge/EaglerForgeInjector/blob/6e8598c180f96a65c0c101be72e6d0fa53195404/examplemods/unlucky_blocks.js#L33) in `unlucky_blocks.js`
+  - When called without a filter function, the filter defaults to `(fn)=>fn.length === 1`
 - `ModAPI.reflect.prototypeStack(rClass: ReflectClass, target: Class/ConstructorFunction) : void`
   - Copies methods from a reflect class and it's parents onto a target native JavaScript class. This allows TeaVM to use these objects normally, without you having to manually reimplement every method. In other words, this is the equivalent of extending a class.
+  - Also adds some metadata to make the class work with `ModAPI.util.asClass`
   - [Example usage](https://github.com/eaglerforge/EaglerForgeInjector/blob/6e8598c180f96a65c0c101be72e6d0fa53195404/examplemods/unlucky_blocks.js#L37)
+- `ModAPI.reflect.implements(target: Class/ConstructorFunction, interface: ReflectClass)`
+  - Marks the provided interface as a supertype of the target class.
+  - JavaScript equivalent of the `implements` keyword
 ### ReflectClass Definition
 
 Each `ReflectClass` has the following properties:
@@ -49,11 +55,8 @@ Each `ReflectClass` has the following properties:
   - List of all the static variable names for the class.
 - `staticVariables: Map<String, *>`
   - key-value dictionary of all the static variables in a class.
-- `superclass: Class?`
-  - The raw teavm class of the superclass.
-- `superclassName: String?`
-  - The class id of the class's superclass. Eg: `net.minecraft.client.entity.AbstractClientPlayer`
-  - Will be `null` if `hasMeta` is equal to `false`
+- `superclass: ReflectClass?`
+  - The superclass.
 
 Each `ReflectClass` has the following methods:
 

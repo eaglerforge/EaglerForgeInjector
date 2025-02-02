@@ -4,6 +4,7 @@ const asyncSinkIcon = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABIAAAASCAY
 ModAPI.meta.icon(asyncSinkIcon);
 ModAPI.meta.credits("By ZXMushroom63");
 (function AsyncSinkFn() {
+    const ResourceLocation = ModAPI.reflect.getClassByName("ResourceLocation").constructors.find(x => x.length === 1);
     //AsyncSink is a plugin to debug and override asynchronous methods in EaglercraftX
     async function runtimeComponent() {
         const booleanResult = (b) => ModAPI.hooks.methods.nlevit_BooleanResult__new(b * 1);
@@ -43,6 +44,17 @@ ModAPI.meta.credits("By ZXMushroom63");
         AsyncSink.L10N = new Map();
         AsyncSink.FSOverride = new Set();
         AsyncSink.MIDDLEWARE = [];
+
+        //takes in a ResourceLocation and removes cached data. Use to only reload a specific texture if you know where it is stored.
+        AsyncSink.clearResourcePointer = function clearResourcePointer(resourceLocation) {
+            if (!resourceLocation) {
+                return;
+            }
+            var res = ModAPI.util.wrap((resourceLocation.isModProxy === true) ? resourceLocation.getRef() : resourceLocation);
+            res.cachedPointer = null;
+            res.cachedPointerType = 0;
+            ModAPI.mc.getTextureManager().mapTextureObjects.remove(res.getRef());
+        }
         AsyncSink.setFile = function setFile(path, data) {
             if (typeof data === "string") {
                 data = encoder.encode(data).buffer;
@@ -54,6 +66,12 @@ ModAPI.meta.credits("By ZXMushroom63");
 
         AsyncSink.deleteFile = function deleteFile(path) {
             AsyncSink.FSOverride.delete(path);
+            AsyncSink.FS.delete(path);
+            return true;
+        }
+
+        AsyncSink.hideFile = function hideFile(path) {
+            AsyncSink.FSOverride.add(path);
             AsyncSink.FS.delete(path);
             return true;
         }
@@ -160,6 +178,16 @@ ModAPI.meta.credits("By ZXMushroom63");
             return originalL10NRead.apply(this, args);
         };
 
+        const L18NFormat = ModAPI.util.getMethodFromPackage("net.minecraft.client.resources.I18n", "format");
+        const originalL18NFormat = ModAPI.hooks.methods[L18NFormat];
+        ModAPI.hooks.methods[L18NFormat] = function (...args) {
+            var key = ModAPI.util.ustr(args[0]);
+            if (AsyncSink.L10N.has(key)) {
+                args[0] = ModAPI.util.str(AsyncSink.L10N.get(key));
+            }
+            return originalL18NFormat.apply(this, args);
+        };
+
         const L10NCheck = ModAPI.util.getMethodFromPackage("net.minecraft.util.StatCollector", "canTranslate");
         const originalL10NCheck = ModAPI.hooks.methods[L10NCheck];
         ModAPI.hooks.methods[L10NCheck] = function (...args) {
@@ -203,7 +231,7 @@ ModAPI.meta.credits("By ZXMushroom63");
         } else {
             resourcePackList.resourcePacks.push(pack);
         }
-        
+
         const writeableTransaction = db.transaction(["filesystem"], "readwrite");
         const writeableObjectStore = writeableTransaction.objectStore("filesystem");
         await promisifyIDBRequest(writeableObjectStore.put({
@@ -255,8 +283,9 @@ ModAPI.meta.credits("By ZXMushroom63");
         if (e.message.toLowerCase().startsWith(".reload_tex")) {
             e.preventDefault = true;
             ModAPI.mc.renderItem.itemModelMesher.simpleShapesCache.clear();
-            ModAPI.promisify(ModAPI.mc.refreshResources)().then(()=>{
+            ModAPI.promisify(ModAPI.mc.refreshResources)().then(() => {
                 ModAPI.events.callEvent("custom:asyncsink_reloaded", {});
+                ModAPI.events.callEvent("lib:asyncsink:registeritems", ModAPI.mc.renderItem);
             });
         }
     });
@@ -268,4 +297,69 @@ ModAPI.meta.credits("By ZXMushroom63");
         ModAPI.events.callEvent("lib:asyncsink:registeritems", ModAPI.util.wrap(args[0]));
     }
 
+    AsyncSink.Audio = {};
+    AsyncSink.Audio.Category = ModAPI.reflect.getClassByName("SoundCategory").staticVariables;
+    AsyncSink.Audio.Objects = [];
+    const SoundHandler_onResourceManagerReload = ModAPI.hooks.methods[ModAPI.util.getMethodFromPackage("net.minecraft.client.audio.SoundHandler", "onResourceManagerReload")];
+    ModAPI.hooks.methods[ModAPI.util.getMethodFromPackage("net.minecraft.client.audio.SoundHandler", "onResourceManagerReload")] = function (...args) {
+        SoundHandler_onResourceManagerReload.apply(this, args);
+        if (ModAPI.util.isCritical()) {
+            return;
+        }
+        var snd = ModAPI.mc.mcSoundHandler;
+        var registry = snd.sndRegistry.soundRegistry;
+        console.log("[AsyncSink] Populating sound registry hash map with " + AsyncSink.Audio.Objects.length + " sound effects.");
+        AsyncSink.Audio.Objects.forEach(pair => {
+            registry.put(pair[0], pair[1]);
+        });
+    }
+
+    // key = "mob.entity.say"
+    // values = SoundEntry[]
+    // category: AsyncSink.Audio.Category.*
+    // SoundEntry = {path: String, pitch: 1, volume: 1, streaming: false}
+    const SoundPoolEntry = ModAPI.reflect.getClassByName("SoundPoolEntry").constructors.find(x => x.length === 4);
+    const EaglercraftRandom = ModAPI.reflect.getClassByName("EaglercraftRandom").constructors.find(x=>x.length===0);
+    const SoundEventAccessorClass = ModAPI.reflect.getClassByName("SoundEventAccessor").class;
+    function makeSoundEventAccessor(soundpoolentry, weight) {
+        var object = new SoundEventAccessorClass;
+        var wrapped = ModAPI.util.wrap(object).getCorrective();
+        wrapped.entry = soundpoolentry;
+        wrapped.weight = weight;
+        return object;
+    }
+    const SoundEventAccessorCompositeClass = ModAPI.reflect.getClassByName("SoundEventAccessorComposite").class;
+    function makeSoundEventAccessorComposite(rKey, pitch, volume, category) {
+        var object = new SoundEventAccessorCompositeClass;
+        var wrapped = ModAPI.util.wrap(object).getCorrective();
+        wrapped.soundLocation = rKey;
+        wrapped.eventPitch = pitch;
+        wrapped.eventVolume = volume;
+        wrapped.category = category;
+        wrapped.soundPool = ModAPI.hooks.methods.cgcc_Lists_newArrayList1();
+        wrapped.rnd = EaglercraftRandom();
+        return object;
+    }
+    AsyncSink.Audio.register = function addSfx(key, category, values) {
+        if (!category) {
+            throw new Error("[AsyncSink] Invalid audio category provided: "+category);
+        }
+        var snd = ModAPI.mc.mcSoundHandler;
+        var registry = snd.sndRegistry.soundRegistry;
+        var rKey = ResourceLocation(ModAPI.util.str(key));
+        var soundPool = values.map(se => {
+            var path = ResourceLocation(ModAPI.util.str(se.path));
+            return SoundPoolEntry(path, se.pitch, se.volume, 1 * se.streaming);
+        }).map(spe => {
+            return makeSoundEventAccessor(spe, 1); // 1 = weight
+        });
+        var compositeSound = makeSoundEventAccessorComposite(rKey, 1, 1, category);
+        var compositeSoundWrapped = ModAPI.util.wrap(compositeSound);
+        soundPool.forEach(sound => {
+            compositeSoundWrapped.soundPool.add(sound);
+        });
+        AsyncSink.Audio.Objects.push([rKey, compositeSound]);
+        registry.put(rKey, compositeSound);
+        values.map(x=>"resourcepacks/AsyncSinkLib/assets/minecraft/" + x.path + ".mcmeta").forEach(x=>AsyncSink.setFile(x, new ArrayBuffer(0)));
+    }
 })();

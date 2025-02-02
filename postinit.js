@@ -166,6 +166,8 @@ globalThis.modapi_postinit = "(" + (() => {
         return name;
     }
 
+    ModAPI.util.asClass = ModAPI.hooks._teavm.$rt_cls;
+
     ModAPI.util.wrap = function (outputValue, target, corrective, disableFunctions) {
         target ||= {};
         corrective ||= false;
@@ -187,9 +189,9 @@ globalThis.modapi_postinit = "(" + (() => {
         if (!disableFunctions && outputValue && typeof outputValue === "function" && target) {
             return function (...args) {
                 var xOut = outputValue.apply(target, args);
-                if (xOut && typeof xOut === "object" && Array.isArray(xOut.data) && typeof outputValue.type === "function") {
+                if (xOut && typeof xOut === "object" && Array.isArray(xOut.data) && typeof xOut.type === "function") {
                     if (corrective) {
-                        return new Proxy(outputValue.data, CorrectiveArray);
+                        return new Proxy(xOut.data, CorrectiveArray);
                     }
                     return new Proxy(xOut.data, ModAPI.util.TeaVMArray_To_Recursive_BaseData_ProxyConf);
                 }
@@ -267,6 +269,7 @@ globalThis.modapi_postinit = "(" + (() => {
         ModAPI.hooks._rippedConstructorKeys = Object.keys(ModAPI.hooks._rippedConstructors);
         ModAPI.hooks._rippedInternalConstructorKeys = Object.keys(ModAPI.hooks._rippedInternalConstructors);
         ModAPI.hooks._rippedMethodKeys = Object.keys(ModAPI.hooks._rippedMethodTypeMap);
+        ModAPI.hooks._rippedInterfaceKeys = Object.keys(ModAPI.hooks._rippedInterfaceMap);
 
         var compiledNames = new Set();
         var metaMap = {};
@@ -300,10 +303,19 @@ globalThis.modapi_postinit = "(" + (() => {
             }
         });
 
+        ModAPI.hooks._rippedInterfaceKeys.forEach(className => {
+            if (typeof className === "string" && className.length > 0) {
+                //Interfaces using $rt_classWithoutFields(0) and no constructors.
+                if (className && className.includes("_")) {
+                    compiledNames.add(className);
+                }
+            }
+        });
+
 
         //Initialise all compiled names into the class map
         compiledNames.forEach(compiledName => {
-            var item = metaMap[compiledName];
+            var item = metaMap[compiledName] || ModAPI.hooks._rippedInterfaceMap[compiledName];
             var classId = item?.$meta?.name || null;
 
             if (!ModAPI.hooks._classMap[compiledName]) {
@@ -319,7 +331,7 @@ globalThis.modapi_postinit = "(" + (() => {
                     "staticVariables": {},
                     "staticVariableNames": [],
                     "class": item || null,
-                    "hasMeta": !!item,
+                    "hasMeta": !!(item?.$meta),
                     "instanceOf": function (object) {
                         try {
                             return ModAPI.hooks._teavm.$rt_isInstance(object, item || null);
@@ -341,15 +353,14 @@ globalThis.modapi_postinit = "(" + (() => {
                                 return this.constructors[i];
                             }
                         }
-                    }
+                    },
                 }
             }
+
             if (typeof item?.$meta?.superclass === "function" && item?.$meta?.superclass?.$meta) {
-                ModAPI.hooks._classMap[compiledName].superclassName = item.$meta.superclass.$meta.name;
-                ModAPI.hooks._classMap[compiledName].superclass = item.$meta.superclass;
+                ModAPI.hooks._classMap[compiledName].superclassRaw = item.$meta.superclass;
             } else {
-                ModAPI.hooks._classMap[compiledName].superclass = null;
-                ModAPI.hooks._classMap[compiledName].superclassName = null;
+                ModAPI.hooks._classMap[compiledName].superclassRaw = null;
             }
 
             if (item?.["$$constructor$$"]) {
@@ -385,8 +396,13 @@ globalThis.modapi_postinit = "(" + (() => {
 
                     //Prototype Injection, allows for far easier access to methods
                     if (typeof item === "function" && ModAPI.hooks._rippedMethodTypeMap[method] === "instance") {
-                        item.prototype["$" + method.replace(compiledName + "_", "")] ||= function (...args) {
+                        var prototypeInjectedMethod = function prototypeInjectedMethod(...args) {
                             return ModAPI.hooks.methods[method].apply(this, [this, ...args]);
+                        }
+                        if ((item.prototype["$" + method.replace(compiledName + "_", "")]?.name ?? "prototypeInjectedMethod") === "prototypeInjectedMethod") {
+                            item.prototype["$" + method.replace(compiledName + "_", "")] = prototypeInjectedMethod;
+                        } else {
+                            item.prototype["$" + method.replace(compiledName + "_", "")] ||= prototypeInjectedMethod;
                         }
                     }
                 }
@@ -396,7 +412,19 @@ globalThis.modapi_postinit = "(" + (() => {
             }));
             ModAPI.hooks._classMap[compiledName].staticVariableNames = Object.keys(ModAPI.hooks._classMap[compiledName].staticVariables);
         });
+
+        //populate superclasses
+        compiledNames.forEach(compiledName => {
+            var item = ModAPI.hooks._classMap[compiledName];
+            if (item.superclassRaw) {
+                item.superclass = ModAPI.hooks._classMap[item.superclassRaw.name];
+            } else {
+                item.superclass = null;
+            }
+        });
+
         ModAPI.reflect.classes = Object.values(ModAPI.hooks._classMap);
+        ModAPI.reflect.classMap = ModAPI.hooks._classMap;
         console.log("[ModAPI] Regenerated hook classmap.");
     }
     ModAPI.hooks.regenerateClassMap();
@@ -411,8 +439,14 @@ globalThis.modapi_postinit = "(" + (() => {
 
     //Magical function for making a subclass with a custom constructor that you can easily use super(...) on.
     ModAPI.reflect.getSuper = function getSuper(reflectClass, filter) {
-        filter ||= () => true;
+        filter ||= (x) => x.length === 1;
+        while (!reflectClass.internalConstructors.find(filter) && reflectClass.superclass) {
+            reflectClass = reflectClass.superclass;
+        }
         var initialiser = reflectClass.internalConstructors.find(filter);
+        if (!initialiser) {
+            throw new Error("[ModAPI] Failed to find matching superclass constructor in tree.");
+        }
         return function superFunction(thisArg, ...extra_args) {
             reflectClass.class.call(thisArg);
             initialiser(thisArg, ...extra_args);
@@ -427,18 +461,27 @@ globalThis.modapi_postinit = "(" + (() => {
             item: null,
             supertypes: [reflectClass.class]
         };
+        classFn.classObject = null;
+    }
+    ModAPI.reflect.implements = function impl(classFn, reflectClass) {
+        classFn.$meta ||= {};
+        classFn.$meta.supertypes ||= [];
+        if (reflectClass && reflectClass.class) {
+            classFn.$meta.supertypes.push(reflectClass.class);
+        }
     }
 
     var reloadDeprecationWarnings = 0;
     const TeaVMArray_To_Recursive_BaseData_ProxyConf = {
         get(target, prop, receiver) {
+            var corrective = !!this._corrective;
             if (prop === "getRef") {
                 return function () {
                     return target;
                 }
             }
             var outputValue = Reflect.get(target, prop, receiver);
-            var wrapped = ModAPI.util.wrap(outputValue, target, this._corrective, true);
+            var wrapped = ModAPI.util.wrap(outputValue, target, corrective, true);
             if (wrapped) {
                 return wrapped;
             }
@@ -460,6 +503,7 @@ globalThis.modapi_postinit = "(" + (() => {
             return ("$" + prop) in target;
         },
         get(target, prop, receiver) {
+            var corrective = !!this._corrective;
             if (prop === "getCorrective") {
                 return function () {
                     return new Proxy(target, patchProxyConfToCorrective(TeaVM_to_Recursive_BaseData_ProxyConf));
@@ -467,7 +511,7 @@ globalThis.modapi_postinit = "(" + (() => {
             }
             if (prop === "isCorrective") {
                 return function () {
-                    return !!this._corrective;
+                    return corrective;
                 }
             }
             if (prop === "getRef") {
@@ -484,22 +528,26 @@ globalThis.modapi_postinit = "(" + (() => {
                 }
             }
             if (prop === "isModProxy") {
-                return true
+                return true;
             }
 
             var outProp = "$" + prop;
-            if (this._corrective) {
+            if (corrective) {
                 outProp = ModAPI.util.getNearestProperty(target, outProp);
             }
             var outputValue = Reflect.get(target, outProp, receiver);
-            var wrapped = ModAPI.util.wrap(outputValue, target, this._corrective, false);
+            var wrapped = ModAPI.util.wrap(outputValue, target, corrective, false);
             if (wrapped) {
                 return wrapped;
             }
             return outputValue;
         },
         set(object, prop, value) {
+            var corrective = !!this._corrective;
             var outProp = "$" + prop;
+            if (corrective) {
+                outProp = ModAPI.util.getNearestProperty(object, outProp);
+            }
             object[outProp] = value;
             return true;
         },
@@ -1019,9 +1067,9 @@ globalThis.modapi_postinit = "(" + (() => {
     ModAPI.util.getBlockFromItem = easyStaticMethod("net.minecraft.block.Block", "getBlockFromItem", true);
     ModAPI.util.getIdFromBlock = easyStaticMethod("net.minecraft.block.Block", "getIdFromBlock", true);
 
-    function qhash(txt, arr) {
-        var interval = 4095; //used to be 4095 - arr.length, but that increases incompatibility based on load order and otehr circumstances
-        if (arr.length >= 4095) {
+    function qhash(txt, arr, interval) {
+        // var interval = 4095; //used to be 4095 - arr.length, but that increases incompatibility based on load order and other circumstances
+        if (arr.length >= interval) {
             console.error("[ModAPI.keygen] Ran out of IDs while generating for " + txt);
             return -1;
         }
@@ -1049,10 +1097,15 @@ globalThis.modapi_postinit = "(" + (() => {
     }
     ModAPI.keygen.item = function (item) {
         var values = [...ModAPI.reflect.getClassById("net.minecraft.item.Item").staticVariables.itemRegistry.$modapi_specmap.values()];
-        return qhash(item, values);
+        return qhash(item, values, 4095);
     }
     ModAPI.keygen.block = function (block) {
         var values = [...ModAPI.reflect.getClassById("net.minecraft.block.Block").staticVariables.blockRegistry.$modapi_specmap.values()];
-        return qhash(block, values);
+        return qhash(block, values, 4095);
+    }
+    ModAPI.keygen.entity = function (entity) {
+        var hashMap = ModAPI.util.wrap(ModAPI.reflect.getClassById("net.minecraft.entity.EntityList").staticVariables.idToClassMapping).getCorrective();
+        var values = hashMap.keys.getRef().data.filter(x=>hashMap.get(x));
+        return qhash(entity, values, 127);
     }
 }).toString() + ")();";
