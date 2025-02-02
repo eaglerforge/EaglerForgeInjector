@@ -29,7 +29,7 @@
             this.wrapped.tasks.addTask(4, AITask("EntityAIFollowParent", 2)(this, 1.2));
             this.wrapped.tasks.addTask(5, AITask("EntityAIWander", 2)(this, 1.1));
             this.wrapped.tasks.addTask(6, AITask("EntityAIWatchClosest", 3)(this, ModAPI.util.asClass(EntityPlayer.class), 6));
-            this.wrapped.tasks.addTask(7, AITask("EntityAILookIdle", 1)(this)); 
+            this.wrapped.tasks.addTask(7, AITask("EntityAILookIdle", 1)(this));
         }
         ModAPI.reflect.prototypeStack(entityClass, nme_EntityDuck);
         nme_EntityDuck.prototype.$getEyeHeight = function () {
@@ -50,7 +50,8 @@
             this.wrapped ||= ModAPI.util.wrap(this).getCorrective();
             originalLivingUpdate.apply(this, []);
             if (this.wrapped.isInWater()) {
-                this.wrapped.getEntityAttribute(SharedMonsterAttributes.movementSpeed).setBaseValue(1.15);
+                this.wrapped.motionY *= 0.5;
+                this.wrapped.getEntityAttribute(SharedMonsterAttributes.movementSpeed).setBaseValue(1.4);
             } else {
                 this.wrapped.getEntityAttribute(SharedMonsterAttributes.movementSpeed).setBaseValue(0.25);
             }
@@ -89,14 +90,6 @@
             modelChickenSuper(this);
         }
         ModAPI.reflect.prototypeStack(modelChickenClass, nmcm_ModelDuck);
-        var parentSetRotationAndAngles = nmcm_ModelDuck.$setRotationAngles;
-        nmcm_ModelDuck.$setRotationAngles = function (f, f1, f2, f3, f4, var6, entity) {
-            parentSetRotationAndAngles.apply(this, [f, f1, f2, f3, f4, var6, entity]);
-            var wrapped = ModAPI.util.wrap(this).getCorrective();
-            var wingPos = 0;
-            wrapped.rightWing.rotateAngleZ = wingPos;
-		    wrapped.leftWing.rotateAngleZ = -wingPos;
-        }
         // END CUSTOM MODEL
 
 
@@ -110,6 +103,14 @@
         ModAPI.reflect.prototypeStack(renderClass, nmcre_RenderDuck);
         nmcre_RenderDuck.prototype.$getEntityTexture = function (entity) {
             return duckTextures;
+        }
+        nmcre_RenderDuck.prototype.$handleRotationFloat = function (entity, partialTicks) {
+            entity = ModAPI.util.wrap(entity);
+            if ((!entity.onGround) && (!entity.isInWater())) {
+                return 2; //falling
+            } else {
+                return 0;
+            }
         }
 
         const ID = ModAPI.keygen.entity("duck");
@@ -125,8 +126,37 @@
             0x5e3e2d, //egg base
             0x269166 //egg spots
         );
-        // Note that the spawn egg for this will not work, as spawn eggs only spawn entities that are a subclass of EntityLivingBase
-        console.log(ID);
+
+        const SpawnPlacementType = ModAPI.reflect.getClassById("net.minecraft.entity.EntityLiving$SpawnPlacementType").staticVariables;
+        const ENTITY_PLACEMENTS = ModAPI.util.wrap(
+            ModAPI.reflect.getClassById("net.minecraft.entity.EntitySpawnPlacementRegistry")
+                .staticVariables.ENTITY_PLACEMENTS
+        );
+        ENTITY_PLACEMENTS.put(ModAPI.util.asClass(nme_EntityDuck), SpawnPlacementType.ON_GROUND);
+        ModAPI.addEventListener('bootstrap', ()=>{
+            const SpawnListEntry = ModAPI.reflect
+                .getClassById("net.minecraft.world.biome.BiomeGenBase$SpawnListEntry")
+                .constructors.find(x => x.length === 4);
+            const BiomeGenSwamp = ModAPI.util.wrap(
+                ModAPI.reflect.getClassById("net.minecraft.world.biome.BiomeGenBase")
+                    .staticVariables.swampland
+            );
+            const BiomeGenRiver = ModAPI.util.wrap(
+                ModAPI.reflect.getClassById("net.minecraft.world.biome.BiomeGenBase")
+                    .staticVariables.river
+            );
+            const BiomeGenBeach = ModAPI.util.wrap(
+                ModAPI.reflect.getClassById("net.minecraft.world.biome.BiomeGenBase")
+                    .staticVariables.beach
+            );
+            const duckSpawnSwamp = SpawnListEntry(ModAPI.util.asClass(nme_EntityDuck), 22, 3, 5);
+            const duckSpawnRiverBed = SpawnListEntry(ModAPI.util.asClass(nme_EntityDuck), 10, 5, 9);
+            const duckSpawnBeach = SpawnListEntry(ModAPI.util.asClass(nme_EntityDuck), 24, 2, 3);
+            BiomeGenSwamp.spawnableCreatureList.add(duckSpawnSwamp);
+            BiomeGenRiver.spawnableCreatureList.add(duckSpawnRiverBed);
+            BiomeGenBeach.spawnableCreatureList.add(duckSpawnBeach);
+        });
+        
 
         ModAPI.addEventListener("lib:asyncsink", async () => {
             AsyncSink.L10N.set("entity.Duck.name", "Duck");
