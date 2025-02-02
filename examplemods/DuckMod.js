@@ -1,5 +1,5 @@
 (function DuckEntity() {
-    ModAPI.meta.title("Duck Mod");
+    ModAPI.meta.title("Duck Mod 🦆");
     ModAPI.meta.version("v1");
     ModAPI.meta.description("adds ducks to the game");
     ModAPI.meta.credits("By ZXMushroom63");
