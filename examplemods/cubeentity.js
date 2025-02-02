@@ -132,11 +132,11 @@
         )).arrayBuffer());
         AsyncSink.hideFile("resourcepacks/AsyncSinkLib/assets/minecraft/textures/entity/cube.png.mcmeta");
         
+        await waitForRenderManager()
+        ModAPI.mc.renderManager.entityRenderMap.put(ModAPI.util.asClass(data.EntityCube), new data.RenderCube(ModAPI.mc.renderManager.getRef()));
         ModAPI.promisify(ModAPI.mc.renderEngine.bindTexture)(data.cubeTexture).then(() => {
             console.log("Loaded cube texture into cache.");
         });
-        await waitForRenderManager()
-        ModAPI.mc.renderManager.entityRenderMap.put(ModAPI.util.asClass(data.EntityCube), new data.RenderCube(ModAPI.mc.renderManager.getRef()));
     });
     console.log(data);
     window.temp1 = data;
