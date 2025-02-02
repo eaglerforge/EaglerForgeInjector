@@ -3,7 +3,18 @@
     ModAPI.meta.version("v1");
     ModAPI.meta.description("adds ducks to the game");
     ModAPI.meta.credits("By ZXMushroom63");
-
+    function waitForRenderManager() {
+        return new Promise((res, rej)=>{
+            function check() {
+                if (ModAPI.mc.renderManager) {
+                    res();
+                } else {
+                    setTimeout(check, 1/20);
+                }
+            }
+            check();
+        });
+    }
     function registerEntity() {
         ModAPI.hooks.methods.jl_String_format = ModAPI.hooks.methods.nlev_HString_format; //temporary thing to fix an issue in eaglercraft
         // Utils
@@ -179,7 +190,6 @@
             "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAAAgBAMAAABQs2O3AAAAAXNSR0IB2cksfwAAAAlwSFlzAAAOxAAADsQBlSsOGwAAACdQTFRFAAAALJBrKYdk1pcLp3UI4JEzL5pyaFY4AAAANa6BW0AjYUQlVTwhXohvWAAAAA10Uk5TAP///////////////y0EQa0AAADJSURBVHicY2RgVPj/gIGBwZhBkGEPkGb9zYACGBmYEv4tADKKj/CCFYT+3oCmgE3g1weQAQwQIzAUJLIyMACF9MA8kBEMASgqGIXYGl8ArbiPEEJToMbg8AdIz8OpIJGBFSTwCqcCIQYGfgb8VjDYoFqBChiBeDWYFYpbwSkwywy3ArDvGVyoZMVuVwJWrApDV7AaiQO05YwJuoJTSBwzbFbsQeK4UGzFIwaGf0wMDCE4rQDGGuN/BgZTnFZAFbiRZgUDATCqAAIA8Z45IRCQkrIAAAAASUVORK5CYII="
         )).arrayBuffer());
         AsyncSink.hideFile("resourcepacks/AsyncSinkLib/assets/minecraft/textures/entity/duck.png.mcmeta");
-        ModAPI.mc.renderManager.entityRenderMap.put(ModAPI.util.asClass(data.EntityDuck), new data.RenderDuck(ModAPI.mc.renderManager.getRef(), new data.ModelDuck(), 0.3));
         ModAPI.promisify(ModAPI.mc.renderEngine.bindTexture)(data.duckTextures).then(() => {
             console.log("Loaded duck texture into cache.");
         });
@@ -205,5 +215,8 @@
                 streaming: false //use for large audio files
             }
         ]);
+
+        await waitForRenderManager();
+        ModAPI.mc.renderManager.entityRenderMap.put(ModAPI.util.asClass(data.EntityDuck), new data.RenderDuck(ModAPI.mc.renderManager.getRef(), new data.ModelDuck(), 0.3));
     });
 })();
