@@ -3,7 +3,18 @@
     ModAPI.meta.version("v0");
     ModAPI.meta.description("testing custom entities");
     ModAPI.meta.credits("By ZXMushroom63");
-
+    function waitForRenderManager() {
+        return new Promise((res, rej)=>{
+            function check() {
+                if (ModAPI.mc.renderManager) {
+                    res();
+                } else {
+                    setTimeout(check, 1/20);
+                }
+            }
+            check();
+        });
+    }
     function registerEntity() {
         // Utils
         const ResourceLocation = ModAPI.reflect.getClassByName("ResourceLocation").constructors.find(x => x.length === 1);
@@ -120,6 +131,8 @@
             "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAAAXNSR0IArs4c6QAAAQBJREFUeF7l0BFzAmAAgOGvKxgMgiAYDIJgEARBEASDQTAIgiAYBEEQBN0NBkEQBEEQBIMgCAZBEAwGgyAIgiAIgiConxE88PJ790RCCNdYCOGeRe/4j4SYDvCgAzzqAHEdIKEDJHWAJx3gWQdI6QBpHeBFB8joAFkdIKcD5HWAgg5Q1AFedYA3HaCkA7zrAGUdoKIDVHWAmg7woQPUdYCGDtDUAVo6QFsH6OgAnzrAlw7Q1QF6OkBfBxjoAEMdYKQDjHWAiQ7wrQNMdYCZDjDXAX50gIUOsNQBVjrArw7wpwP86wBrHWCjA2x1gJ0OsNcBDjrAUQc46QBnHeBiA9wALSueIjTE4PwAAAAASUVORK5CYII="
         )).arrayBuffer());
         AsyncSink.hideFile("resourcepacks/AsyncSinkLib/assets/minecraft/textures/entity/cube.png.mcmeta");
+        
+        await waitForRenderManager()
         ModAPI.mc.renderManager.entityRenderMap.put(ModAPI.util.asClass(data.EntityCube), new data.RenderCube(ModAPI.mc.renderManager.getRef()));
         ModAPI.promisify(ModAPI.mc.renderEngine.bindTexture)(data.cubeTexture).then(() => {
             console.log("Loaded cube texture into cache.");

@@ -771,7 +771,7 @@ globalThis.modapi_postinit = "(" + (() => {
         if (!object) {
             return null;
         }
-        if (prop in object) {
+        if ((prop in object) && Object.keys(object).includes(prop)) {
             return prop;
         }
         var possibleKeys = Object.keys(object).filter(x => { return x.startsWith(prop) });
@@ -780,7 +780,7 @@ globalThis.modapi_postinit = "(" + (() => {
         })
         return possibleKeys.sort((a, b) => {
             return a.length - b.length;
-        })[0] || null;
+        })[0] || prop;
     }
 
     ModAPI.util.modifyFunction = function (fn, patcherFn) {
