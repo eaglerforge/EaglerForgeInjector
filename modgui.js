@@ -10,7 +10,8 @@ globalThis.modapi_guikit = "(" + (() => {
     "hey you should check out https://github.com/ZXMushroom63/scratch-gui",
     "99% of people stop gambling before they win big.",
     "Now with free estradiol!",
-    "Now with H.I.V (Hyper Injected Virtual-debugger)"
+    "Now with H.I.V (Hyper Injected Virtual-debugger)",
+    "asdasd"
   ];
   var gui = `<div id="modapi_gui_container">
       <header>
