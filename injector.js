@@ -352,7 +352,7 @@ document.querySelector("#giveme").addEventListener("click", () => {
         if (globalThis.doEaglerforge) {
             if (string.includes("__eaglerforgeinjector_installation_flag__")) {
                 backgroundLog("Detected input containing EFI installation flag.", true);
-                return alert("this file already has eaglerforge injected in it, you nonce.\nif you're trying to update, you need a vanilla file.");
+                return alert("this file already has EaglerForge injected in it, you nonce.\nif you're trying to update, you need a vanilla file.");
             }
             patchedFile = await processClasses(patchedFile);
         } else if (globalThis.doShronk) {
