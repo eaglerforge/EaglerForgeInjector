@@ -322,7 +322,7 @@ var main;(function(){`
     \<script id="__eaglerforgeinjector_installation_flag__"\>console.log("Thank you for using EaglerForge!");\<\/script\>`
     );
     backgroundLog("[HTML] Injecting script files");
-    patchedFile = patchedFile.replace(`<title>EaglercraftX`, `<title>EFI ${globalThis.ModAPIVersion}`);
+    patchedFile = patchedFile.replace(`<title>EaglercraftX`, `<title>EFI ${globalThis.ModAPIVersion} on`);
     backgroundLog("[HTML] Injecting title");
     patchedFile = patchedFile.replaceAll(/main\(\);\s*?}/gm, (match) => {
         return match.replace("main();", "main();ModAPI.hooks._postInit();");

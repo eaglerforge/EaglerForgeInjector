@@ -1,23 +1,17 @@
-// Babel plugin to transform functions and calls
-const ASYNC_PLUGIN_1 = function ({ types: t }) {
+const MINIFY = function () {
     return {
         visitor: {
-            FunctionDeclaration(path) {
-                console.log(path);
-                path.node.async = true;
-            },
-            ArrowFunctionExpression(path) {
-                console.log(path);
-                path.node.async = true;
-            },
-            CallExpression(path) {
-                console.log(path);
-                if (path.parent.type !== 'AwaitExpression') {
-                    path.replaceWith(
-                        t.awaitExpression(path.node)
-                    );
+            Identifier(path) {
+                if (path.node.name === "$ptr") {
+                    path.node.name = "r";
                 }
-            }
+                if (path.node.name === "$tmp") {
+                    path.node.name = "m";
+                }
+                if (path.node.name === "$thread") {
+                    path.node.name = "t";
+                }
+            },
         }
     };
 };
@@ -45,7 +39,9 @@ async function shronk(input) {
 
 
         const output = Babel.transform(code, {
-            plugins: []
+            plugins: globalThis.doShronkPlus ? [
+                MINIFY()
+            ] : []
         });
         scriptTag.textContent = output.code;
         await wait(10);
