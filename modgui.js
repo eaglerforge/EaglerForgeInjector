@@ -186,7 +186,8 @@ globalThis.modapi_guikit = "(" + (() => {
       cb ||= document.querySelector("#modapi_gui_container")._cb;
       document.querySelector("#modapi_gui_container").remove();
     }
-
+    
+    
     var element = document.createElement("div");
 
     element.innerHTML = gui.replace("{splash_msg}", splashes[Math.floor(Math.random() * splashes.length)]);

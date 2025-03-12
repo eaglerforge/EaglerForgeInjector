@@ -31,7 +31,7 @@ async function shronk(input) {
         inputHtml = `<script>${input}</script>`;
     }
 
-    _status("[ASYNC_PLUGIN_1] Parsing html...");
+    _status("[MINIFY] Parsing html...");
     await wait(50);
     const parser = new DOMParser();
     const doc = parser.parseFromString(inputHtml, 'text/html');
@@ -40,7 +40,7 @@ async function shronk(input) {
     for (let i = 0; i < scriptTags.length; i++) {
         const scriptTag = scriptTags[i];
         const code = scriptTag.textContent;
-        _status("[ASYNC_PLUGIN_1] Transpiling script #" + (i + 1) + " of length " + Math.round(code.length / 1000) + "k...");
+        _status("[MINIFY] Transpiling script #" + (i + 1) + " of length " + Math.round(code.length / 1000) + "k...");
         await wait(150);
 
 
@@ -51,7 +51,7 @@ async function shronk(input) {
         await wait(10);
     }
 
-    _status("[ASYNC_PLUGIN_1] Job complete!");
+    _status("[MINIFY] Job complete!");
     await wait(50);
 
     if (isHtml) {

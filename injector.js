@@ -8,6 +8,7 @@ function wait(ms) {
     });
 }
 function _status(x) {
+    backgroundLog(x, true);
     document.querySelector("#status").innerText = x;
 }
 function entriesToStaticVariableProxy(entries, prefix, clinitList) {
@@ -77,6 +78,7 @@ async function processClasses(string) {
         if (!confirm("The minify step is extremely slow, especially on lower-end devices, and can take upwards of 15 minutes.")) {
             return;
         }
+        backgroundLog("[MINIFY] Minify warning bypassed.");
     }
     _status("Beginning patch process...");
     await wait(50);
@@ -101,6 +103,7 @@ var main;(function(){`
             "var main;\n(function() {",
             modapi_preinit + "var main;\n(function() {"
         );
+    backgroundLog("[JSPATCH] Adding pre-init script");
     patchedFile = patchedFile.replace(
         /function \$rt_metadata\(data\)( ?){/gm,
         `function $rt_metadata(data) {
@@ -108,20 +111,21 @@ var main;(function(){`
             ModAPI.hooks._rippedData.push(data);
             /*/EaglerForge Client Patch/*/`
     );
-
+    backgroundLog("[JSPATCH] Redirecting $rt_metadata to ModAPI.hooks._rippedData");
     patchedFile = patchedFile.replaceAll(
         `return thread != null && thread.isResuming()`,
         (match) => {
             return freezeCallstack + match;
         }
     );
-
+    backgroundLog("[JSPATCH] Freeze-callstack patch on TeaVMThread.isResuming()");
     patchedFile = patchedFile.replaceAll(
         `return thread != null && thread.isSuspending();`,
         (match) => {
             return freezeCallstack + match;
         }
     );
+    backgroundLog("[JSPATCH] Freeze-callstack patch on TeaVMThread.isSuspending()");
 
     patchedFile = patchedFile.replaceAll(
         `return $rt_currentNativeThread;`,
@@ -132,12 +136,12 @@ var main;(function(){`
             );
         }
     );
+    backgroundLog("[JSPATCH] Freeze-callstack patch thread getter");
 
     patchedFile = patchedFile.replaceAll("function TeaVMThread(", "globalThis.ModAPI.hooks.TeaVMThread = TeaVMThread;\nfunction TeaVMThread(");
 
     _status("Getting clinit list...");
     var clinitList = [...patchedFile.matchAll(/^[\t ]*function \S+?_\S+?_\$callClinit\(/gm)].map(x => x[0].replaceAll("function ", "").replaceAll("(", "").trim());
-    console.log(clinitList);
 
     _status("Extracting constructors and methods...");
     await wait(50);
@@ -158,6 +162,8 @@ var main;(function(){`
         }
     );
 
+    backgroundLog("-> Extract contructor 1");
+
     const extractInternalConstructorRegex =
         /^\s*function (\S*?)__init_\d*?\(\$this/gm; //same as extract constructor regex, but only allow $this as first argument
     patchedFile = patchedFile.replaceAll(
@@ -171,6 +177,8 @@ var main;(function(){`
             );
         }
     );
+
+    backgroundLog("-> Extract contructor 2");
 
     const extractInstanceMethodRegex =
         /^[\t ]*function \S+?_\S+?_\S+?\((\$this)?/gm; // /^[\t ]*function \S+?_\S+?_\S+?\(\$this/gm
@@ -198,6 +206,10 @@ var main;(function(){`
             );
         }
     );
+
+    backgroundLog("-> Extract instance methods");
+    backgroundLog("-> Expose instance methods");
+
     var staticVariables = [
         ...patchedFile.matchAll(/var \S+?_\S+?_\S+? = /gm),
     ].flatMap((x) => {
@@ -205,6 +217,7 @@ var main;(function(){`
     }).filter(x => {
         return (!x.includes("$_clinit_$")) && (!x.includes("$lambda$"))
     });
+    backgroundLog("-> Extract static variables");
     //Also stores classes from $rt_classWithoutFields(0)
     patchedFile = patchedFile.replaceAll(
         /var \S+?_\S+? = \$rt_classWithoutFields\(\S*?\);/gm,
@@ -240,6 +253,7 @@ var main;(function(){`
     );
     //Edge cases. sigh
     //Done: add support for static properties on classes with constructors like this: function nmcg_GuiMainMenu() {
+    backgroundLog("-> Expose static variables");
 
 
     patchedFile = patchedFile.replaceAll(
@@ -307,10 +321,13 @@ var main;(function(){`
     \<script id="libserverside"\>{"._|_libserverside_|_."}\<\/script\>
     \<script id="__eaglerforgeinjector_installation_flag__"\>console.log("Thank you for using EaglerForge!");\<\/script\>`
     );
-    patchedFile = patchedFile.replace(`<title>EaglercraftX 1.8</title>`, `<title>EFI ${globalThis.ModAPIVersion}</title>`);
+    backgroundLog("[HTML] Injecting script files");
+    patchedFile = patchedFile.replace(`<title>EaglercraftX`, `<title>EFI ${globalThis.ModAPIVersion}`);
+    backgroundLog("[HTML] Injecting title");
     patchedFile = patchedFile.replaceAll(/main\(\);\s*?}/gm, (match) => {
         return match.replace("main();", "main();ModAPI.hooks._postInit();");
     });
+    backgroundLog("[HTML] Injecting main function");
 
     _status("Done, awaiting input...");
     await wait(50);
@@ -334,6 +351,7 @@ document.querySelector("#giveme").addEventListener("click", () => {
 
         if (globalThis.doEaglerforge) {
             if (string.includes("__eaglerforgeinjector_installation_flag__")) {
+                backgroundLog("Detected input containing EFI installation flag.", true);
                 return alert("this file already has eaglerforge injected in it, you nonce.\nif you're trying to update, you need a vanilla file.");
             }
             patchedFile = await processClasses(patchedFile);
@@ -344,6 +362,7 @@ document.querySelector("#giveme").addEventListener("click", () => {
         patchedFile.replace(`{"._|_libserverside_|_."}`, "");
         var blob = new Blob([patchedFile], { type: file.type });
         saveAs(blob, "processed." + fileType);
+        backgroundLog("Saving file...", true);
     });
 });
 
