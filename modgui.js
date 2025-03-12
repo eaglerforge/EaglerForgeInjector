@@ -11,7 +11,8 @@ globalThis.modapi_guikit = "(" + (() => {
     "99% of people stop gambling before they win big.",
     "Now with free estradiol!",
     "Now with H.I.V (Hyper Injected Virtual-debugger)",
-    "asdasd"
+    "asdasd",
+    "Star us on GitHub to support us! https://github.com/EaglerForge/EaglerForgeInjector"
   ];
   var gui = `<div id="modapi_gui_container">
       <header>
