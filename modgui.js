@@ -10,7 +10,9 @@ globalThis.modapi_guikit = "(" + (() => {
     "hey you should check out https://github.com/ZXMushroom63/scratch-gui",
     "99% of people stop gambling before they win big.",
     "Now with free estradiol!",
-    "Now with H.I.V (Hyper Injected Virtual-debugger)"
+    "Now with H.I.V (Hyper Injected Virtual-debugger)",
+    "asdasd",
+    "Star us on GitHub to support us! https://github.com/EaglerForge/EaglerForgeInjector"
   ];
   var gui = `<div id="modapi_gui_container">
       <header>
@@ -184,7 +186,8 @@ globalThis.modapi_guikit = "(" + (() => {
       cb ||= document.querySelector("#modapi_gui_container")._cb;
       document.querySelector("#modapi_gui_container").remove();
     }
-
+    
+    
     var element = document.createElement("div");
 
     element.innerHTML = gui.replace("{splash_msg}", splashes[Math.floor(Math.random() * splashes.length)]);
