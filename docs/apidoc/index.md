@@ -100,6 +100,8 @@ The ModAPI object has the following methods:
  - `promisify(asyncJavaMethod: Method | Constructor) : PromisifiedJavaRunner`
     - Allows running java methods that are @Async/@Async dependent.
     - More [PromisifyDocumentation](promisify.md)
+ - `addCredit(category: String, contributor: String, contents: String)`
+    - Lets you easily add credits to Eaglercraft's credits.txt
 
 
 ## Handling strings, numbers and booleans to and from java.

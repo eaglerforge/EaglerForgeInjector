@@ -1,4 +1,4 @@
-globalThis.ModAPIVersion = "v2.7.1";
+globalThis.ModAPIVersion = "v2.7.2";
 globalThis.doEaglerforge = true;
 document.querySelector("title").innerText = `EaglerForge Injector ${ModAPIVersion}`;
 document.querySelector("h1").innerText = `EaglerForge Injector ${ModAPIVersion}`;
