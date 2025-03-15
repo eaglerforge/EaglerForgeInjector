@@ -102,6 +102,7 @@ The ModAPI object has the following methods:
     - More [PromisifyDocumentation](promisify.md)
  - `addCredit(category: String, contributor: String, contents: String)`
     - Lets you easily add credits to Eaglercraft's credits.txt
+    - eg: `ModAPI.addCredit("My Cool Mod", "Username", "  - Coded the mod\n  - Wrote somne credits")`
 
 
 ## Handling strings, numbers and booleans to and from java.
