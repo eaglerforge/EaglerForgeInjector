@@ -31,7 +31,7 @@ var asyncDownloadRemoteURI = ModAPI.promisify(ModAPI.hooks.methods.nlevi_Platfor
 console.log(typeof asyncDownloadRemoteURI); //Logs function
 ```
 
-When it is called, like any other asyncronoush function, it returns a `Promise` object.
+When it is called, like any other asyncronous function, it returns a `Promise` object.
 https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise
 
 You can replace the argument with any other method or constructor, including non asynchronous ones.
