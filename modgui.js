@@ -248,15 +248,27 @@ globalThis.modapi_guikit = "(" + (() => {
       spacer.classList.add("nothing");
       var controls = document.createElement("td");
 
-      var button = document.createElement("button");
-      button.innerText = "Delete";
-      button.style.height = "3rem";
-      button.addEventListener("click", async () => {
+      var deleteBtn = document.createElement("button");
+      deleteBtn.innerText = "Delete";
+      deleteBtn.style.height = "3rem";
+      deleteBtn.addEventListener("click", async () => {
         await removeMod(i);
         window.modapi_displayModGui();
       });
-      button.classList.add("button");
-      controls.appendChild(button);
+      deleteBtn.classList.add("button");
+      controls.appendChild(deleteBtn);
+
+      if (typeof ModAPI.meta._configMap[hash] === "function") {
+        var configBtn = document.createElement("button");
+        configBtn.innerText = "Delete";
+        configBtn.style.height = "3rem";
+        configBtn.addEventListener("click", async () => {
+          ModAPI.meta._configMap[hash]();
+        });
+        configBtn.classList.add("button");
+        controls.appendChild(configBtn);
+      }
+
       tr.appendChild(mod);
       tr.appendChild(spacer);
       tr.appendChild(controls);
