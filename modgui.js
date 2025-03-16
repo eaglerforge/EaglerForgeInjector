@@ -260,7 +260,7 @@ globalThis.modapi_guikit = "(" + (() => {
 
       if (typeof ModAPI.meta._configMap[hash] === "function") {
         var configBtn = document.createElement("button");
-        configBtn.innerText = "Delete";
+        configBtn.innerText = "Config";
         configBtn.style.height = "3rem";
         configBtn.addEventListener("click", async () => {
           ModAPI.meta._configMap[hash]();
