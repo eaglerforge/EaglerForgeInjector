@@ -22,6 +22,7 @@ globalThis.modapi_postinit = "(" + (() => {
     ModAPI.meta = {};
     ModAPI.meta._titleMap = {};
     ModAPI.meta._descriptionMap = {};
+    ModAPI.meta._configMap = {};
     ModAPI.meta._developerMap = {};
     ModAPI.meta._iconMap = {};
     ModAPI.meta._versionMap = {};
@@ -78,6 +79,9 @@ globalThis.modapi_postinit = "(" + (() => {
         "  - Made the mod gui open before the client starts");
 
     function limitSize(x, n) {
+        if (!x) {
+            return "";
+        }
         if (x.length > n) {
             return x.substring(0, n) + "…";
         } else {
@@ -160,6 +164,18 @@ globalThis.modapi_postinit = "(" + (() => {
             return console.log("[ModAPIMeta] Script does not have a hashcode.");
         }
         ModAPI.meta._descriptionMap[document.currentScript.getAttribute("data-hash")] = limitSize(desc, 160);
+    }
+    ModAPI.meta.config = function (conf) {
+        if (typeof conf !== "function") {
+            return console.log("[ModAPIMeta] Config value was not a function");
+        }
+        if (!document.currentScript || document.currentScript.getAttribute("data-isMod") !== "true") {
+            return console.log("[ModAPIMeta] Cannot set meta for non-mod script.");
+        }
+        if (!document.currentScript.hasAttribute("data-hash")) {
+            return console.log("[ModAPIMeta] Script does not have a hashcode.");
+        }
+        ModAPI.meta._configMap[document.currentScript.getAttribute("data-hash")] = conf;
     }
     ModAPI.meta.version = function (ver) {
         if (!document.currentScript || document.currentScript.getAttribute("data-isMod") !== "true") {
