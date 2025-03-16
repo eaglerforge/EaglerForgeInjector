@@ -262,6 +262,7 @@ globalThis.modapi_guikit = "(" + (() => {
         var configBtn = document.createElement("button");
         configBtn.innerText = "Config";
         configBtn.style.height = "3rem";
+        configBtn.style.marginLeft = "1rem";
         configBtn.addEventListener("click", async () => {
           ModAPI.meta._configMap[hash]();
         });
