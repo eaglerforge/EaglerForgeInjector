@@ -11,3 +11,7 @@ Methods:
 - `ModAPI.meta.icon(iconURL: String)`
     - Sets the icon of the mod.
     - It can be extremely low res, it will not appear blurry.
+- `ModAPI.meta.version(versionCode: String)`
+    - Sets the version of the mod. Appended after the title.
+- `ModAPI.meta.config(configFn: Function)`
+    - Once the client is fully loaded, creates a button in the mod manager GUI that runs the specified function when pressed.

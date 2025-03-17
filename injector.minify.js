@@ -1,23 +1,17 @@
-// Babel plugin to transform functions and calls
-const ASYNC_PLUGIN_1 = function ({ types: t }) {
+const MINIFY = function () {
     return {
         visitor: {
-            FunctionDeclaration(path) {
-                console.log(path);
-                path.node.async = true;
-            },
-            ArrowFunctionExpression(path) {
-                console.log(path);
-                path.node.async = true;
-            },
-            CallExpression(path) {
-                console.log(path);
-                if (path.parent.type !== 'AwaitExpression') {
-                    path.replaceWith(
-                        t.awaitExpression(path.node)
-                    );
+            Identifier(path) {
+                if (path.node.name === "$ptr") {
+                    path.node.name = "r";
                 }
-            }
+                if (path.node.name === "$tmp") {
+                    path.node.name = "m";
+                }
+                if (path.node.name === "$thread") {
+                    path.node.name = "t";
+                }
+            },
         }
     };
 };
@@ -31,7 +25,7 @@ async function shronk(input) {
         inputHtml = `<script>${input}</script>`;
     }
 
-    _status("[ASYNC_PLUGIN_1] Parsing html...");
+    _status("[MINIFY] Parsing html...");
     await wait(50);
     const parser = new DOMParser();
     const doc = parser.parseFromString(inputHtml, 'text/html');
@@ -40,18 +34,20 @@ async function shronk(input) {
     for (let i = 0; i < scriptTags.length; i++) {
         const scriptTag = scriptTags[i];
         const code = scriptTag.textContent;
-        _status("[ASYNC_PLUGIN_1] Transpiling script #" + (i + 1) + " of length " + Math.round(code.length / 1000) + "k...");
+        _status("[MINIFY] Transpiling script #" + (i + 1) + " of length " + Math.round(code.length / 1000) + "k...");
         await wait(150);
 
 
         const output = Babel.transform(code, {
-            plugins: []
+            plugins: globalThis.doShronkPlus ? [
+                MINIFY()
+            ] : []
         });
         scriptTag.textContent = output.code;
         await wait(10);
     }
 
-    _status("[ASYNC_PLUGIN_1] Job complete!");
+    _status("[MINIFY] Job complete!");
     await wait(50);
 
     if (isHtml) {

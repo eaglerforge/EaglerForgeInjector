@@ -3,6 +3,7 @@ globalThis.modapi_postinit = "(" + (() => {
     //This script cannot contain backticks, escape characters, or backslashes in order to inject into the dedicated server code.
     var startedModLoader = false;
     var BACKSLASH = String.fromCharCode(92);
+    var LF = String.fromCharCode(10);
     var STRIP_COMMENTS = new RegExp(atob("KChcL1wvLiokKXwoXC9cKltcc1xTXSo/XCpcLykp"), "gm");
     var ARGUMENT_NAMES = new RegExp(atob("KFteXHMsXSsp"), "g");
 
@@ -21,17 +22,66 @@ globalThis.modapi_postinit = "(" + (() => {
     ModAPI.meta = {};
     ModAPI.meta._titleMap = {};
     ModAPI.meta._descriptionMap = {};
+    ModAPI.meta._configMap = {};
     ModAPI.meta._developerMap = {};
     ModAPI.meta._iconMap = {};
     ModAPI.meta._versionMap = {};
+    const credits = {};
+    ModAPI.addCredit = function (category, name, contents) {
+        if (!credits[category]) {
+            credits[category] = [];
+        }
+        credits[category].push(LF + LF + " " + name + ": " + LF + LF + contents);
+    }
+    function getCreditsString() {
+        return Object.entries(credits).map((entry) => {
+            return " "+entry[0] + LF + " " + (new Array(entry[0].length)).fill("~").join("") + entry[1].join("") + LF + LF + LF;
+        }).join("");
+    }
     ModAPI.array = {};
 
     ModAPI.version = "__modapi_version_code__";
     ModAPI.flavour = "injector";
     ModAPI.GNU = "terry pratchett";
-    ModAPI.credits = ["ZXMushroom63", "radmanplays", "Murturtle", "OtterCodes101", "TheIdiotPlays", "OeildeLynx31", "Stpv22"];
+
+    ModAPI.addCredit("EaglerForge Devs", "ZXMushroom63",
+        "  - Built the original PluginAPI for EaglerReborn" + LF +
+        "  - Built EaglerForgeInjector as a procedural replacement for EaglerForge clients" + LF +
+        "  - Made the mod loader and gui loader" + LF +
+        "  - Added singleplayer support" + LF +
+        "  - Made the AsyncSink corelib");
+
+    ModAPI.addCredit("EaglerForge Devs", "radmanplays",
+        "  - Ported and maintained EaglerReborn's PluginAPI to modern version of eaglercrafts (u22+)" + LF +
+        "  - Rebranded PluginAPI to ModAPI" + LF +
+        "  - Added various new features to ModAPI" + LF +
+        "  - Made the worldedit mod + a few other mods");
+
+    ModAPI.addCredit("EaglerForge Devs", "LeahOnBrainrot / OtterCodes101 / OtterDev",
+        "  - Created EaglerReborn" + LF +
+        "  - EaglerForge developer" + LF +
+        "  - Helped update the client to newer versions" + LF +
+        "  - Made signed clients work" + LF +
+        "  - Maintainer nowadays" + LF +
+        "  - Various bug fixes for EaglerForgeInjector");
+
+    ModAPI.addCredit("EaglerForge Devs", "Murturtle",
+        "  - Added the render event to EaglerForgeInjector" + LF +
+        "  - Added pi optimiser to the injector (now removed)");
+
+    ModAPI.addCredit("EaglerForge Devs", "TheIdiotPlays",
+        "  - Made the mod manager GUI");
+
+    ModAPI.addCredit("EaglerForge Devs", "OeildeLynx31",
+        "  - Work on the worldedit mod");
+
+    ModAPI.addCredit("EaglerForge Devs", "Stpv22",
+        "  - Made the mod gui open before the client starts");
 
     function limitSize(x, n) {
+        if (!x) {
+            return "";
+        }
         if (x.length > n) {
             return x.substring(0, n) + "…";
         } else {
@@ -41,20 +91,20 @@ globalThis.modapi_postinit = "(" + (() => {
     function arraysAreSame(arr1, arr2) {
         if (!arr1 || !arr2)
             return false;
-        if(arr1 === arr2)
+        if (arr1 === arr2)
             return true;
         if (arr1.length !== arr2.length)
             return false;
 
-        for (var i = 0, l=arr1.length; i < l; i++) {
+        for (var i = 0, l = arr1.length; i < l; i++) {
             if (arr1[i] instanceof Array && arr2[i] instanceof Array) {
                 if (!arr1[i].equals(arr2[i]))
-                    return false;       
+                    return false;
             }
             else if (arr1[i] !== arr2[i]) {
-                return false;   
-            }           
-        }       
+                return false;
+            }
+        }
         return true;
     }
     function getParamNames(func) {
@@ -114,6 +164,18 @@ globalThis.modapi_postinit = "(" + (() => {
             return console.log("[ModAPIMeta] Script does not have a hashcode.");
         }
         ModAPI.meta._descriptionMap[document.currentScript.getAttribute("data-hash")] = limitSize(desc, 160);
+    }
+    ModAPI.meta.config = function (conf) {
+        if (typeof conf !== "function") {
+            return console.log("[ModAPIMeta] Config value was not a function");
+        }
+        if (!document.currentScript || document.currentScript.getAttribute("data-isMod") !== "true") {
+            return console.log("[ModAPIMeta] Cannot set meta for non-mod script.");
+        }
+        if (!document.currentScript.hasAttribute("data-hash")) {
+            return console.log("[ModAPIMeta] Script does not have a hashcode.");
+        }
+        ModAPI.meta._configMap[document.currentScript.getAttribute("data-hash")] = conf;
     }
     ModAPI.meta.version = function (ver) {
         if (!document.currentScript || document.currentScript.getAttribute("data-isMod") !== "true") {
@@ -343,7 +405,7 @@ globalThis.modapi_postinit = "(" + (() => {
                     "getConstructorByArgs": function (...argNames) {
                         if (!argumentCache) {
                             argumentCache = [];
-                            this.internalConstructors.forEach(x=>{
+                            this.internalConstructors.forEach(x => {
                                 argumentCache.push(getParamNames(x).slice(1).map(y => y.substring(1)));
                             });
                         }
@@ -771,7 +833,7 @@ globalThis.modapi_postinit = "(" + (() => {
         if (!object) {
             return null;
         }
-        if (prop in object) {
+        if ((prop in object) && Object.keys(object).includes(prop)) {
             return prop;
         }
         var possibleKeys = Object.keys(object).filter(x => { return x.startsWith(prop) });
@@ -780,7 +842,7 @@ globalThis.modapi_postinit = "(" + (() => {
         })
         return possibleKeys.sort((a, b) => {
             return a.length - b.length;
-        })[0] || null;
+        })[0] || prop;
     }
 
     ModAPI.util.modifyFunction = function (fn, patcherFn) {
@@ -819,6 +881,22 @@ globalThis.modapi_postinit = "(" + (() => {
     ModAPI.hooks.methods[updateMethodName] = function (...args) {
         ModAPI.onUpdate();
         return originalUpdate.apply(this, args);
+    };
+
+    const getCreditsName = ModAPI.util.getMethodFromPackage("net.lax1dude.eaglercraft.v1_8.EagRuntime", "getResourceString");
+    const originalGetCredits = ModAPI.hooks.methods[getCreditsName];
+    ModAPI.hooks.methods[getCreditsName] = function ($path) {
+        if (!$path) {
+            return originalGetCredits.apply(this, [$path]);
+        }
+        if (ModAPI.util.ustr($path).toLowerCase().endsWith("credits.txt")) {
+            var out = originalGetCredits.apply(this, [$path]);
+            out = ModAPI.util.ustr(out);
+            out = getCreditsString() + out;
+            out = ModAPI.util.str(out);
+            return out;
+        }
+        return originalGetCredits.apply(this, [$path]);
     };
 
     const initMethodName = ModAPI.util.getMethodFromPackage("net.minecraft.client.Minecraft", "startGame");
@@ -1105,7 +1183,7 @@ globalThis.modapi_postinit = "(" + (() => {
     }
     ModAPI.keygen.entity = function (entity) {
         var hashMap = ModAPI.util.wrap(ModAPI.reflect.getClassById("net.minecraft.entity.EntityList").staticVariables.idToClassMapping).getCorrective();
-        var values = hashMap.keys.getRef().data.filter(x=>hashMap.get(x));
+        var values = hashMap.keys.getRef().data.filter(x => hashMap.get(x));
         return qhash(entity, values, 127);
     }
 }).toString() + ")();";

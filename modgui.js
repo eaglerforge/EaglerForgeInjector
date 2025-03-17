@@ -10,7 +10,9 @@ globalThis.modapi_guikit = "(" + (() => {
     "hey you should check out https://github.com/ZXMushroom63/scratch-gui",
     "99% of people stop gambling before they win big.",
     "Now with free estradiol!",
-    "Now with H.I.V (Hyper Injected Virtual-debugger)"
+    "Now with H.I.V (Hyper Injected Virtual-debugger)",
+    "asdasd",
+    "Star us on GitHub to support us! https://github.com/EaglerForge/EaglerForgeInjector"
   ];
   var gui = `<div id="modapi_gui_container">
       <header>
@@ -184,7 +186,8 @@ globalThis.modapi_guikit = "(" + (() => {
       cb ||= document.querySelector("#modapi_gui_container")._cb;
       document.querySelector("#modapi_gui_container").remove();
     }
-
+    
+    
     var element = document.createElement("div");
 
     element.innerHTML = gui.replace("{splash_msg}", splashes[Math.floor(Math.random() * splashes.length)]);
@@ -245,15 +248,28 @@ globalThis.modapi_guikit = "(" + (() => {
       spacer.classList.add("nothing");
       var controls = document.createElement("td");
 
-      var button = document.createElement("button");
-      button.innerText = "Delete";
-      button.style.height = "3rem";
-      button.addEventListener("click", async () => {
+      var deleteBtn = document.createElement("button");
+      deleteBtn.innerText = "Delete";
+      deleteBtn.style.height = "3rem";
+      deleteBtn.addEventListener("click", async () => {
         await removeMod(i);
         window.modapi_displayModGui();
       });
-      button.classList.add("button");
-      controls.appendChild(button);
+      deleteBtn.classList.add("button");
+      controls.appendChild(deleteBtn);
+
+      if (typeof ModAPI.meta._configMap[hash] === "function") {
+        var configBtn = document.createElement("button");
+        configBtn.innerText = "Config";
+        configBtn.style.height = "3rem";
+        configBtn.style.marginLeft = "1rem";
+        configBtn.addEventListener("click", async () => {
+          ModAPI.meta._configMap[hash]();
+        });
+        configBtn.classList.add("button");
+        controls.appendChild(configBtn);
+      }
+
       tr.appendChild(mod);
       tr.appendChild(spacer);
       tr.appendChild(controls);
