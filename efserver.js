@@ -76,7 +76,7 @@ function EFServer() {
         cmdbox.style.display = "none";
     }
     function displayText(msg) {
-        displayText(msg);
+        gui.innerText += "\n" + msg;
     }
 
     function EFB2__defineExecCmdAsGlobal() {
