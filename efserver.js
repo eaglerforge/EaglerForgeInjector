@@ -76,7 +76,14 @@ function EFServer() {
         cmdbox.style.display = "none";
     }
     function displayText(msg) {
-        gui.innerHTML += "\n" + msg;
+        let patches = [
+            [/\/[A-Za-z]+/i, "<b>$&</b>"], //add the bold tag to each command name
+        ];
+        let diplayMessage = msg;
+        patches.forEach((patch) => {
+            diplayMessage.replace(patch[0], patch[1]);
+        });
+        gui.innerHTML += "\n" + diplayMessage;
     }
 
     function EFB2__defineExecCmdAsGlobal() {
