@@ -11,6 +11,8 @@
     gui.style.zIndex = 254;
     gui.style.position = "fixed";
     gui.style.display = "none";
+    gui.style.height = "calc(100vh - 1rem - 4px)";
+    gui.style.overflowY = "scroll";
     gui.style.color = "white";
     gui.style.top = gui.style.left = gui.style.bottom = gui.style.right = 0;
     document.documentElement.appendChild(gui);
@@ -26,6 +28,7 @@
     cmdbox.style.background = "black";
     cmdbox.style.zIndex = 255;
     cmdbox.style.color = "white";
+    cmdbox.style.height = "1rem";
     cmdbox.type = "text";
     cmdbox.addEventListener("keydown", (e) => {
         e.stopPropagation();
@@ -37,12 +40,16 @@
         if (e.key === "Enter") {
             e.preventDefault();
             toServer("chat", cmdbox.value);
+            cmdbox.value = "";
         }
     }, true);
     document.documentElement.appendChild(cmdbox);
 
     function worldUpdate() {
         if (ModAPI.mc && ModAPI.mc.theWorld) {
+            ModAPI.hooks.methods.nmcs_GameSettings_saveOptions = ()=>{};
+            ModAPI.settings.limitFramerate = 1;
+            ModAPI.settings.enableVsync = 0;
             showgui();
             openSharedWorld()
         } else {
@@ -67,17 +74,53 @@
         cmdbox.style.display = "none";
     }
 
+    function EFB2__defineExecCmdAsGlobal() {
+        var getServer = ModAPI.reflect.getClassById("net.minecraft.server.MinecraftServer").staticMethods.getServer.method;
+        globalThis.efb2__executeCommandAs = function efb2__executeCommandAs($commandsender, command, feedback) {
+            var server = getServer();
+            if (!server) { return };
+            var commandManager = server.$commandManager;
 
-    function openSharedWorld(){
-        if(ModAPI.mc.theWorld && !ModAPI.hooks.methods.nlevsl_LANServerController_isLANOpen()){
-            ModAPI.hooks.methods.nlevi_PlatformWebRTC_startRTCLANServer();
-            var worldName = ModAPI.util.unstr(ModAPI.mc.thePlayer.getName()) + "'s World";
-	    var ls = ModAPI.mc.loadingScreen;
-            var code = ModAPI.hooks.methods.nlevsl_LANServerController_shareToLAN(ls.resetProgressAndMessage, worldName, false)
-            if (code != null) {
-				ModAPI.hooks.methods.nlevs_SingleplayerServerController_configureLAN(ModAPI.mc.playerController.getCurrentGameType(), false);
-                alert("code: " + code +" relay: " + ModAPI.hooks.methods.nlevsl_LANServerController_getCurrentURI())
-			}
+            //lie a bit
+            var x = $commandsender.$canCommandSenderUseCommand;
+            $commandsender.$canCommandSenderUseCommand = () => 1;
+
+            var y = $commandsender.$sendCommandFeedback;
+            $commandsender.$sendCommandFeedback = feedback ? () => 1 : () => 0;
+
+            try {
+                commandManager.$executeCommand($commandsender, ModAPI.util.str(command));
+            } catch (error) {
+                console.error(error);
+            }
+
+            $commandsender.$canCommandSenderUseCommand = x;
+            $commandsender.$sendCommandFeedback = y;
+        }
+    }
+    ModAPI.dedicatedServer.appendCode(EFB2__defineExecCmdAsGlobal);
+
+    ModAPI.hooks.methods.nmc_LoadingScreenRenderer_eaglerShow = ()=>{};
+    var opening = false;
+    function openSharedWorld() {
+        var platform = ModAPI.reflect.getClassById("net.lax1dude.eaglercraft.v1_8.internal.PlatformWebRTC");
+        if (!opening && ModAPI.mc.theWorld && !ModAPI.hooks.methods.nlevsl_LANServerController_isLANOpen()) {
+            platform.staticVariables.rtcLANServer = ModAPI.reflect.getClassById("net.lax1dude.eaglercraft.v1_8.internal.PlatformWebRTC$LANServer").constructors[0]();
+            var worldName = ModAPI.util.unstr(ModAPI.mc.thePlayer.getName().getRef()) + "'s World";
+            opening = true;
+            ModAPI.promisify(ModAPI.hooks.methods.nlevsl_LANServerController_shareToLAN)({
+                $accept: (status)=>{
+                    gui.innerText += "\n" + ModAPI.util.ustr(status);
+                }
+            }, ModAPI.util.str(worldName), 0).then(code => {
+                opening = true; //change to false later
+                if (code != null) {
+                    ModAPI.hooks.methods.nlevs_SingleplayerServerController_configureLAN(ModAPI.mc.playerController.currentGameType.getRef(), 0);
+                    var msg = "code: " + ModAPI.util.ustr(code) + " relay: " + ModAPI.util.ustr(ModAPI.hooks.methods.nlevsl_LANServerController_getCurrentURI());
+                    alert(msg);
+                    gui.innerText += "\n" + msg;
+                }
+            });
         } else {
             return;
         }
@@ -100,11 +143,15 @@
     var token = crypto.randomUUID();
     const clientMessageHandlers = {
         chat: function (data) {
+            if (gui.scrollHeight > (innerHeight * 5)) {
+                gui.innerText = "Console cleared. Logs were over 5 pages long.";
+            }
             gui.innerText += data + "\n";
+            gui.scrollTop = gui.scrollHeight;
         },
     };
     var client_comms_channel = new BroadcastChannel("efserv:" + token);
-    client_comms_channel.addEventListener("message", (ev)=>{
+    client_comms_channel.addEventListener("message", (ev) => {
         if (ev.data.audience !== "client") {
             return;
         }
@@ -144,11 +191,10 @@
 
         const messageHandlers = {
             chat: function (data) {
-                ModAPI.hooks.methods.nmc_CommandHandler_executeCommand(
-                    ModAPI.server.commandManager.getRef(),
-                    getHostPlayer(),
-                    ModAPI.util.str(data)
-                ); //host has to use /say
+                console.log("Received cmd: ", data);
+                console.log("Received hostplayer: ", getHostPlayer());
+                getHostPlayer().$addChatMessage = (comp)=>{toClient("chat", ModAPI.util.ustr(comp.$getUnformattedText()))};
+                efb2__executeCommandAs(getHostPlayer(), data, true);
             },
         };
 
@@ -166,9 +212,24 @@
             toClient("chat", ModAPI.util.ustr(args[2]));
             return oldLog.apply(this, args);
         };
+
+        ModAPI.addEventListener("tick", ()=>{
+            var host = ModAPI.util.wrap(getHostPlayer());
+            host.posY = -10;
+            host.posX = 0;
+            host.posZ = 0;
+            host.capabilities.disableDamage = 1;
+            host.capabilities.isCreativeMode = 1;
+            host.capabilities.isFlying = 1;
+            host.motionY = 0;
+            host.motionX = 0;
+            host.motionZ = 0;
+            host.isDead = 0;
+            host.setHealth(20);
+        });
     });
 
-    
+
 
     function renameButton(array, originalName, newName) {
         array.find(
