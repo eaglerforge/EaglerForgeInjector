@@ -387,8 +387,12 @@ document.querySelector("#givemeserver").addEventListener("click", () => {
             patchedFile = await shronk(patchedFile);
         }
 
-        patchedFile.replace(`{"._|_libserverside_|_."}`, `(${EFServer.toString()})()`);
+        patchedFile = patchedFile.replace(`{"._|_libserverside_|_."}`, `(${EFServer.toString()})()`);
+        backgroundLog("[EFSERVER] Injecting libserverside corelib");
+        patchedFile = patchedFile.replace("<title>EFI", "<title>EF Server");
+        backgroundLog("[EFSERVER] Patching title");
         var blob = new Blob([patchedFile], { type: file.type });
         saveAs(blob, "efserver." + fileType);
+        backgroundLog("Saving file...", true);
     });
 });
