@@ -6,6 +6,7 @@
 
 
     const gui = document.createElement("div");
+    gui.innerText = "EFSERVER CONSOLE";
     gui.style.background = "black";
     gui.style.fontFamily = "sans-serif";
     gui.style.zIndex = 254;
@@ -146,7 +147,7 @@
             if (gui.scrollHeight > (innerHeight * 5)) {
                 gui.innerText = "Console cleared. Logs were over 5 pages long.";
             }
-            gui.innerText += data + "\n";
+            gui.innerText += "\n" + data.replaceAll("§r", "");
             gui.scrollTop = gui.scrollHeight;
         },
     };
@@ -194,9 +195,11 @@
 
         const messageHandlers = {
             chat: function (data) {
-                console.log("Received cmd: ", data);
-                console.log("Received hostplayer: ", getHostPlayer());
-                getHostPlayer().$addChatMessage = (comp)=>{toClient("chat", ModAPI.util.ustr(comp.$getUnformattedText()))};
+                var host = getHostPlayer();
+                if (!host) {
+                    return;
+                }
+                host.$addChatMessage = (comp)=>{toClient("chat", ModAPI.util.ustr(comp.$getUnformattedText()))};
                 efb2__executeCommandAs(getHostPlayer(), data, true);
             },
         };
@@ -218,6 +221,9 @@
 
         ModAPI.addEventListener("tick", ()=>{
             var host = ModAPI.util.wrap(getHostPlayer());
+            if (!host) {
+                return;
+            }
             host.posY = -10;
             host.posX = 0;
             host.posZ = 0;
