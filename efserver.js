@@ -75,6 +75,9 @@ function EFServer() {
         cmdbox.style.opacity = "0";
         cmdbox.style.display = "none";
     }
+    function displayText(msg) {
+        displayText(msg);
+    }
 
     function EFB2__defineExecCmdAsGlobal() {
         var getServer = ModAPI.reflect.getClassById("net.minecraft.server.MinecraftServer").staticMethods.getServer.method;
@@ -112,7 +115,7 @@ function EFServer() {
             opening = true;
             ModAPI.promisify(ModAPI.hooks.methods.nlevsl_LANServerController_shareToLAN)({
                 $accept: (status)=>{
-                    gui.innerText += "\n" + ModAPI.util.ustr(status);
+                    displayText(ModAPI.util.ustr(status));
                 }
             }, ModAPI.util.str(worldName), 0).then(code => {
                 opening = true; //change to false later
@@ -120,7 +123,7 @@ function EFServer() {
                     ModAPI.hooks.methods.nlevs_SingleplayerServerController_configureLAN(ModAPI.mc.playerController.currentGameType.getRef(), 0);
                     var msg = "code: " + ModAPI.util.ustr(code) + " relay: " + ModAPI.util.ustr(ModAPI.hooks.methods.nlevsl_LANServerController_getCurrentURI());
                     alert(msg);
-                    gui.innerText += "\n" + msg;
+                    displayText(msg);
                 }
             });
         } else {
@@ -148,7 +151,7 @@ function EFServer() {
             if (gui.scrollHeight > (innerHeight * 5)) {
                 gui.innerText = "Console cleared. Logs were over 5 pages long.";
             }
-            gui.innerText += "\n" + data.replaceAll("§r", "");
+            displayText(data.replaceAll("§r", ""));
             gui.scrollTop = gui.scrollHeight;
         },
     };
