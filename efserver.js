@@ -76,7 +76,7 @@ function EFServer() {
         cmdbox.style.display = "none";
     }
     function displayText(msg) {
-        gui.innerText += "\n" + msg;
+        gui.innerHTML += "\n" + msg;
     }
 
     function EFB2__defineExecCmdAsGlobal() {
@@ -121,7 +121,7 @@ function EFServer() {
                 opening = true; //change to false later
                 if (code != null) {
                     ModAPI.hooks.methods.nlevs_SingleplayerServerController_configureLAN(ModAPI.mc.playerController.currentGameType.getRef(), 0);
-                    var msg = "code: " + ModAPI.util.ustr(code) + " relay: " + ModAPI.util.ustr(ModAPI.hooks.methods.nlevsl_LANServerController_getCurrentURI());
+                    var msg = "<b>Server successfully started</b>\n on relay <u>" + ModAPI.util.ustr(ModAPI.hooks.methods.nlevsl_LANServerController_getCurrentURI()) + "</u>\n with code: " + ModAPI.util.ustr(code);
                     alert(msg);
                     displayText(msg);
                 }
