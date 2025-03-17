@@ -368,7 +368,7 @@ document.querySelector("#givemeserver").addEventListener("click", () => {
             patchedFile = await shronk(patchedFile);
         }
 
-        patchedFile.replace(`{"._|_libserverside_|_."}`, `(${EFServer.toString()})()`);
+        patchedFile = patchedFile.replace(`{"._|_libserverside_|_."}`, `(${EFServer.toString()})()`);
         var blob = new Blob([patchedFile], { type: file.type });
         saveAs(blob, "efserver." + fileType);
     });
