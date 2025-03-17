@@ -6,13 +6,13 @@ function EFServer() {
 
 
     const gui = document.createElement("div");
-    gui.innerText = "EFSERVER CONSOLE";
+    gui.innerText = "EFSERVER CONSOLE\n";
     gui.style.background = "black";
-    gui.style.fontFamily = "sans-serif";
+    gui.style.fontFamily = "monospace";
     gui.style.zIndex = 254;
     gui.style.position = "fixed";
     gui.style.display = "none";
-    gui.style.height = "calc(100vh - 1rem - 4px)";
+    gui.style.height = "calc(100vh - 2rem)";
     gui.style.overflowY = "scroll";
     gui.style.color = "white";
     gui.style.top = gui.style.left = gui.style.bottom = gui.style.right = 0;
@@ -29,7 +29,8 @@ function EFServer() {
     cmdbox.style.background = "black";
     cmdbox.style.zIndex = 255;
     cmdbox.style.color = "white";
-    cmdbox.style.height = "1rem";
+    cmdbox.style.height = "2rem";
+    cmdbox.style.fontFamily = "monospace";
     cmdbox.type = "text";
     cmdbox.addEventListener("keydown", (e) => {
         e.stopPropagation();
