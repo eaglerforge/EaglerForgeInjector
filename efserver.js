@@ -190,7 +190,7 @@ function EFServer() {
         function getHostPlayer() {
             var host = null;
             ModAPI.server.getRef().$worldServers.data.forEach((world) => {
-                host ||= world.$playerEntities.$array1.data.find((player) => {
+                host = world.$playerEntities.$array1.data.find((player) => {
                     if (!player) {
                         return;
                     }
