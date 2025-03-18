@@ -74,6 +74,14 @@ function entriesToStaticVariableProxy(entries, prefix, clinitList) {
     return proxy;
 }
 async function processClasses(string) {
+    if (string.includes("__eaglerforgeinjector_installation_flag__")) {
+        backgroundLog("Detected input containing EFI installation flag.", true);
+        return alert("this file already has EaglerForge injected in it, you nonce.\nif you're trying to update, you need a vanilla file.")
+    }
+    if (!string.includes("function nmc_Minecraft_startGame(")) {
+        backgroundLog("Detected invalid input.\nPlease ensure file is unsigned, unminified and unobfuscated.", true);
+        return alert("This file does not match the requirements for EaglerForgeInjector. (not unminified & unobfuscated). Check info.")
+    }
     if (globalThis.doShronk) {
         if (!confirm("The minify step is extremely slow, especially on lower-end devices, and can take upwards of 15 minutes.")) {
             return;
@@ -350,10 +358,6 @@ document.querySelector("#giveme").addEventListener("click", () => {
         var patchedFile = string;
 
         if (globalThis.doEaglerforge) {
-            if (string.includes("__eaglerforgeinjector_installation_flag__")) {
-                backgroundLog("Detected input containing EFI installation flag.", true);
-                return alert("this file already has EaglerForge injected in it, you nonce.\nif you're trying to update, you need a vanilla file.");
-            }
             patchedFile = await processClasses(patchedFile);
         } else if (globalThis.doShronk) {
             patchedFile = await shronk(patchedFile);
