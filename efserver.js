@@ -77,7 +77,7 @@ function EFServer() {
     }
     function displayText(msg) {
         let patches = [
-            [/\/[A-Za-z]+/i, "<b>$&</b>"], //add the bold tag to each command name
+            [/\/[A-Za-z]+/i, "<b>$&</b>"],
         ];
         let diplayMessage = msg;
         patches.forEach((patch) => {
