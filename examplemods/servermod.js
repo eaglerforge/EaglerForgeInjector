@@ -114,7 +114,7 @@
                     gui.innerText += "\n" + ModAPI.util.ustr(status);
                 }
             }, ModAPI.util.str(worldName), 0).then(code => {
-                opening = true; //change to false later
+                opening = false;
                 if (code != null) {
                     ModAPI.hooks.methods.nlevs_SingleplayerServerController_configureLAN(ModAPI.mc.playerController.currentGameType.getRef(), 0);
                     var msg = "code: " + ModAPI.util.ustr(code) + " relay: " + ModAPI.util.ustr(ModAPI.hooks.methods.nlevsl_LANServerController_getCurrentURI());
