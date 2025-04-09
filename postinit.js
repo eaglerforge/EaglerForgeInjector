@@ -61,7 +61,7 @@ globalThis.modapi_postinit = "(" + (() => {
         "  - Created EaglerReborn" + LF +
         "  - EaglerForge developer" + LF +
         "  - Helped update the client to newer versions" + LF +
-        "  - Made signed clients work" + LF +
+        "  - Made signed clients work in the legacy version" + LF +
         "  - Maintainer nowadays" + LF +
         "  - Various bug fixes for EaglerForgeInjector");
 
