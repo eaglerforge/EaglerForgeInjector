@@ -6,13 +6,13 @@ function EFServer() {
 
 
     const gui = document.createElement("div");
-    gui.innerText = "EFSERVER CONSOLE";
+    gui.innerText = "EFSERVER CONSOLE\n";
     gui.style.background = "black";
-    gui.style.fontFamily = "sans-serif";
+    gui.style.fontFamily = "monospace";
     gui.style.zIndex = 254;
     gui.style.position = "fixed";
     gui.style.display = "none";
-    gui.style.height = "calc(100vh - 1rem - 4px)";
+    gui.style.height = "calc(100vh - 2rem)";
     gui.style.overflowY = "scroll";
     gui.style.color = "white";
     gui.style.top = gui.style.left = gui.style.bottom = gui.style.right = 0;
@@ -29,7 +29,8 @@ function EFServer() {
     cmdbox.style.background = "black";
     cmdbox.style.zIndex = 255;
     cmdbox.style.color = "white";
-    cmdbox.style.height = "1rem";
+    cmdbox.style.height = "2rem";
+    cmdbox.style.fontFamily = "monospace";
     cmdbox.type = "text";
     cmdbox.addEventListener("keydown", (e) => {
         e.stopPropagation();
@@ -74,6 +75,16 @@ function EFServer() {
         cmdbox.style.opacity = "0";
         cmdbox.style.display = "none";
     }
+    function displayText(msg) {
+        let patches = [
+            [/\/[A-Za-z]+/i, "<b>$&</b>"],
+        ];
+        let diplayMessage = msg;
+        patches.forEach((patch) => {
+            diplayMessage.replace(patch[0], patch[1]);
+        });
+        gui.innerHTML += "\n" + diplayMessage;
+    }
 
     function EFB2__defineExecCmdAsGlobal() {
         var getServer = ModAPI.reflect.getClassById("net.minecraft.server.MinecraftServer").staticMethods.getServer.method;
@@ -111,15 +122,15 @@ function EFServer() {
             opening = true;
             ModAPI.promisify(ModAPI.hooks.methods.nlevsl_LANServerController_shareToLAN)({
                 $accept: (status)=>{
-                    gui.innerText += "\n" + ModAPI.util.ustr(status);
+                    displayText(ModAPI.util.ustr(status));
                 }
             }, ModAPI.util.str(worldName), 0).then(code => {
                 opening = true; //change to false later
                 if (code != null) {
                     ModAPI.hooks.methods.nlevs_SingleplayerServerController_configureLAN(ModAPI.mc.playerController.currentGameType.getRef(), 0);
-                    var msg = "code: " + ModAPI.util.ustr(code) + " relay: " + ModAPI.util.ustr(ModAPI.hooks.methods.nlevsl_LANServerController_getCurrentURI());
+                    var msg = "<b>Server successfully started</b>\n on relay <u>" + ModAPI.util.ustr(ModAPI.hooks.methods.nlevsl_LANServerController_getCurrentURI()) + "</u>\n with code: " + ModAPI.util.ustr(code);
                     alert(msg);
-                    gui.innerText += "\n" + msg;
+                    displayText(msg);
                 }
             });
         } else {
@@ -147,7 +158,7 @@ function EFServer() {
             if (gui.scrollHeight > (innerHeight * 5)) {
                 gui.innerText = "Console cleared. Logs were over 5 pages long.";
             }
-            gui.innerText += "\n" + data.replaceAll("§r", "");
+            displayText(data.replaceAll("§r", ""));
             gui.scrollTop = gui.scrollHeight;
         },
     };
@@ -179,7 +190,7 @@ function EFServer() {
         function getHostPlayer() {
             var host = null;
             ModAPI.server.getRef().$worldServers.data.forEach((world) => {
-                host ||= world.$playerEntities.$array1.data.find((player) => {
+                host = world.$playerEntities.$array1.data.find((player) => {
                     if (!player) {
                         return;
                     }
