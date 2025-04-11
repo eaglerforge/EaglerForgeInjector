@@ -15,6 +15,7 @@ We'll begin with the basic boilerplate mod code:
 Let's write the client side part of the code first.
 - We'll get the keys for the ModAPI.blocks object (ids of each block) using [`Object.keys()`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/keys)
 - Then, we'll loop over those keys, and modify their respective block to be as slippery as ice.
+
 ```javascript
 var blockKeys = Object.keys(ModAPI.blocks);
 

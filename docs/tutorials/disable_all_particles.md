@@ -62,7 +62,7 @@ When TeaVM translates booleans, it converts booleans to integers:
 - `false` turns into `0`
 - `true` turns into `1`
 
-So when we override `hasParticlesInAlphaLayer`, we'll need to return a `0` or a `1`. Since we want the game to thing that there aren't any particles in the alpha layer, we'll return `0` (false).
+So when we override `hasParticlesInAlphaLayer`, we'll need to return a `0` or a `1`. Since we want the game to think that there aren't any particles in the alpha layer, we'll return `0` (false).
 
 ```javascript
 (function NoParticles() {

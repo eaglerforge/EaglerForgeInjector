@@ -1,6 +1,6 @@
 ## /hat with ModAPI
 /hat is a common server-side plugin that lets you put any block/item on your head. This tutorial will explain how to register a server-side command, construct a packet, and send it to a player.
-[`S09PacketHeldItemChange` constructors]()
+[`S09PacketHeldItemChange` constructors](https://nurmarvin.github.io/Minecraft-1.8-JavaDocs/net/minecraft/network/play/server/S09PacketHeldItemChange.html)
 
 
 As always, start with the basic boilerplate IIFE with credits:
