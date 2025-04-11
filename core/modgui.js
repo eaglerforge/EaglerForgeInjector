@@ -1,5 +1,5 @@
 
-globalThis.modapi_guikit = "(" + (() => {
+const modapi_guikit = "(" + (() => {
   // ModAPI GUI made by TheIdiotPlays
   // https://github.com/TheIdiotPlays
   var splashes = [
@@ -317,3 +317,9 @@ globalThis.modapi_guikit = "(" + (() => {
     f.click();
   }
 }).toString() + ")();";
+
+if (globalThis.process) {
+  module.exports = {
+      modapi_guikit: modapi_guikit
+  }
+}

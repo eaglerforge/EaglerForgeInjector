@@ -1,3 +1,11 @@
+if (!globalThis.Babel) {
+    globalThis.Babel = require("@babel/core");
+}
+function wait(ms) {
+    return new Promise((resolve, reject) => {
+        setTimeout(() => { resolve(); }, ms);
+    });
+}
 const MINIFY = function () {
     return {
         visitor: {
@@ -15,11 +23,13 @@ const MINIFY = function () {
         }
     };
 };
-async function shronk(input) {
+async function minify(input, parser, EFIConfig) {
+    if (globalThis.process) {
+        var _status = console.log;
+    }
     let isHtml = true;
     let inputHtml = input;
 
-    // Check if the input is raw JavaScript
     if (!input.trim().startsWith('<')) {
         isHtml = false;
         inputHtml = `<script>${input}</script>`;
@@ -27,10 +37,9 @@ async function shronk(input) {
 
     _status("[MINIFY] Parsing html...");
     await wait(50);
-    const parser = new DOMParser();
     const doc = parser.parseFromString(inputHtml, 'text/html');
-    const scriptTags = doc.querySelectorAll('script');
-    await wait(100); //trying to get chrome to gc
+    const scriptTags = doc.getElementsByTagName('script');
+    await wait(200); //trying to get chrome to gc
     for (let i = 0; i < scriptTags.length; i++) {
         const scriptTag = scriptTags[i];
         const code = scriptTag.textContent;
@@ -39,7 +48,7 @@ async function shronk(input) {
 
 
         const output = Babel.transform(code, {
-            plugins: globalThis.doShronkPlus ? [
+            plugins: EFIConfig.doMinifyPlus ? [
                 MINIFY()
             ] : []
         });
@@ -51,8 +60,14 @@ async function shronk(input) {
     await wait(50);
 
     if (isHtml) {
-        return doc.documentElement.outerHTML;
+        return globalThis.process ? doc.toString() : doc.documentElement.outerHTML;
     } else {
         return doc.querySelector('script').textContent;
+    }
+}
+
+if (globalThis.process) {
+    module.exports = {
+        minify: minify
     }
 }

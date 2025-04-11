@@ -282,3 +282,9 @@ function EFServer() {
     // disable rendering
     ModAPI.hooks.methods.nmcr_EntityRenderer_renderWorld = () => { };
 }
+
+if (globalThis.process) {
+    module.exports = {
+        EFServer: EFServer
+    }
+}
