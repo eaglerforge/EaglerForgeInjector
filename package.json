@@ -1,20 +1,29 @@
 {
   "name": "eaglerforgeinjector",
-  "version": "0.0.0",
+  "version": "1.0.0",
   "description": "Advanced modding API injector for unminified, unobfuscated, unsigned eaglercraft builds.",
   "main": "node.js",
   "directories": {
     "doc": "docs"
   },
-  "scripts": {
-    "efi": "node --max-old-space-size=16384 cli.js"
+  "bin": {
+    "efi": "index.js"
   },
   "author": "EaglerForge Team",
   "license": "MIT",
   "devDependencies": {
     "@xmldom/xmldom": "^0.9.8"
   },
+  "keywords": [
+    "eaglercraft",
+    "eaglerforge",
+    "modding",
+    "injector",
+    "api"
+  ],
   "dependencies": {
-    "@babel/core": "^7.26.10"
+    "@babel/core": "^7.26.10",
+    "eaglerforgeinjector": "file:",
+    "xmldom": "^0.6.0"
   }
 }
