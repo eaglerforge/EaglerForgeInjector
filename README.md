@@ -13,6 +13,12 @@ Go to https://eaglerforge.github.io/EaglerForgeInjector/ and upload an unminifie
 #### Portable Offline
 Download this repository as a .zip, and extract it. Open index.html with your preferred browser (use `ctrl` + `O` on a new tab) and upload an unminified, unobfuscated, unsigned EaglercraftX offline download.
 
+#### Offline CLI
+- Clone the repository and run `npm ci` to install the required libraries.
+- In the project directory, run `npm run efi /help` for use instructions.
+- This is good for bypassing browser memory limitations, for minifying.
+- Yes, I am forcing DOS command syntax upon you
+
 #### How does it work?
 This tool matches patterns in eaglercraft builds and adds patching code to let you modify how the code works at runtime. It then adds a [corelib](./postinit.js) that initialises the `ModAPI` object.
 
