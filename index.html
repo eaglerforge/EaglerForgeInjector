@@ -91,11 +91,11 @@
         >
         <br />
         <span>
-        <label>Minify:&nbsp;</label><input type="checkbox" oninput="globalThis.doShronk = this.checked">
+        <label>Minify:&nbsp;</label><input type="checkbox" oninput="EFIConfig.doMinify = this.checked">
             &nbsp;&nbsp;&nbsp;
-        <label>MinifyExtras:&nbsp;</label><input type="checkbox" oninput="globalThis.doShronkPlus = this.checked">
+        <label>MinifyExtras:&nbsp;</label><input type="checkbox" oninput="EFIConfig.doMinifyPlus = this.checked">
             &nbsp;&nbsp;&nbsp;
-        <label>EaglerForge:&nbsp;</label><input checked type="checkbox" oninput="globalThis.doEaglerforge = this.checked">
+        <label>EaglerForge:&nbsp;</label><input checked type="checkbox" oninput="EFIConfig.doEaglerforge = this.checked">
           &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<code id="status">Awaiting input...</code></span>
         <br /><br />
         <button class="btn btn-primary" id="giveme">Make modded client</button>
@@ -151,31 +151,16 @@
             e.target.files[0].name;
         }
       });
-      var modapi_preinit = `globalThis.ModAPI ||= {};
-          ModAPI.hooks ||= {};
-          ModAPI.hooks.freezeCallstack = false;
-          ModAPI.hooks._rippedData ||= [];
-          ModAPI.hooks._rippedInterfaceMap ||= {};
-          ModAPI.hooks._teavm ||= {};
-          ModAPI.hooks._rippedConstructors ||= {};
-          ModAPI.hooks._rippedInternalConstructors ||= {};
-          ModAPI.hooks.methods ||= {};
-          ModAPI.hooks._rippedMethodTypeMap ||= {};
-          ModAPI.hooks._postInit ||= ()=>{};
-          ModAPI.hooks._rippedStaticProperties ||= {};
-          ModAPI.hooks._rippedStaticIndexer ||= {};
-      `;
-      var freezeCallstack = `if(ModAPI.hooks.freezeCallstack){return false};`;
     </script>
-    <script src="backgroundLogger.js"></script>
-    <script src="patches.js"></script>
-    <script src="injector.minify.js"></script>
-    <script src="injector.js"></script>
 
     <!-- Code assets -->
-    <script src="postinit.js"></script>
-    <script src="modloader.js"></script>
-    <script src="modgui.js"></script>
-    <script src="efserver.js"></script>
+    <script src="core/postinit.js"></script>
+    <script src="core/modloader.js"></script>
+    <script src="core/modgui.js"></script>
+    <script src="core/efserver.js"></script>
+    <script src="core/core.js"></script>
+
+    <script src="backgroundLogger.js"></script>
+    <script src="browser.js"></script>
   </body>
 </html>

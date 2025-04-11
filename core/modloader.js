@@ -1,4 +1,4 @@
-globalThis.modapi_modloader = "(" + (() => {
+const modapi_modloader = "(" + (() => {
     globalThis.promisifyIDBRequest = function promisifyIDBRequest(request) {
         return new Promise((resolve, reject) => {
             request.onsuccess = () => resolve(request.result);
@@ -253,3 +253,9 @@ globalThis.modapi_modloader = "(" + (() => {
         };
     };
 }).toString() + ")();"
+
+if (globalThis.process) {
+    module.exports = {
+        modapi_modloader: modapi_modloader
+    }
+}

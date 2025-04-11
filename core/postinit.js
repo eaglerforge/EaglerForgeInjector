@@ -1,4 +1,4 @@
-globalThis.modapi_postinit = "(" + (() => {
+const modapi_postinit = "(" + (() => {
     //EaglerForge post initialization code.
     //This script cannot contain backticks, escape characters, or backslashes in order to inject into the dedicated server code.
     var startedModLoader = false;
@@ -61,7 +61,7 @@ globalThis.modapi_postinit = "(" + (() => {
         "  - Created EaglerReborn" + LF +
         "  - EaglerForge developer" + LF +
         "  - Helped update the client to newer versions" + LF +
-        "  - Made signed clients work" + LF +
+        "  - Made signed clients work in the legacy version" + LF +
         "  - Maintainer nowadays" + LF +
         "  - Various bug fixes for EaglerForgeInjector");
 
@@ -1187,3 +1187,9 @@ globalThis.modapi_postinit = "(" + (() => {
         return qhash(entity, values, 127);
     }
 }).toString() + ")();";
+
+if (globalThis.process) {
+    module.exports = {
+        modapi_postinit: modapi_postinit
+    }
+  }

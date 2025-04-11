@@ -1,13 +1,44 @@
-globalThis.ModAPIVersion = "v2.7.3";
-globalThis.doEaglerforge = true;
-document.querySelector("title").innerText = `EaglerForge Injector ${ModAPIVersion}`;
-document.querySelector("h1").innerText = `EaglerForge Injector ${ModAPIVersion}`;
+var modapi_preinit = `globalThis.ModAPI ||= {};
+          ModAPI.hooks ||= {};
+          ModAPI.hooks.freezeCallstack = false;
+          ModAPI.hooks._rippedData ||= [];
+          ModAPI.hooks._rippedInterfaceMap ||= {};
+          ModAPI.hooks._teavm ||= {};
+          ModAPI.hooks._rippedConstructors ||= {};
+          ModAPI.hooks._rippedInternalConstructors ||= {};
+          ModAPI.hooks.methods ||= {};
+          ModAPI.hooks._rippedMethodTypeMap ||= {};
+          ModAPI.hooks._postInit ||= ()=>{};
+          ModAPI.hooks._rippedStaticProperties ||= {};
+          ModAPI.hooks._rippedStaticIndexer ||= {};
+      `;
+var freezeCallstack = `if(ModAPI.hooks.freezeCallstack){return false};`;
+const EFIConfig = {
+    ModAPIVersion: "v2.7.3",
+    doEaglerforge: true,
+    verbose: false,
+    doServerExtras: false,
+    doMinify: false,
+    doMinifyPlus: false
+}
+if (globalThis.process) {
+    var backgroundLog = (x) => {
+        if (EFIConfig.verbose) {
+            console.log(x);
+        }
+    };
+    var alert = console.error;
+    var confirm = console.warn;
+}
 function wait(ms) {
     return new Promise((resolve, reject) => {
         setTimeout(() => { resolve(); }, ms);
     });
 }
 function _status(x) {
+    if (globalThis.process) {
+        return console.log(x);
+    }
     backgroundLog(x, true);
     document.querySelector("#status").innerText = x;
 }
@@ -73,7 +104,15 @@ function entriesToStaticVariableProxy(entries, prefix, clinitList) {
           });`;
     return proxy;
 }
-async function processClasses(string) {
+async function processClasses(string, parser) {
+    if (globalThis.process) {
+        var { modapi_guikit } = require("./modgui");
+        var { modapi_postinit } = require("./postinit");
+        var { modapi_modloader } = require("./modloader");
+        var { PatchesRegistry } = require("./patches");
+        var { EFServer } = require("./efserver");
+        var { minify } = require("./minify");
+    }
     if (string.includes("__eaglerforgeinjector_installation_flag__")) {
         backgroundLog("Detected input containing EFI installation flag.", true);
         return alert("this file already has EaglerForge injected in it, you nonce.\nif you're trying to update, you need a vanilla file.")
@@ -82,11 +121,14 @@ async function processClasses(string) {
         backgroundLog("Detected invalid input.\nPlease ensure file is unsigned, unminified and unobfuscated.", true);
         return alert("This file does not match the requirements for EaglerForgeInjector. (not unminified & unobfuscated). Check info.")
     }
-    if (globalThis.doShronk) {
-        if (!confirm("The minify step is extremely slow, especially on lower-end devices, and can take upwards of 15 minutes.")) {
+    if (EFIConfig.doMinify) {
+        if (!confirm("The minify step is extremely slow, especially on lower-end devices, and can take upwards of 15 minutes.") && !module) {
             return;
         }
         backgroundLog("[MINIFY] Minify warning bypassed.");
+        if (globalThis.process) {
+            await wait(1000);
+        }
     }
     _status("Beginning patch process...");
     await wait(50);
@@ -308,11 +350,11 @@ var main;(function(){`
     await wait(50);
     patchedFile = PatchesRegistry.patchFile(patchedFile);
 
-    if (globalThis.doShronk) {
+    if (EFIConfig.doMinify) {
         _status("Shrinking file...");
         await wait(50);
 
-        patchedFile = await shronk(patchedFile);
+        patchedFile = await minify(patchedFile, parser, EFIConfig);
     }
 
 
@@ -322,15 +364,15 @@ var main;(function(){`
         ` id="game_frame">`,
         ` id="game_frame">
     \<script id="modapi_patchesreg_events"\>${PatchesRegistry.getEventInjectorCode()};\<\/script\>
-    \<script id="modapi_postinit"\>${globalThis.modapi_postinit.replace("__modapi_version_code__", ModAPIVersion)}\<\/script\>
-    \<script id="modapi_modloader"\>${globalThis.modapi_modloader}\<\/script\>
-    \<script id="modapi_guikit"\>${globalThis.modapi_guikit}\<\/script\>
-    \<script id="modapi_postinit_data"\>globalThis.modapi_postinit = \`${globalThis.modapi_postinit.replaceAll("\\", "\\\\")}\`\<\/script\>
+    \<script id="modapi_postinit"\>${modapi_postinit.replace("__modapi_version_code__", EFIConfig.ModAPIVersion)}\<\/script\>
+    \<script id="modapi_modloader"\>${modapi_modloader}\<\/script\>
+    \<script id="modapi_guikit"\>${modapi_guikit}\<\/script\>
+    \<script id="modapi_postinit_data"\>globalThis.modapi_postinit = \`${modapi_postinit.replaceAll("\\", "\\\\")}\`\<\/script\>
     \<script id="libserverside"\>{"._|_libserverside_|_."}\<\/script\>
     \<script id="__eaglerforgeinjector_installation_flag__"\>console.log("Thank you for using EaglerForge!");\<\/script\>`
     );
     backgroundLog("[HTML] Injecting script files");
-    patchedFile = patchedFile.replace(`<title>EaglercraftX`, `<title>EFI ${globalThis.ModAPIVersion} on`);
+    patchedFile = patchedFile.replace(`<title>EaglercraftX`, `<title>EFI ${EFIConfig.ModAPIVersion} on`);
     backgroundLog("[HTML] Injecting title");
     patchedFile = patchedFile.replaceAll(/main\(\);\s*?}/gm, (match) => {
         return match.replace("main();", "main();ModAPI.hooks._postInit();");
@@ -341,62 +383,35 @@ var main;(function(){`
     await wait(50);
     return patchedFile;
 }
+async function patchClient(string, parser) {
+    var patchedFile = string;
+    if (EFIConfig.doEaglerforge) {
+        patchedFile = await processClasses(patchedFile, parser);
+    } else if (EFIConfig.doMinify) {
+        patchedFile = await minify(patchedFile, parser, EFIConfig);
+    }
 
-document.querySelector("#giveme").addEventListener("click", () => {
-    if (
-        !document.querySelector("input").files ||
-        !document.querySelector("input").files[0]
-    ) {
+    if (!patchedFile) {
         return;
     }
-    // @type File
-    var file = document.querySelector("input").files[0];
-    var fileType = file.name.split(".");
-    fileType = fileType[fileType.length - 1];
 
-    file.text().then(async (string) => {
-        var patchedFile = string;
-
-        if (globalThis.doEaglerforge) {
-            patchedFile = await processClasses(patchedFile);
-        } else if (globalThis.doShronk) {
-            patchedFile = await shronk(patchedFile);
+    if (EFIConfig.doServerExtras) {
+        if (!EFServer) {
+            var { EFServer } = require("./efserver");
         }
-
-        patchedFile.replace(`{"._|_libserverside_|_."}`, "");
-        var blob = new Blob([patchedFile], { type: file.type });
-        saveAs(blob, "processed." + fileType);
-        backgroundLog("Saving file...", true);
-    });
-});
-
-document.querySelector("#givemeserver").addEventListener("click", () => {
-    if (
-        !document.querySelector("input").files ||
-        !document.querySelector("input").files[0]
-    ) {
-        return;
-    }
-    // @type File
-    var file = document.querySelector("input").files[0];
-    var fileType = file.name.split(".");
-    fileType = fileType[fileType.length - 1];
-
-    file.text().then(async (string) => {
-        var patchedFile = string;
-
-        if (globalThis.doEaglerforge) {
-            patchedFile = await processClasses(patchedFile);
-        } else if (globalThis.doShronk) {
-            patchedFile = await shronk(patchedFile);
-        }
-
         patchedFile = patchedFile.replace(`{"._|_libserverside_|_."}`, `(${EFServer.toString()})()`);
         backgroundLog("[EFSERVER] Injecting libserverside corelib");
         patchedFile = patchedFile.replace("<title>EFI", "<title>EF Server");
         backgroundLog("[EFSERVER] Patching title");
-        var blob = new Blob([patchedFile], { type: file.type });
-        saveAs(blob, "efserver." + fileType);
-        backgroundLog("Saving file...", true);
-    });
-});
+    } else {
+        patchedFile.replace(`{"._|_libserverside_|_."}`, "");
+    }
+    return patchedFile;
+}
+
+if (globalThis.process) {
+    module.exports = {
+        patchClient: patchClient,
+        conf: EFIConfig
+    }
+}

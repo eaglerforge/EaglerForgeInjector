@@ -36,3 +36,9 @@ PatchesRegistry.addPatch(function (input) {
     );
     return output;
 });
+
+if (globalThis.process) {
+    module.exports = {
+        PatchesRegistry: PatchesRegistry
+    }
+}
