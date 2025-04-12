@@ -1,6 +1,6 @@
 {
   "name": "eaglerforgeinjector",
-  "version": "0.0.0",
+  "version": "2.7.3",
   "description": "Advanced modding API injector for unminified, unobfuscated, unsigned eaglercraft builds.",
   "main": "node.js",
   "directories": {
@@ -8,6 +8,9 @@
   },
   "scripts": {
     "efi": "node --max-old-space-size=16384 cli.js"
+  },
+  "bin": {
+    "efi": "./npx_wrapper.js"
   },
   "author": "EaglerForge Team",
   "license": "MIT",
