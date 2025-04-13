@@ -105,13 +105,28 @@ function entriesToStaticVariableProxy(entries, prefix, clinitList) {
     return proxy;
 }
 async function processClasses(string, parser) {
+    var assets = {
+        modapi_guikit: null,
+        modapi_postinit: null,
+        modapi_modloader: null,
+        PatchesRegistry: null,
+        EFServer: null,
+        minify: null
+    };
     if (globalThis.process) {
-        var { modapi_guikit } = require("./modgui");
-        var { modapi_postinit } = require("./postinit");
-        var { modapi_modloader } = require("./modloader");
-        var { PatchesRegistry } = require("./patches");
-        var { EFServer } = require("./efserver");
-        var { minify } = require("./minify");
+        assets.modapi_guikit = require("./modgui").modapi_guikit;
+        assets.modapi_postinit = require("./postinit").modapi_postinit;
+        assets.modapi_modloader = require("./modloader").modapi_modloader;
+        assets.PatchesRegistry = require("./patches").PatchesRegistry;
+        assets.EFServer = require("./efserver").EFServer;
+        assets.minify = require("./minify").minify;
+    } else {
+        assets.PatchesRegistry = PatchesRegistry;
+        assets.minify = minify;
+        assets.EFServer = EFServer;
+        assets.modapi_postinit = modapi_postinit;
+        assets.modapi_modloader = modapi_modloader;
+        assets.modapi_guikit = modapi_guikit;
     }
     if (string.includes("__eaglerforgeinjector_installation_flag__")) {
         backgroundLog("Detected input containing EFI installation flag.", true);
@@ -348,7 +363,7 @@ var main;(function(){`
 
     _status("Applying bonus patches from patch registry...");
     await wait(50);
-    patchedFile = PatchesRegistry.patchFile(patchedFile);
+    patchedFile = assets.PatchesRegistry.patchFile(patchedFile);
 
     if (EFIConfig.doMinify) {
         _status("Shrinking file...");
@@ -363,11 +378,11 @@ var main;(function(){`
     patchedFile = patchedFile.replace(
         ` id="game_frame">`,
         ` id="game_frame">
-    \<script id="modapi_patchesreg_events"\>${PatchesRegistry.getEventInjectorCode()};\<\/script\>
-    \<script id="modapi_postinit"\>${modapi_postinit.replace("__modapi_version_code__", EFIConfig.ModAPIVersion)}\<\/script\>
-    \<script id="modapi_modloader"\>${modapi_modloader}\<\/script\>
-    \<script id="modapi_guikit"\>${modapi_guikit}\<\/script\>
-    \<script id="modapi_postinit_data"\>globalThis.modapi_postinit = \`${modapi_postinit.replaceAll("\\", "\\\\")}\`\<\/script\>
+    \<script id="modapi_patchesreg_events"\>${assets.PatchesRegistry.getEventInjectorCode()};\<\/script\>
+    \<script id="modapi_postinit"\>${assets.modapi_postinit.replace("__modapi_version_code__", EFIConfig.ModAPIVersion)}\<\/script\>
+    \<script id="modapi_modloader"\>${assets.modapi_modloader}\<\/script\>
+    \<script id="modapi_guikit"\>${assets.modapi_guikit}\<\/script\>
+    \<script id="modapi_postinit_data"\>globalThis.modapi_postinit = \`${assets.modapi_postinit.replaceAll("\\", "\\\\")}\`\<\/script\>
     \<script id="libserverside"\>{"._|_libserverside_|_."}\<\/script\>
     \<script id="__eaglerforgeinjector_installation_flag__"\>console.log("Thank you for using EaglerForge!");\<\/script\>`
     );
@@ -396,8 +411,11 @@ async function patchClient(string, parser) {
     }
 
     if (EFIConfig.doServerExtras) {
-        if (!EFServer) {
-            var { EFServer } = require("./efserver");
+        var efserv = null;
+        if (!globalThis.process) {
+            efserv = require("./efserver").EFServer;
+        } else {
+            efserv = EFServer;
         }
         patchedFile = patchedFile.replace(`{"._|_libserverside_|_."}`, `(${EFServer.toString()})()`);
         backgroundLog("[EFSERVER] Injecting libserverside corelib");
