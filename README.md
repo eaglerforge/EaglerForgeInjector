@@ -19,6 +19,10 @@ Download this repository as a .zip, and extract it. Open index.html with your pr
 - This is good for bypassing browser memory limitations, for minifying.
 - Yes, I am forcing DOS command syntax upon you
 
+#### npx command
+- Run `npm install -g eaglerforgeinjector` to install eaglerforgeinjector.
+- Run `npx efi /help` for use instructions.
+
 #### How does it work?
 This tool matches patterns in eaglercraft builds and adds patching code to let you modify how the code works at runtime. It then adds a [corelib](./postinit.js) that initialises the `ModAPI` object.
 

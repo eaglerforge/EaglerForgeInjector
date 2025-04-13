@@ -17,7 +17,7 @@ document.querySelector("#giveme").addEventListener("click", () => {
         var patchedFile = string;
 
         EFIConfig.doServerExtras = false;
-        patchedFile = patchClient(string, new DOMParser());
+        patchedFile = await patchClient(string, new DOMParser());
 
         var blob = new Blob([patchedFile], { type: file.type });
         saveAs(blob, "processed." + fileType);
@@ -41,7 +41,7 @@ document.querySelector("#givemeserver").addEventListener("click", () => {
         var patchedFile = string;
 
         EFIConfig.doServerExtras = true;
-        patchedFile = patchClient(string, new DOMParser());
+        patchedFile = await patchClient(string, new DOMParser());
 
         var blob = new Blob([patchedFile], { type: file.type });
         saveAs(blob, "efserver." + fileType);

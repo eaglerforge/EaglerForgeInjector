@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 const { DOMParser } = require("@xmldom/xmldom");
 const fs = require("fs/promises");
 const EFI = require("./core/core");
@@ -10,15 +11,15 @@ async function main() {
         console.log("* EaglerForgeInjector CLI *");
         console.log("***************************");
         console.log("");
-        console.log("> npm run efi /help #shows this help text");
-        console.log("> npm run efi my_unminified_file.html #does nothing");
-        console.log("> npm run efi my_unminified_file.html /eaglerforge #injects eaglerforge");
-        console.log("> npm run efi my_unminified_file.html /minify #minifies file");
-        console.log("> npm run efi my_unminified_file.html /minify /minify_extras #minifies file with extra optimisations");
-        console.log("> npm run efi my_unminified_file.html /eaglerforge /minify #minifies file and injects eaglerforge");
-        console.log("> npm run efi my_unminified_file.html /server_extras #inject server hosting stuff");
-        console.log("> npm run efi my_unminified_file.html output.html /eaglerforge /minify #minifies file and injects eaglerforge, write to file named output.html");
-        console.log("> npm run efi my_unminified_file.html /verbose #much logging");
+        console.log("> npx efi /help #shows this help text");
+        console.log("> npx efi my_unminified_file.html #does nothing");
+        console.log("> npx efi my_unminified_file.html /eaglerforge #injects eaglerforge");
+        console.log("> npx efi my_unminified_file.html /minify #minifies file");
+        console.log("> npx efi my_unminified_file.html /minify /minify_extras #minifies file with extra optimisations");
+        console.log("> npx efi my_unminified_file.html /eaglerforge /minify #minifies file and injects eaglerforge");
+        console.log("> npx efi my_unminified_file.html /server_extras #inject server hosting stuff");
+        console.log("> npx efi my_unminified_file.html output.html /eaglerforge /minify #minifies file and injects eaglerforge, write to file named output.html");
+        console.log("> npx efi my_unminified_file.html /verbose #much logging");
         console.log("By default, output is written to processed.html");
         return;
     }
