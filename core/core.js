@@ -14,7 +14,7 @@ var modapi_preinit = `globalThis.ModAPI ||= {};
       `;
 var freezeCallstack = `if(ModAPI.hooks.freezeCallstack){return false};`;
 const EFIConfig = {
-    ModAPIVersion: "v2.7.4", //also change in package.json
+    ModAPIVersion: "v2.7.5", //also change in package.json
     doEaglerforge: true,
     verbose: false,
     doServerExtras: false,
@@ -375,9 +375,11 @@ var main;(function(){`
 
     _status("Injecting scripts...");
     await wait(50);
+    // 1.12 check is using nleit_MainClass, because peyton felt like renaming stuff. annoying, but useful too ig
     patchedFile = patchedFile.replace(
         ` id="game_frame">`,
         ` id="game_frame">
+    \<script id="1_12_corelib_flag"\>ModAPI.is_1_12 = ${patchedFile.includes("nleit_MainClass_main")}\<\/script\>
     \<script id="modapi_patchesreg_events"\>${assets.PatchesRegistry.getEventInjectorCode()};\<\/script\>
     \<script id="modapi_postinit"\>${assets.modapi_postinit.replace("__modapi_version_code__", EFIConfig.ModAPIVersion)}\<\/script\>
     \<script id="modapi_modloader"\>${assets.modapi_modloader}\<\/script\>
@@ -388,6 +390,8 @@ var main;(function(){`
     );
     backgroundLog("[HTML] Injecting script files");
     patchedFile = patchedFile.replace(`<title>EaglercraftX`, `<title>EFI ${EFIConfig.ModAPIVersion} on`);
+    patchedFile = patchedFile.replace(`<title>Eaglercraft`, `<title>EFI ${EFIConfig.ModAPIVersion} on`);
+
     backgroundLog("[HTML] Injecting title");
     patchedFile = patchedFile.replaceAll(/main\(\);\s*?}/gm, (match) => {
         return match.replace("main();", "main();ModAPI.hooks._postInit();");

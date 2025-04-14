@@ -129,6 +129,16 @@ const modapi_postinit = "(" + (() => {
             }) : args))
         }
     }
+    function easyAlias(obj, realProperty, alias) {
+        Object.defineProperty(obj, alias, {
+            get: function () {
+                return obj[realProperty];
+            },
+            set: function (x) {
+                obj[realProperty] = x;
+            }
+        });
+    }
     ModAPI.meta.title = function (title) {
         if (!document.currentScript || document.currentScript.getAttribute("data-isMod") !== "true") {
             return console.log("[ModAPIMeta] Cannot set meta for non-mod script.");
@@ -203,6 +213,9 @@ const modapi_postinit = "(" + (() => {
     }
     ModAPI.util ||= {};
     ModAPI.util.getMethodFromPackage = function (classId, methodName) {
+        if (ModAPI.is_1_12) {
+            classId = classId.replace(".eaglercraft.v1_8", ".eaglercraft"); //why peyton why must you do this. you couldve changed it to v1_12 too, that would've worked
+        }
         var name = "";
         var classStuff = classId.split(".");
         classStuff.forEach((component, i) => {
@@ -216,6 +229,9 @@ const modapi_postinit = "(" + (() => {
         return name;
     }
     ModAPI.util.getCompiledNameFromPackage = ModAPI.util.getCompiledName = function (classId) {
+        if (ModAPI.is_1_12) {
+            classId = classId.replace(".eaglercraft.v1_8", ".eaglercraft"); //why peyton why must you do this. you couldve changed it to v1_12 too, that would've worked
+        }
         var name = "";
         var classStuff = classId.split(".");
         classStuff.forEach((component, i) => {
@@ -908,7 +924,15 @@ const modapi_postinit = "(" + (() => {
         globalThis.Minecraft = ModAPI.mcinstance = ModAPI.javaClient = args[0];
         ModAPI.settings = new Proxy(ModAPI.mcinstance.$gameSettings, TeaVM_to_Recursive_BaseData_ProxyConf);
 
+
+        if (ModAPI.is_1_12) {
+            easyAlias(ModAPI.javaClient, "$player", "$thePlayer");
+            easyAlias(ModAPI.javaClient, "$world", "$theWorld");
+        }
+
         startModLoader();
+
+        ModAPI.hooks.methods[initMethodName] = originalInit; //unhook
 
         return x;
     };
@@ -1126,6 +1150,7 @@ const modapi_postinit = "(" + (() => {
     ModAPI.hooks.methods[ModAPI.util.getMethodFromPackage("net.lax1dude.eaglercraft.v1_8.internal.teavm.ClientMain", "_main")] = function (...args) {
         if ((!inited) && (!getEaglerConfigFlag("noInitialModGui"))) {
             inited = true;
+            ModAPI.hooks.methods[ModAPI.util.getMethodFromPackage("net.lax1dude.eaglercraft.v1_8.internal.teavm.ClientMain", "_main")] = originalMainMethod; //unhook
             return modapi_displayModGui(globalThis.main);
         } else {
             return originalMainMethod.apply(this, args);
