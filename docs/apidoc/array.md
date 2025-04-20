@@ -5,7 +5,7 @@ Methods:
 - `ModAPI.array.object(class: Class|String, jsarray: object[]) : Object[]`
     - Converts a javascript array of a class to a java array of a class.
     - The class argument can be a raw java class (eg. `ModAPI.reflect.getClassByName(...).class`)
-    - It can also be a string '"java.util.String"`
+    - It can also be a string `"java.util.String"`
 - `ModAPI.array.object(class: Class, size: number) : Object[]`
     - Creates a java array of a class with the specified size.
 - `ModAPI.array.boolean(jsarray: boolean[]) : Boolean[]`
