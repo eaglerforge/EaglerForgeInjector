@@ -285,7 +285,7 @@ const modapi_postinit = "(" + (() => {
         return null;
     }
     ModAPI.array.object = function (jclass, size) {
-        if (typeof jclass = "string") {
+        if (typeof jclass === "string") {
             jclass = ModAPI.reflect.getClassById(jclass).class;
         }
         if (Array.isArray(size)) {
