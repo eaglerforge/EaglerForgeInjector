@@ -1,6 +1,6 @@
 (function grapplehook() {
     PluginAPI.require("player"); //Require the player
-    var GrappleHookPlugin = {
+    globalThis.GrappleHookPlugin = {
         oldXYZ: [0, 0, 0], //The previous hook position.
         prev: "NONE", //The previous state
         scaleH: 0.25, //Used for X and Z velocity
@@ -31,7 +31,7 @@
         if (
             player.fishEntity !== undefined && //If the fish hook exists
             GrappleHookPlugin.prev === "AIR" && //And the hook was previously in the air
-            player.fishEntity.inGround //And the hook is in the ground
+            (player.fishEntity.inGround || player.fishEntity.onGround) //And the hook is in the ground
         ) {
             GrappleHookPlugin.oldXYZ = [ //Set old grapple hook position
                 player.fishEntity.posX,
