@@ -296,7 +296,7 @@ ModAPI.meta.credits("By ZXMushroom63");
         oldRegisterItems.apply(this, args);
         ModAPI.events.callEvent("lib:asyncsink:registeritems", ModAPI.util.wrap(args[0]));
     }
-
+    /*
     AsyncSink.Audio = {};
     AsyncSink.Audio.Category = ModAPI.reflect.getClassByName("SoundCategory").staticVariables;
     AsyncSink.Audio.Objects = [];
@@ -362,4 +362,5 @@ ModAPI.meta.credits("By ZXMushroom63");
         registry.put(rKey, compositeSound);
         values.map(x=>"resourcepacks/AsyncSinkLib/assets/minecraft/" + x.path + ".mcmeta").forEach(x=>AsyncSink.setFile(x, new ArrayBuffer(0)));
     }
+    */
 })();
