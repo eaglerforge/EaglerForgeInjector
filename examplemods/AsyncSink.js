@@ -16,7 +16,8 @@ ModAPI.meta.credits("By ZXMushroom63");
         }
         var fs_debugging = false;
         const encoder = new TextEncoder('utf-8');
-        var filesystemPlatform = ModAPI.hooks.methods.nlevit_IndexedDBFilesystem$AsyncHandlers_readWholeFile ? true : false;
+        if (ModAPI.is_1_12) {var filesystemPlatform = ModAPI.hooks.methods.nleit_IndexedDBFilesystem$AsyncHandlers_readWholeFile ? true : false;};
+        if (!ModAPI.is_1_12) {var filesystemPlatform = ModAPI.hooks.methods.nlevit_IndexedDBFilesystem$AsyncHandlers_readWholeFile ? true : false;};
         if (!filesystemPlatform) {
             console.error("AsyncSink requires EaglercraftX u37 or greater to work! Attempting to run anyway...");
         }
@@ -296,7 +297,7 @@ ModAPI.meta.credits("By ZXMushroom63");
         oldRegisterItems.apply(this, args);
         ModAPI.events.callEvent("lib:asyncsink:registeritems", ModAPI.util.wrap(args[0]));
     }
-    /*
+    if (!ModAPI.is_1_12) {
     AsyncSink.Audio = {};
     AsyncSink.Audio.Category = ModAPI.reflect.getClassByName("SoundCategory").staticVariables;
     AsyncSink.Audio.Objects = [];
@@ -362,5 +363,5 @@ ModAPI.meta.credits("By ZXMushroom63");
         registry.put(rKey, compositeSound);
         values.map(x=>"resourcepacks/AsyncSinkLib/assets/minecraft/" + x.path + ".mcmeta").forEach(x=>AsyncSink.setFile(x, new ArrayBuffer(0)));
     }
-    */
+    }
 })();
