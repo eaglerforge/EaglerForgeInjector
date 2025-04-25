@@ -16,9 +16,9 @@ ModAPI.meta.credits("By ZXMushroom63");
         }
         var fs_debugging = false;
         const encoder = new TextEncoder('utf-8');
-        var filesystemPlatform = ModAPI.hooks.methods.nlevit_IndexedDBFilesystem$AsyncHandlers_readWholeFile ? true : false;
+        var filesystemPlatform = (ModAPI.hooks.methods.nlevit_IndexedDBFilesystem$AsyncHandlers_readWholeFile || ModAPI.hooks.methods.nleit_IndexedDBFilesystem$AsyncHandlers_readWholeFile) ? true : false;
         if (!filesystemPlatform) {
-            console.error("AsyncSink requires EaglercraftX u37 or greater to work! Attempting to run anyway...");
+            console.warn("AsyncSink requires EaglercraftX u37 or greater to work! Attempting to run anyway...");
         }
         const AsyncSink = {};
         const originalSuspend = ModAPI.hooks.TeaVMThread.prototype.suspend;
@@ -209,7 +209,7 @@ ModAPI.meta.credits("By ZXMushroom63");
     async function assureAsyncSinkResources() {
         const dec = new TextDecoder("utf-8");
         const enc = new TextEncoder("utf-8");
-        var resourcePackKey = (await indexedDB.databases()).find(x => x?.name?.endsWith("_resourcePacks")).name;
+        var resourcePackKey = ModAPI.is_1_12 ? "_net_lax1dude_eaglercraft_v1_8_internal_PlatformFilesystem_1_12_2_" :(await indexedDB.databases()).find(x => x?.name?.endsWith("_resourcePacks")).name;
         const dbRequest = indexedDB.open(resourcePackKey);
         const db = await promisifyIDBRequest(dbRequest);
         const transaction = db.transaction(["filesystem"], "readonly");
@@ -242,7 +242,7 @@ ModAPI.meta.credits("By ZXMushroom63");
             path: "resourcepacks/AsyncSinkLib/pack.mcmeta",
             data: enc.encode(JSON.stringify({
                 "pack": {
-                    "pack_format": 1,
+                    "pack_format": ModAPI.is_1_12 ? 3 : 1,
                     "description": "AsyncSink Library Resources"
                 }
             })).buffer
@@ -307,7 +307,7 @@ ModAPI.meta.credits("By ZXMushroom63");
             return;
         }
         var snd = ModAPI.mc.mcSoundHandler;
-        var registry = snd.sndRegistry.soundRegistry;
+        var registry = (snd.sndRegistry || snd.soundRegistry).getCorrective().soundRegistry;
         console.log("[AsyncSink] Populating sound registry hash map with " + AsyncSink.Audio.Objects.length + " sound effects.");
         AsyncSink.Audio.Objects.forEach(pair => {
             registry.put(pair[0], pair[1]);
@@ -318,18 +318,19 @@ ModAPI.meta.credits("By ZXMushroom63");
     // values = SoundEntry[]
     // category: AsyncSink.Audio.Category.*
     // SoundEntry = {path: String, pitch: 1, volume: 1, streaming: false}
-    const SoundPoolEntry = ModAPI.reflect.getClassByName("SoundPoolEntry").constructors.find(x => x.length === 4);
     const EaglercraftRandom = ModAPI.reflect.getClassByName("EaglercraftRandom").constructors.find(x=>x.length===0);
-    const SoundEventAccessorClass = ModAPI.reflect.getClassByName("SoundEventAccessor").class;
+    
     function makeSoundEventAccessor(soundpoolentry, weight) {
+        const SoundEventAccessorClass = ModAPI.reflect.getClassByName("SoundEventAccessor").class;
         var object = new SoundEventAccessorClass;
         var wrapped = ModAPI.util.wrap(object).getCorrective();
         wrapped.entry = soundpoolentry;
         wrapped.weight = weight;
         return object;
     }
-    const SoundEventAccessorCompositeClass = ModAPI.reflect.getClassByName("SoundEventAccessorComposite").class;
+    
     function makeSoundEventAccessorComposite(rKey, pitch, volume, category) {
+        const SoundEventAccessorCompositeClass = ModAPI.reflect.getClassByName("SoundEventAccessorComposite").class;
         var object = new SoundEventAccessorCompositeClass;
         var wrapped = ModAPI.util.wrap(object).getCorrective();
         wrapped.soundLocation = rKey;
@@ -340,26 +341,64 @@ ModAPI.meta.credits("By ZXMushroom63");
         wrapped.rnd = EaglercraftRandom();
         return object;
     }
-    AsyncSink.Audio.register = function addSfx(key, category, values) {
-        if (!category) {
-            throw new Error("[AsyncSink] Invalid audio category provided: "+category);
+    function makeSoundEventAccessor112(rKey) {
+        const SoundEventAccessorClass = ModAPI.reflect.getClassByName("SoundEventAccessor").class;
+        var object = new SoundEventAccessorClass;
+        var wrapped = ModAPI.util.wrap(object).getCorrective();
+        wrapped.location = rKey;
+        wrapped.subtitle = null;
+        wrapped.accessorList = ModAPI.hooks.methods.cgcc_Lists_newArrayList0();
+        wrapped.rnd = EaglercraftRandom();
+        return object;
+    }
+    if (ModAPI.is_1_12) {
+        const soundType = ModAPI.reflect.getClassById("net.minecraft.client.audio.Sound$Type").staticVariables.FILE;
+        const mkSound = ModAPI.reflect.getClassById("net.minecraft.client.audio.Sound").constructors[0];
+        
+        AsyncSink.Audio.register = function addSfx(key, category, values) {
+            if (!category) {
+                throw new Error("[AsyncSink] Invalid audio category provided: "+category);
+            }
+            var snd = ModAPI.mc.mcSoundHandler.getCorrective();
+            var registry = snd.soundRegistry.soundRegistry;
+            var rKey = ResourceLocation(ModAPI.util.str(key));
+            var soundPool = values.map(se => {
+                return mkSound(ModAPI.util.str(se.path), se.volume, se.pitch, 1, soundType, 1 * se.streaming);
+            });
+            var eventAccessor = makeSoundEventAccessor112(rKey);
+            var eventAccessorWrapped = ModAPI.util.wrap(eventAccessor);
+            soundPool.forEach(sound => {
+                eventAccessorWrapped.accessorList.add(sound);
+            });
+            AsyncSink.Audio.Objects.push([rKey, eventAccessor]);
+            registry.put(rKey, eventAccessor);
+            values.map(x=>"resourcepacks/AsyncSinkLib/assets/minecraft/" + x.path + ".mcmeta").forEach(x=>AsyncSink.setFile(x, new ArrayBuffer(0)));
+            return soundPool;
         }
-        var snd = ModAPI.mc.mcSoundHandler;
-        var registry = snd.sndRegistry.soundRegistry;
-        var rKey = ResourceLocation(ModAPI.util.str(key));
-        var soundPool = values.map(se => {
-            var path = ResourceLocation(ModAPI.util.str(se.path));
-            return SoundPoolEntry(path, se.pitch, se.volume, 1 * se.streaming);
-        }).map(spe => {
-            return makeSoundEventAccessor(spe, 1); // 1 = weight
-        });
-        var compositeSound = makeSoundEventAccessorComposite(rKey, 1, 1, category);
-        var compositeSoundWrapped = ModAPI.util.wrap(compositeSound);
-        soundPool.forEach(sound => {
-            compositeSoundWrapped.soundPool.add(sound);
-        });
-        AsyncSink.Audio.Objects.push([rKey, compositeSound]);
-        registry.put(rKey, compositeSound);
-        values.map(x=>"resourcepacks/AsyncSinkLib/assets/minecraft/" + x.path + ".mcmeta").forEach(x=>AsyncSink.setFile(x, new ArrayBuffer(0)));
+    } else {
+        const SoundPoolEntry = ModAPI.reflect.getClassByName("SoundPoolEntry").constructors.find(x => x.length === 4);
+        AsyncSink.Audio.register = function addSfx(key, category, values) {
+            if (!category) {
+                throw new Error("[AsyncSink] Invalid audio category provided: "+category);
+            }
+            var snd = ModAPI.mc.mcSoundHandler;
+            var registry = snd.sndRegistry.soundRegistry;
+            var rKey = ResourceLocation(ModAPI.util.str(key));
+            var soundPool = values.map(se => {
+                var path = ResourceLocation(ModAPI.util.str(se.path));
+                return SoundPoolEntry(path, se.pitch, se.volume, 1 * se.streaming);
+            }).map(spe => {
+                return makeSoundEventAccessor(spe, 1); // 1 = weight
+            });
+            var compositeSound = makeSoundEventAccessorComposite(rKey, 1, 1, category);
+            var compositeSoundWrapped = ModAPI.util.wrap(compositeSound);
+            soundPool.forEach(sound => {
+                compositeSoundWrapped.soundPool.add(sound);
+            });
+            AsyncSink.Audio.Objects.push([rKey, compositeSound]);
+            registry.put(rKey, compositeSound);
+            values.map(x=>"resourcepacks/AsyncSinkLib/assets/minecraft/" + x.path + ".mcmeta").forEach(x=>AsyncSink.setFile(x, new ArrayBuffer(0)));
+            return soundPool;
+        }
     }
 })();
