@@ -368,8 +368,12 @@ var main;(function(){`
     if (EFIConfig.doMinify) {
         _status("Shrinking file...");
         await wait(50);
-
-        patchedFile = await minify(patchedFile, parser, EFIConfig);
+        if (globalThis.process) {
+            let _minify = require("./minify").minify;
+            patchedFile = await _minify(patchedFile, parser, EFIConfig);
+        } else {
+            patchedFile = await minify(patchedFile, parser, EFIConfig);
+        }
     }
 
 
