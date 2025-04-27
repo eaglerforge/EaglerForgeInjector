@@ -10,7 +10,8 @@ ModAPI.meta.credits("By ZXMushroom63");
         let booleanResult;
 
         if (ModAPI.is_1_12) {
-            booleanResult = (b) => ModAPI.reflect.getClassById("net.lax1dude.eaglercraft.internal.teavm.BooleanResult").constructors[0](b*1);
+            const _boolRes = ModAPI.reflect.getClassById("net.lax1dude.eaglercraft.internal.teavm.BooleanResult").constructors[0];
+            booleanResult = (b) => _boolRes(b*1);
         } else {
             booleanResult = (b) => ModAPI.hooks.methods.nlevit_BooleanResult__new(b * 1);
         }
