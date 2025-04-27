@@ -1172,7 +1172,7 @@ const modapi_postinit = "(" + (() => {
     ModAPI.util.getBlockById = easyStaticMethod("net.minecraft.block.Block", "getBlockById", false);
     ModAPI.util.getBlockFromItem = easyStaticMethod("net.minecraft.block.Block", "getBlockFromItem", true);
     ModAPI.util.getIdFromBlock = easyStaticMethod("net.minecraft.block.Block", "getIdFromBlock", true);
-
+    
     function qhash(txt, arr, interval) {
         // var interval = 4095; //used to be 4095 - arr.length, but that increases incompatibility based on load order and other circumstances
         if (arr.length >= interval) {
@@ -1210,8 +1210,18 @@ const modapi_postinit = "(" + (() => {
         return qhash(block, values, 4095);
     }
     ModAPI.keygen.entity = function (entity) {
-        var hashMap = ModAPI.util.wrap(ModAPI.reflect.getClassById("net.minecraft.entity.EntityList").staticVariables.idToClassMapping).getCorrective();
-        var values = hashMap.keys.getRef().data.filter(x => hashMap.get(x));
+        var values = [];
+        if (ModAPI.is_1_12) {
+            var arrayList = ModAPI.util.wrap(ModAPI.reflect.getClassById("net.minecraft.entity.EntityList").staticVariables.field_191311_g).getCorrective().array;
+            arrayList.forEach((x, i) => {
+                if (x) {
+                    values.push(i);
+                }
+            });
+        } else {
+            var hashMap = ModAPI.util.wrap(ModAPI.reflect.getClassById("net.minecraft.entity.EntityList").staticVariables.idToClassMapping).getCorrective();
+            values = hashMap.keys.getRef().data.filter(x => hashMap.get(x));
+        }
         return qhash(entity, values, 127);
     }
 }).toString() + ")();";

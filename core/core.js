@@ -14,7 +14,7 @@ var modapi_preinit = `globalThis.ModAPI ||= {};
       `;
 var freezeCallstack = `if(ModAPI.hooks.freezeCallstack){return false};`;
 const EFIConfig = {
-    ModAPIVersion: "v2.7.6", //also change in package.json
+    ModAPIVersion: "v2.7.7", //also change in package.json
     doEaglerforge: true,
     verbose: false,
     doServerExtras: false,
@@ -368,8 +368,12 @@ var main;(function(){`
     if (EFIConfig.doMinify) {
         _status("Shrinking file...");
         await wait(50);
-
-        patchedFile = await minify(patchedFile, parser, EFIConfig);
+        if (globalThis.process) {
+            let _minify = require("./minify").minify;
+            patchedFile = await _minify(patchedFile, parser, EFIConfig);
+        } else {
+            patchedFile = await minify(patchedFile, parser, EFIConfig);
+        }
     }
 
 
