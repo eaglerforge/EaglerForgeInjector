@@ -105,7 +105,7 @@ const modapi_guikit = "(" + (() => {
           height: 100vh;
           width: 100vw;
           position: fixed;
-          z-index: 9999999999;
+          z-index: 127;
           top: 0;
           left: 0;
           font-family: sans-serif;
