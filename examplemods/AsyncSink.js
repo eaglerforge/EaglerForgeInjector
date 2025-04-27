@@ -8,12 +8,13 @@ ModAPI.meta.credits("By ZXMushroom63");
     //AsyncSink is a plugin to debug and override asynchronous methods in EaglercraftX
     async function runtimeComponent() {
         let booleanResult;
+
         if (ModAPI.is_1_12) {
-            booleanResult = (b) = ModAPI.reflect.getClassById("net.lax1dude.eaglercraft.internal.teavm.BooleanResult").constructors[0](b*1);
+            booleanResult = (b) => ModAPI.reflect.getClassById("net.lax1dude.eaglercraft.internal.teavm.BooleanResult").constructors[0](b*1);
         } else {
             booleanResult = (b) => ModAPI.hooks.methods.nlevit_BooleanResult__new(b * 1);
         }
-        const booleanResult = (b) => ModAPI.hooks.methods.nlevit_BooleanResult__new(b * 1);
+
         const wrap = ModAPI.hooks.methods.otji_JSWrapper_wrap;
         const unwrap = ModAPI.hooks.methods.otji_JSWrapper_unwrap;
         function getAsyncHandlerName(name) {
