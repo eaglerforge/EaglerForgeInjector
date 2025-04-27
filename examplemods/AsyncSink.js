@@ -7,6 +7,13 @@ ModAPI.meta.credits("By ZXMushroom63");
     const ResourceLocation = ModAPI.reflect.getClassByName("ResourceLocation").constructors.find(x => x.length === 1);
     //AsyncSink is a plugin to debug and override asynchronous methods in EaglercraftX
     async function runtimeComponent() {
+        let booleanResult;
+        //jl_Boolean_valueOf-> 1.12, nlevit_BooleanResult__new-> 1.8 
+        if (ModAPI.is_1_12) {
+            booleanResult = (b) => ModAPI.hooks.methods.jl_Boolean_valueOf(b * 1);
+        } else {
+            booleanResult = (b) => ModAPI.hooks.methods.nlevit_BooleanResult__new(b * 1);
+        }
         const booleanResult = (b) => ModAPI.hooks.methods.nlevit_BooleanResult__new(b * 1);
         const wrap = ModAPI.hooks.methods.otji_JSWrapper_wrap;
         const unwrap = ModAPI.hooks.methods.otji_JSWrapper_unwrap;
