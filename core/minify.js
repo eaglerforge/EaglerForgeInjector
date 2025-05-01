@@ -24,9 +24,8 @@ const MINIFY = function () {
     };
 };
 async function minify(input, parser, EFIConfig) {
-    if (globalThis.process) {
-        var _status = console.log;
-    }
+    var _status = globalThis._status || console.log;
+
     let isHtml = true;
     let inputHtml = input;
 
