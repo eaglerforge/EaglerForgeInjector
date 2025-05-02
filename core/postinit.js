@@ -16,6 +16,7 @@ const modapi_postinit = "(" + (() => {
     }
 
     ModAPI.hooks._classMap = {};
+    ModAPI.is_1_12 = !!ModAPI.hooks.methods.nleit_MainClass_main;
     globalThis.PluginAPI ||= ModAPI;
     ModAPI.mcinstance ||= {};
     ModAPI.javaClient ||= {};

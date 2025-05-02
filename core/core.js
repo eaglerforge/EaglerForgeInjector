@@ -383,7 +383,6 @@ var main;(function(){`
     patchedFile = patchedFile.replace(
         ` id="game_frame">`,
         ` id="game_frame">
-    \<script id="1_12_corelib_flag"\>ModAPI.is_1_12 = ${patchedFile.includes("nleit_MainClass_main")}\<\/script\>
     \<script id="modapi_patchesreg_events"\>${assets.PatchesRegistry.getEventInjectorCode()};\<\/script\>
     \<script id="modapi_postinit"\>${assets.modapi_postinit.replace("__modapi_version_code__", EFIConfig.ModAPIVersion)}\<\/script\>
     \<script id="modapi_modloader"\>${assets.modapi_modloader}\<\/script\>
