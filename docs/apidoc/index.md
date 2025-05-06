@@ -79,6 +79,8 @@ The global object has the following properties:
     - More: [ArrayDocumentation](array.md)
  - `ModAPI.version: String`
     - The version of ModAPI.
+ - `ModAPI.is_1_12: Boolean`
+    - Property defining wether or not ModAPI thinks the current version is 1.12-based.
  - `ModAPI.flavour: String`
     - The flavour of ModAPI. Hardcoded to be `"injector"`.
 
