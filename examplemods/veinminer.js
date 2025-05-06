@@ -115,14 +115,11 @@
                 b.$harvestBlock = function ($theWorld, $player, $blockpos, $blockstate, $tileentity, ...args) {
                     const blockState = ModAPI.util.wrap($blockstate);
                     const player = ModAPI.util.wrap($player);
-                    console.log(blockState, player);
                     if (player.isSneaking() && !ModAPI.util.isCritical() && !(logs.includes(blockState.block.getRef()) && !axes.includes(player.inventory.mainInventory[player.inventory.currentItem]?.getCorrective()?.item?.getRef()))) {
                         ModAPI.promisify(async () => {
                             var world = ModAPI.util.wrap($theWorld);
                             var harvestCall = ModAPI.promisify(ModAPI.is_1_12 ? player.interactionManager.tryHarvestBlock : player.theItemInWorldManager.tryHarvestBlock);
-
                             const blocks = await getBlockGraph(ModAPI.util.wrap($blockpos), ModAPI.promisify(world.getBlockState), b);
-                            console.log(blocks);
                             for (let i = 0; i < blocks.length; i++) {
                                 await harvestCall(blocks[i].getRef());
                             }
