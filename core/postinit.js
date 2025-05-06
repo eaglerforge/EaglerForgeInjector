@@ -1094,7 +1094,7 @@ const modapi_postinit = "(" + (() => {
         ModAPI.items = new Proxy(ModAPI.hooks._classMap[ModAPI.util.getCompiledName("net.minecraft.init.Items")].staticVariables, StaticProps_ProxyConf);
         ModAPI.blocks = new Proxy(ModAPI.hooks._classMap[ModAPI.util.getCompiledName("net.minecraft.init.Blocks")].staticVariables, StaticProps_ProxyConf);
         ModAPI.materials = new Proxy(ModAPI.hooks._classMap[ModAPI.util.getCompiledName("net.minecraft.block.material.Material")].staticVariables, StaticProps_ProxyConf);
-        ModAPI.enchantments = new Proxy(ModAPI.hooks._classMap[ModAPI.util.getCompiledName("net.minecraft.enchantment.Enchantment")].staticVariables, StaticProps_ProxyConf);
+        ModAPI.enchantments = new Proxy(ModAPI.hooks._classMap[ModAPI.util.getCompiledName("net.minecraft.enchantment.Enchantment")].staticVariables, StaticProps_ProxyConf); //bugged on 1.12 due to more client optimisations. might need to change the optimisation intensity
     }
 
     ModAPI.events.newEvent("bootstrap", "server");
