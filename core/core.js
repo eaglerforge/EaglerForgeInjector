@@ -14,7 +14,7 @@ var modapi_preinit = `globalThis.ModAPI ||= {};
       `;
 var freezeCallstack = `if(ModAPI.hooks.freezeCallstack){return false};`;
 const EFIConfig = {
-    ModAPIVersion: "v2.7.8", //also change in package.json
+    ModAPIVersion: "v2.7.9", //also change in package.json
     doEaglerforge: true,
     verbose: false,
     doServerExtras: false,
@@ -128,6 +128,7 @@ async function processClasses(string, parser) {
         assets.modapi_modloader = modapi_modloader;
         assets.modapi_guikit = modapi_guikit;
     }
+    _status("Running EaglerForgeInjector " + EFIConfig.ModAPIVersion);
     if (string.includes("__eaglerforgeinjector_installation_flag__")) {
         backgroundLog("Detected input containing EFI installation flag.", true);
         return alert("this file already has EaglerForge injected in it, you nonce.\nif you're trying to update, you need a vanilla file.")

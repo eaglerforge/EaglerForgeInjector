@@ -246,7 +246,6 @@ const modapi_postinit = "(" + (() => {
     }
 
     ModAPI.util.asClass = ModAPI.hooks._teavm.$rt_cls;
-
     ModAPI.util.wrap = function (outputValue, target, corrective, disableFunctions) {
         target ||= {};
         corrective ||= false;
@@ -258,6 +257,16 @@ const modapi_postinit = "(" + (() => {
                 return new Proxy(outputValue.data, CorrectiveArray);
             }
             return new Proxy(outputValue.data, ModAPI.util.TeaVMArray_To_Recursive_BaseData_ProxyConf);
+        }
+        if (ModAPI.is_1_12 && outputValue && typeof outputValue === "object" && outputValue.constructor === NonNullList) { //1.12 NonNullList support
+            const targetProperty = Object.values(outputValue)?.find(x => x && typeof x === "object" && x.constructor === ArrayAsList);
+            if (targetProperty) {
+                const arrayProp = Object.values(targetProperty).find(x => x && typeof x === "object" && Array.isArray(x.data) && typeof x.type === "function");
+                if (corrective) {
+                    return new Proxy(arrayProp.data, CorrectiveArray);
+                }
+                return new Proxy(arrayProp.data, ModAPI.util.TeaVMArray_To_Recursive_BaseData_ProxyConf);
+            }
         }
         if (outputValue && typeof outputValue === "object" && !Array.isArray(outputValue)) {
             if (corrective) {
@@ -643,6 +652,7 @@ const modapi_postinit = "(" + (() => {
         get(target, prop, receiver) {
             var outProp = prop;
             var outputValue = Reflect.get(target, outProp, receiver);
+            outputValue ||= Reflect.get(target, outProp.toUpperCase(), receiver); //1.12 made a lot of variables uppercase (idk why)
             if (outputValue && typeof outputValue === "object" && Array.isArray(outputValue.data) && typeof outputValue.type === "function") {
                 return new Proxy(outputValue.data, TeaVMArray_To_Recursive_BaseData_ProxyConf);
             }
@@ -799,6 +809,9 @@ const modapi_postinit = "(" + (() => {
 
     //Function used for running @Async / @Async-dependent TeaVM methods.
     ModAPI.promisify = function promisify(fn) {
+        if (typeof fn !== "function") {
+            console.error("[ModAPI.promisify] Input was not a function: ", fn);
+        }
         return function promisifiedJavaMethod(...inArguments) {
             return new Promise((res, rej) => {
                 Promise.resolve().then( //queue microtask
@@ -1173,6 +1186,12 @@ const modapi_postinit = "(" + (() => {
     ModAPI.util.getBlockById = easyStaticMethod("net.minecraft.block.Block", "getBlockById", false);
     ModAPI.util.getBlockFromItem = easyStaticMethod("net.minecraft.block.Block", "getBlockFromItem", true);
     ModAPI.util.getIdFromBlock = easyStaticMethod("net.minecraft.block.Block", "getIdFromBlock", true);
+
+    // 1.12 utility junk
+    if (ModAPI.is_1_12) {
+        var NonNullList = ModAPI.reflect.getClassById("net.minecraft.util.NonNullList").class;
+        var ArrayAsList = ModAPI.reflect.getClassById("java.util.Arrays$ArrayAsList").class;
+    }
     
     function qhash(txt, arr, interval) {
         // var interval = 4095; //used to be 4095 - arr.length, but that increases incompatibility based on load order and other circumstances

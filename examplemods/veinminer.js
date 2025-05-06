@@ -14,7 +14,7 @@
     } catch (error) {
         //swallow
     }
-    ModAPI.meta.config(()=>{
+    ModAPI.meta.config(() => {
         var conf = document.createElement("div");
         conf.innerHTML = `
         <h1>Vein Miner Settings&nbsp;<a href="javascript:void(0)" onclick="this.parentElement.parentElement.remove()" style="color:red">[X]</a></h1>
@@ -25,7 +25,7 @@
         <label>Veinmine Clay: </label><input type=checkbox ${VEINMINERCONF.doClay ? "checked" : ""} oninput="VEINMINERCONF.doClay = this.checked; this.parentElement.__save();"></input><br>
         `;
         conf.style = "position: fixed; background-color: white; color: black; width: 100vw; height: 100vh; z-index: 256;top:0;left:0;";
-        conf.__save = ()=>localStorage.setItem("trc_mod::conf", JSON.stringify(VEINMINERCONF));
+        conf.__save = () => localStorage.setItem("trc_mod::conf", JSON.stringify(VEINMINERCONF));
         document.body.appendChild(conf);
     });
 
@@ -33,6 +33,8 @@
 
     ModAPI.dedicatedServer.appendCode(function () {
         ModAPI.addEventListener("bootstrap", () => {
+            const axes = [ModAPI.items.iron_axe, ModAPI.items.stone_axe, ModAPI.items.golden_axe, ModAPI.items.wooden_axe, ModAPI.items.diamond_axe].map(x => x.getRef());
+            const logs = ["log", "log2"].map(x => ModAPI.blocks[x].getRef());
             const targettedBlockIds = [];
             if (VEINMINERCONF.doLogs) {
                 targettedBlockIds.push("log", "log2");
@@ -110,21 +112,23 @@
 
             valid_log_blocks.forEach(b => {
                 const originalHarvest = b.$harvestBlock;
-                b.$harvestBlock = function ($theWorld, $player, $blockpos, $blockstate, $tileentity) {
-                    if ($player.$isSneaking() && !ModAPI.util.isCritical()) {
+                b.$harvestBlock = function ($theWorld, $player, $blockpos, $blockstate, $tileentity, ...args) {
+                    const blockState = ModAPI.util.wrap($blockstate);
+                    const player = ModAPI.util.wrap($player);
+                    console.log(blockState, player);
+                    if (player.isSneaking() && !ModAPI.util.isCritical() && !(logs.includes(blockState.block.getRef()) && !axes.includes(player.inventory.mainInventory[player.inventory.currentItem]?.getCorrective()?.item?.getRef()))) {
                         ModAPI.promisify(async () => {
-                            var player = ModAPI.util.wrap($player);
                             var world = ModAPI.util.wrap($theWorld);
-                            var harvestCall = ModAPI.promisify(player.theItemInWorldManager.tryHarvestBlock);
-                            
-                            const blocks = await getBlockGraph(ModAPI.util.wrap($blockpos), ModAPI.promisify(world.getBlockState), b);
+                            var harvestCall = ModAPI.promisify(ModAPI.is_1_12 ? player.interactionManager.tryHarvestBlock : player.theItemInWorldManager.tryHarvestBlock);
 
+                            const blocks = await getBlockGraph(ModAPI.util.wrap($blockpos), ModAPI.promisify(world.getBlockState), b);
+                            console.log(blocks);
                             for (let i = 0; i < blocks.length; i++) {
                                 await harvestCall(blocks[i].getRef());
                             }
                         })();
                     }
-                    originalHarvest.apply(this, [$theWorld, $player, $blockpos, $blockstate, $tileentity]);
+                    originalHarvest.apply(this, [$theWorld, $player, $blockpos, $blockstate, $tileentity, ...args]);
                 }
             });
         });
