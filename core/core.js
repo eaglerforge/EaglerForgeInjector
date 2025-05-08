@@ -370,7 +370,7 @@ var main;(function(){`
         _status("Shrinking file...");
         await wait(50);
         if (globalThis.process) {
-            let _minify = require("./minify").minify;
+            let _minify = assets..minify;
             patchedFile = await _minify(patchedFile, parser, EFIConfig);
         } else {
             patchedFile = await minify(patchedFile, parser, EFIConfig);
@@ -419,13 +419,7 @@ async function patchClient(string, parser) {
     }
 
     if (EFIConfig.doServerExtras) {
-        var efserv = null;
-        if (!globalThis.process) {
-            efserv = require("./efserver").EFServer;
-        } else {
-            efserv = EFServer;
-        }
-        patchedFile = patchedFile.replace(`{"._|_libserverside_|_."}`, `(${EFServer.toString()})()`);
+        patchedFile = patchedFile.replace(`{"._|_libserverside_|_."}`, `(${assets.EFServer.toString()})()`);
         backgroundLog("[EFSERVER] Injecting libserverside corelib");
         patchedFile = patchedFile.replace("<title>EFI", "<title>EF Server");
         backgroundLog("[EFSERVER] Patching title");
