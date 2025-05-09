@@ -1,3 +1,26 @@
+var assets = {
+    modapi_guikit: null,
+    modapi_postinit: null,
+    modapi_modloader: null,
+    PatchesRegistry: null,
+    EFServer: null,
+    minify: null
+};
+if (globalThis.process) {
+    assets.modapi_guikit = require("./modgui").modapi_guikit;
+    assets.modapi_postinit = require("./postinit").modapi_postinit;
+    assets.modapi_modloader = require("./modloader").modapi_modloader;
+    assets.PatchesRegistry = require("./patches").PatchesRegistry;
+    assets.EFServer = require("./efserver").EFServer;
+    assets.minify = require("./minify").minify;
+} else {
+    assets.PatchesRegistry = PatchesRegistry;
+    assets.minify = minify;
+    assets.EFServer = EFServer;
+    assets.modapi_postinit = modapi_postinit;
+    assets.modapi_modloader = modapi_modloader;
+    assets.modapi_guikit = modapi_guikit;
+}
 var modapi_preinit = `globalThis.ModAPI ||= {};
           ModAPI.hooks ||= {};
           ModAPI.hooks.freezeCallstack = false;
@@ -105,29 +128,6 @@ function entriesToStaticVariableProxy(entries, prefix, clinitList) {
     return proxy;
 }
 async function processClasses(string, parser) {
-    var assets = {
-        modapi_guikit: null,
-        modapi_postinit: null,
-        modapi_modloader: null,
-        PatchesRegistry: null,
-        EFServer: null,
-        minify: null
-    };
-    if (globalThis.process) {
-        assets.modapi_guikit = require("./modgui").modapi_guikit;
-        assets.modapi_postinit = require("./postinit").modapi_postinit;
-        assets.modapi_modloader = require("./modloader").modapi_modloader;
-        assets.PatchesRegistry = require("./patches").PatchesRegistry;
-        assets.EFServer = require("./efserver").EFServer;
-        assets.minify = require("./minify").minify;
-    } else {
-        assets.PatchesRegistry = PatchesRegistry;
-        assets.minify = minify;
-        assets.EFServer = EFServer;
-        assets.modapi_postinit = modapi_postinit;
-        assets.modapi_modloader = modapi_modloader;
-        assets.modapi_guikit = modapi_guikit;
-    }
     _status("Running EaglerForgeInjector " + EFIConfig.ModAPIVersion);
     if (string.includes("__eaglerforgeinjector_installation_flag__")) {
         backgroundLog("Detected input containing EFI installation flag.", true);
@@ -370,7 +370,7 @@ var main;(function(){`
         _status("Shrinking file...");
         await wait(50);
         if (globalThis.process) {
-            let _minify = assets..minify;
+            let _minify = assets.minify;
             patchedFile = await _minify(patchedFile, parser, EFIConfig);
         } else {
             patchedFile = await minify(patchedFile, parser, EFIConfig);
