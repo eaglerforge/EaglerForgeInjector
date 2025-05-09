@@ -16,6 +16,7 @@ const modapi_postinit = "(" + (() => {
     }
 
     ModAPI.hooks._classMap = {};
+    ModAPI.is_1_12 = !!ModAPI.hooks.methods.nleit_MainClass_main;
     globalThis.PluginAPI ||= ModAPI;
     ModAPI.mcinstance ||= {};
     ModAPI.javaClient ||= {};
@@ -245,7 +246,6 @@ const modapi_postinit = "(" + (() => {
     }
 
     ModAPI.util.asClass = ModAPI.hooks._teavm.$rt_cls;
-
     ModAPI.util.wrap = function (outputValue, target, corrective, disableFunctions) {
         target ||= {};
         corrective ||= false;
@@ -257,6 +257,16 @@ const modapi_postinit = "(" + (() => {
                 return new Proxy(outputValue.data, CorrectiveArray);
             }
             return new Proxy(outputValue.data, ModAPI.util.TeaVMArray_To_Recursive_BaseData_ProxyConf);
+        }
+        if (ModAPI.is_1_12 && outputValue && typeof outputValue === "object" && outputValue.constructor === NonNullList) { //1.12 NonNullList support
+            const targetProperty = Object.values(outputValue)?.find(x => x && typeof x === "object" && x.constructor === ArrayAsList);
+            if (targetProperty) {
+                const arrayProp = Object.values(targetProperty).find(x => x && typeof x === "object" && Array.isArray(x.data) && typeof x.type === "function");
+                if (corrective) {
+                    return new Proxy(arrayProp.data, CorrectiveArray);
+                }
+                return new Proxy(arrayProp.data, ModAPI.util.TeaVMArray_To_Recursive_BaseData_ProxyConf);
+            }
         }
         if (outputValue && typeof outputValue === "object" && !Array.isArray(outputValue)) {
             if (corrective) {
@@ -285,6 +295,9 @@ const modapi_postinit = "(" + (() => {
         return null;
     }
     ModAPI.array.object = function (jclass, size) {
+        if (typeof jclass === "string") {
+            jclass = ModAPI.reflect.getClassById(jclass).class;
+        }
         if (Array.isArray(size)) {
             return ModAPI.hooks._teavm.$rt_createArrayFromData(jclass, size);
         }
@@ -639,6 +652,7 @@ const modapi_postinit = "(" + (() => {
         get(target, prop, receiver) {
             var outProp = prop;
             var outputValue = Reflect.get(target, outProp, receiver);
+            outputValue ||= Reflect.get(target, outProp.toUpperCase(), receiver); //1.12 made a lot of variables uppercase (idk why)
             if (outputValue && typeof outputValue === "object" && Array.isArray(outputValue.data) && typeof outputValue.type === "function") {
                 return new Proxy(outputValue.data, TeaVMArray_To_Recursive_BaseData_ProxyConf);
             }
@@ -795,6 +809,9 @@ const modapi_postinit = "(" + (() => {
 
     //Function used for running @Async / @Async-dependent TeaVM methods.
     ModAPI.promisify = function promisify(fn) {
+        if (typeof fn !== "function") {
+            console.error("[ModAPI.promisify] Input was not a function: ", fn);
+        }
         return function promisifiedJavaMethod(...inArguments) {
             return new Promise((res, rej) => {
                 Promise.resolve().then( //queue microtask
@@ -1087,10 +1104,14 @@ const modapi_postinit = "(" + (() => {
     }
 
     ModAPI.util.bootstrap = function () {
-        ModAPI.items = new Proxy(ModAPI.hooks._classMap[ModAPI.util.getCompiledName("net.minecraft.init.Items")].staticVariables, StaticProps_ProxyConf);
-        ModAPI.blocks = new Proxy(ModAPI.hooks._classMap[ModAPI.util.getCompiledName("net.minecraft.init.Blocks")].staticVariables, StaticProps_ProxyConf);
-        ModAPI.materials = new Proxy(ModAPI.hooks._classMap[ModAPI.util.getCompiledName("net.minecraft.block.material.Material")].staticVariables, StaticProps_ProxyConf);
-        ModAPI.enchantments = new Proxy(ModAPI.hooks._classMap[ModAPI.util.getCompiledName("net.minecraft.enchantment.Enchantment")].staticVariables, StaticProps_ProxyConf);
+        ModAPI.items = new Proxy(ModAPI.reflect.getClassById("net.minecraft.init.Items").staticVariables, StaticProps_ProxyConf);
+        ModAPI.blocks = new Proxy(ModAPI.reflect.getClassById("net.minecraft.init.Blocks").staticVariables, StaticProps_ProxyConf);
+        ModAPI.materials = new Proxy(ModAPI.reflect.getClassById("net.minecraft.block.material.Material").staticVariables, StaticProps_ProxyConf);
+        if (ModAPI.is_1_12) {
+            ModAPI.enchantments = new Proxy(ModAPI.reflect.getClassById("net.minecraft.init.Enchantments").staticVariables, StaticProps_ProxyConf);
+        } else {
+            ModAPI.enchantments = new Proxy(ModAPI.reflect.getClassById("net.minecraft.enchantment.Enchantment").staticVariables, StaticProps_ProxyConf);
+        }
     }
 
     ModAPI.events.newEvent("bootstrap", "server");
@@ -1170,6 +1191,12 @@ const modapi_postinit = "(" + (() => {
     ModAPI.util.getBlockFromItem = easyStaticMethod("net.minecraft.block.Block", "getBlockFromItem", true);
     ModAPI.util.getIdFromBlock = easyStaticMethod("net.minecraft.block.Block", "getIdFromBlock", true);
 
+    // 1.12 utility junk
+    if (ModAPI.is_1_12) {
+        var NonNullList = ModAPI.reflect.getClassById("net.minecraft.util.NonNullList").class;
+        var ArrayAsList = ModAPI.reflect.getClassById("java.util.Arrays$ArrayAsList").class;
+    }
+    
     function qhash(txt, arr, interval) {
         // var interval = 4095; //used to be 4095 - arr.length, but that increases incompatibility based on load order and other circumstances
         if (arr.length >= interval) {
@@ -1207,8 +1234,18 @@ const modapi_postinit = "(" + (() => {
         return qhash(block, values, 4095);
     }
     ModAPI.keygen.entity = function (entity) {
-        var hashMap = ModAPI.util.wrap(ModAPI.reflect.getClassById("net.minecraft.entity.EntityList").staticVariables.idToClassMapping).getCorrective();
-        var values = hashMap.keys.getRef().data.filter(x => hashMap.get(x));
+        var values = [];
+        if (ModAPI.is_1_12) {
+            var arrayList = ModAPI.util.wrap(ModAPI.reflect.getClassById("net.minecraft.entity.EntityList").staticVariables.field_191311_g).getCorrective().array;
+            arrayList.forEach((x, i) => {
+                if (x) {
+                    values.push(i);
+                }
+            });
+        } else {
+            var hashMap = ModAPI.util.wrap(ModAPI.reflect.getClassById("net.minecraft.entity.EntityList").staticVariables.idToClassMapping).getCorrective();
+            values = hashMap.keys.getRef().data.filter(x => hashMap.get(x));
+        }
         return qhash(entity, values, 127);
     }
 }).toString() + ")();";

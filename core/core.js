@@ -1,3 +1,26 @@
+var assets = {
+    modapi_guikit: null,
+    modapi_postinit: null,
+    modapi_modloader: null,
+    PatchesRegistry: null,
+    EFServer: null,
+    minify: null
+};
+if (globalThis.process) {
+    assets.modapi_guikit = require("./modgui").modapi_guikit;
+    assets.modapi_postinit = require("./postinit").modapi_postinit;
+    assets.modapi_modloader = require("./modloader").modapi_modloader;
+    assets.PatchesRegistry = require("./patches").PatchesRegistry;
+    assets.EFServer = require("./efserver").EFServer;
+    assets.minify = require("./minify").minify;
+} else {
+    assets.PatchesRegistry = PatchesRegistry;
+    assets.minify = minify;
+    assets.EFServer = EFServer;
+    assets.modapi_postinit = modapi_postinit;
+    assets.modapi_modloader = modapi_modloader;
+    assets.modapi_guikit = modapi_guikit;
+}
 var modapi_preinit = `globalThis.ModAPI ||= {};
           ModAPI.hooks ||= {};
           ModAPI.hooks.freezeCallstack = false;
@@ -14,7 +37,7 @@ var modapi_preinit = `globalThis.ModAPI ||= {};
       `;
 var freezeCallstack = `if(ModAPI.hooks.freezeCallstack){return false};`;
 const EFIConfig = {
-    ModAPIVersion: "v2.7.5", //also change in package.json
+    ModAPIVersion: "v2.7.92", //also change in package.json
     doEaglerforge: true,
     verbose: false,
     doServerExtras: false,
@@ -105,29 +128,7 @@ function entriesToStaticVariableProxy(entries, prefix, clinitList) {
     return proxy;
 }
 async function processClasses(string, parser) {
-    var assets = {
-        modapi_guikit: null,
-        modapi_postinit: null,
-        modapi_modloader: null,
-        PatchesRegistry: null,
-        EFServer: null,
-        minify: null
-    };
-    if (globalThis.process) {
-        assets.modapi_guikit = require("./modgui").modapi_guikit;
-        assets.modapi_postinit = require("./postinit").modapi_postinit;
-        assets.modapi_modloader = require("./modloader").modapi_modloader;
-        assets.PatchesRegistry = require("./patches").PatchesRegistry;
-        assets.EFServer = require("./efserver").EFServer;
-        assets.minify = require("./minify").minify;
-    } else {
-        assets.PatchesRegistry = PatchesRegistry;
-        assets.minify = minify;
-        assets.EFServer = EFServer;
-        assets.modapi_postinit = modapi_postinit;
-        assets.modapi_modloader = modapi_modloader;
-        assets.modapi_guikit = modapi_guikit;
-    }
+    _status("Running EaglerForgeInjector " + EFIConfig.ModAPIVersion);
     if (string.includes("__eaglerforgeinjector_installation_flag__")) {
         backgroundLog("Detected input containing EFI installation flag.", true);
         return alert("this file already has EaglerForge injected in it, you nonce.\nif you're trying to update, you need a vanilla file.")
@@ -368,8 +369,12 @@ var main;(function(){`
     if (EFIConfig.doMinify) {
         _status("Shrinking file...");
         await wait(50);
-
-        patchedFile = await minify(patchedFile, parser, EFIConfig);
+        if (globalThis.process) {
+            let _minify = assets.minify;
+            patchedFile = await _minify(patchedFile, parser, EFIConfig);
+        } else {
+            patchedFile = await minify(patchedFile, parser, EFIConfig);
+        }
     }
 
 
@@ -379,7 +384,6 @@ var main;(function(){`
     patchedFile = patchedFile.replace(
         ` id="game_frame">`,
         ` id="game_frame">
-    \<script id="1_12_corelib_flag"\>ModAPI.is_1_12 = ${patchedFile.includes("nleit_MainClass_main")}\<\/script\>
     \<script id="modapi_patchesreg_events"\>${assets.PatchesRegistry.getEventInjectorCode()};\<\/script\>
     \<script id="modapi_postinit"\>${assets.modapi_postinit.replace("__modapi_version_code__", EFIConfig.ModAPIVersion)}\<\/script\>
     \<script id="modapi_modloader"\>${assets.modapi_modloader}\<\/script\>
@@ -415,13 +419,7 @@ async function patchClient(string, parser) {
     }
 
     if (EFIConfig.doServerExtras) {
-        var efserv = null;
-        if (!globalThis.process) {
-            efserv = require("./efserver").EFServer;
-        } else {
-            efserv = EFServer;
-        }
-        patchedFile = patchedFile.replace(`{"._|_libserverside_|_."}`, `(${EFServer.toString()})()`);
+        patchedFile = patchedFile.replace(`{"._|_libserverside_|_."}`, `(${assets.EFServer.toString()})()`);
         backgroundLog("[EFSERVER] Injecting libserverside corelib");
         patchedFile = patchedFile.replace("<title>EFI", "<title>EF Server");
         backgroundLog("[EFSERVER] Patching title");
