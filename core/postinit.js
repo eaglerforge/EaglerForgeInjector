@@ -1248,6 +1248,11 @@ const modapi_postinit = "(" + (() => {
         }
         return qhash(entity, values, 127);
     }
+    ModAPI.keygen.sound = function (soundId) {
+        const SoundEvent = ModAPI.reflect.getClassByName("SoundEvent")
+        const values = ModAPI.util.wrap(SoundEvent.staticVariables.REGISTRY).getCorrective().underlyingIntegerMap.identityMap.elementData.filter(x=>!!x).map(y=>y.value.value);
+        return qhash(soundId, values, 4095);
+    }
 }).toString() + ")();";
 
 if (globalThis.process) {
