@@ -11,7 +11,7 @@ ModAPI.meta.credits("By ZXMushroom63");
 
         if (ModAPI.is_1_12) {
             const _boolRes = ModAPI.reflect.getClassById("net.lax1dude.eaglercraft.internal.teavm.BooleanResult").constructors[0];
-            booleanResult = (b) => _boolRes(b*1);
+            booleanResult = (b) => _boolRes(b * 1);
         } else {
             booleanResult = (b) => ModAPI.hooks.methods.nlevit_BooleanResult__new(b * 1);
         }
@@ -217,7 +217,7 @@ ModAPI.meta.credits("By ZXMushroom63");
     async function assureAsyncSinkResources() {
         const dec = new TextDecoder("utf-8");
         const enc = new TextEncoder("utf-8");
-        var resourcePackKey = ModAPI.is_1_12 ? "_net_lax1dude_eaglercraft_v1_8_internal_PlatformFilesystem_1_12_2_" :(await indexedDB.databases()).find(x => x?.name?.endsWith("_resourcePacks")).name;
+        var resourcePackKey = ModAPI.is_1_12 ? "_net_lax1dude_eaglercraft_v1_8_internal_PlatformFilesystem_1_12_2_" : (await indexedDB.databases()).find(x => x?.name?.endsWith("_resourcePacks")).name;
         const dbRequest = indexedDB.open(resourcePackKey);
         const db = await promisifyIDBRequest(dbRequest);
         const transaction = db.transaction(["filesystem"], "readonly");
@@ -326,8 +326,8 @@ ModAPI.meta.credits("By ZXMushroom63");
     // values = SoundEntry[]
     // category: AsyncSink.Audio.Category.*
     // SoundEntry = {path: String, pitch: 1, volume: 1, streaming: false}
-    const EaglercraftRandom = ModAPI.reflect.getClassByName("EaglercraftRandom").constructors.find(x=>x.length===0);
-    
+    const EaglercraftRandom = ModAPI.reflect.getClassByName("EaglercraftRandom").constructors.find(x => x.length === 0);
+
     function makeSoundEventAccessor(soundpoolentry, weight) {
         const SoundEventAccessorClass = ModAPI.reflect.getClassByName("SoundEventAccessor").class;
         var object = new SoundEventAccessorClass;
@@ -336,7 +336,7 @@ ModAPI.meta.credits("By ZXMushroom63");
         wrapped.weight = weight;
         return object;
     }
-    
+
     function makeSoundEventAccessorComposite(rKey, pitch, volume, category) {
         const SoundEventAccessorCompositeClass = ModAPI.reflect.getClassByName("SoundEventAccessorComposite").class;
         var object = new SoundEventAccessorCompositeClass;
@@ -349,12 +349,12 @@ ModAPI.meta.credits("By ZXMushroom63");
         wrapped.rnd = EaglercraftRandom();
         return object;
     }
-    function makeSoundEventAccessor112(rKey) {
+    function makeSoundEventAccessor112(rKey, subttl) {
         const SoundEventAccessorClass = ModAPI.reflect.getClassByName("SoundEventAccessor").class;
         var object = new SoundEventAccessorClass;
         var wrapped = ModAPI.util.wrap(object).getCorrective();
         wrapped.location = rKey;
-        wrapped.subtitle = null;
+        wrapped.subtitle = ModAPI.util.str(subttl);
         wrapped.accessorList = ModAPI.hooks.methods.cgcc_Lists_newArrayList0();
         wrapped.rnd = EaglercraftRandom();
         return object;
@@ -362,32 +362,44 @@ ModAPI.meta.credits("By ZXMushroom63");
     if (ModAPI.is_1_12) {
         const soundType = ModAPI.reflect.getClassById("net.minecraft.client.audio.Sound$Type").staticVariables.FILE;
         const mkSound = ModAPI.reflect.getClassById("net.minecraft.client.audio.Sound").constructors[0];
-        
-        AsyncSink.Audio.register = function addSfx(key, category, values) {
-            if (!category) {
-                throw new Error("[AsyncSink] Invalid audio category provided: "+category);
+        const SoundEvent = ModAPI.reflect.getClassById("net.minecraft.util.SoundEvent");
+        const SoundEvents = ModAPI.reflect.getClassById("net.minecraft.init.SoundEvents");
+
+        AsyncSink.Audio.register = function addSfx(key, unused, values, subtitle) {
+            subtitle ||= "(AsyncSink Sound)";
+            if (unused) {
+                console.log("Category is not a property of the sound in 1.12, category for " + key + " will be unused.");
             }
+
+            const rKey = ResourceLocation(ModAPI.util.str(key));
+
+            const ev = new SoundEvent.class;
+            ev.$soundName = rKey;
+            ModAPI.util.wrap(SoundEvent.staticVariables.REGISTRY).register(ModAPI.keygen.sound(key), rKey, ev);
+            const outObj = SoundEvents.staticMethods.getRegisteredSoundEvent.method(ModAPI.util.str(key));
+
             var snd = ModAPI.mc.mcSoundHandler.getCorrective();
             var registry = snd.soundRegistry.soundRegistry;
-            var rKey = ResourceLocation(ModAPI.util.str(key));
+
+
             var soundPool = values.map(se => {
-                return mkSound(ModAPI.util.str(se.path), se.volume, se.pitch, 1, soundType, 1 * se.streaming);
+                return mkSound(ModAPI.util.str(se.path.replace("sounds/", "").replace(".ogg", "")), se.volume, se.pitch, 1, soundType, 1 * se.streaming);
             });
-            var eventAccessor = makeSoundEventAccessor112(rKey);
+            var eventAccessor = makeSoundEventAccessor112(rKey, subtitle);
             var eventAccessorWrapped = ModAPI.util.wrap(eventAccessor);
             soundPool.forEach(sound => {
                 eventAccessorWrapped.accessorList.add(sound);
             });
             AsyncSink.Audio.Objects.push([rKey, eventAccessor]);
             registry.put(rKey, eventAccessor);
-            values.map(x=>"resourcepacks/AsyncSinkLib/assets/minecraft/" + x.path + ".mcmeta").forEach(x=>AsyncSink.setFile(x, new ArrayBuffer(0)));
-            return soundPool;
+            values.map(x => "resourcepacks/AsyncSinkLib/assets/minecraft/" + x.path + ".mcmeta").forEach(x => AsyncSink.setFile(x, new ArrayBuffer(0)));
+            return outObj;
         }
     } else {
         const SoundPoolEntry = ModAPI.reflect.getClassByName("SoundPoolEntry").constructors.find(x => x.length === 4);
         AsyncSink.Audio.register = function addSfx(key, category, values) {
             if (!category) {
-                throw new Error("[AsyncSink] Invalid audio category provided: "+category);
+                throw new Error("[AsyncSink] Invalid audio category provided: " + category);
             }
             var snd = ModAPI.mc.mcSoundHandler;
             var registry = snd.sndRegistry.soundRegistry;
@@ -405,7 +417,7 @@ ModAPI.meta.credits("By ZXMushroom63");
             });
             AsyncSink.Audio.Objects.push([rKey, compositeSound]);
             registry.put(rKey, compositeSound);
-            values.map(x=>"resourcepacks/AsyncSinkLib/assets/minecraft/" + x.path + ".mcmeta").forEach(x=>AsyncSink.setFile(x, new ArrayBuffer(0)));
+            values.map(x => "resourcepacks/AsyncSinkLib/assets/minecraft/" + x.path + ".mcmeta").forEach(x => AsyncSink.setFile(x, new ArrayBuffer(0)));
             return soundPool;
         }
     }
