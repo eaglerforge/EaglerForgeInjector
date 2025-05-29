@@ -8,3 +8,5 @@ Methods:
     - Example usage is: `var id = ModAPI.keygen.block("my_example_block");`
 - `ModAPI.keygen.entity(entityId: String) : number`
     - Example usage is: `var id = ModAPI.keygen.entity("my_example_entity");`
+- `ModAPI.keygen.sound(soundId: String) : number`
+    - Example usage is: `var id = ModAPI.keygen.sound("my.example.sound");`
