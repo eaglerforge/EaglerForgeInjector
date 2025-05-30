@@ -140,6 +140,9 @@ const modapi_postinit = "(" + (() => {
             }
         });
     }
+    function easyStaticPropAlias(clsId, real, alias) {
+        easyAlias(ModAPI.reflect.getClassById(clsId).staticVariables, real, alias);
+    }
     ModAPI.meta.title = function (title) {
         if (!document.currentScript || document.currentScript.getAttribute("data-isMod") !== "true") {
             return console.log("[ModAPIMeta] Cannot set meta for non-mod script.");
@@ -1130,6 +1133,11 @@ const modapi_postinit = "(" + (() => {
         } else {
             ModAPI.enchantments = new Proxy(ModAPI.reflect.getClassById("net.minecraft.enchantment.Enchantment").staticVariables, StaticProps_ProxyConf);
         }
+
+        if (ModAPI.is_1_12) {
+            //1.12 specific globals
+            ModAPI.blockSounds = new Proxy(ModAPI.reflect.getClassById("net.minecraft.block.SoundType").staticVariables, StaticProps_ProxyConf);
+        }
     }
 
     ModAPI.events.newEvent("bootstrap", "server");
@@ -1211,8 +1219,10 @@ const modapi_postinit = "(" + (() => {
 
     // 1.12 utility junk
     if (ModAPI.is_1_12) {
+        var Block = ModAPI.reflect.getClassById("net.minecraft.block.Block").class;
         var NonNullList = ModAPI.reflect.getClassById("net.minecraft.util.NonNullList").class;
         var ArrayAsList = ModAPI.reflect.getClassById("java.util.Arrays$ArrayAsList").class;
+        easyStaticPropAlias("net.minecraft.block.Block", "REGISTRY", "blockRegistry");
     }
 
     ModAPI.util.qhash = function qhash(txt, arr, interval) {
