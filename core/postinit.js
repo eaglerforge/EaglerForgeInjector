@@ -1227,7 +1227,7 @@ const modapi_postinit = "(" + (() => {
         easyStaticPropAlias("net.minecraft.item.Item", "REGISTRY", "itemRegistry");
     }
 
-    ModAPI.util.qhash = function qhash(txt, arr, interval) {
+    function qhash(txt, arr, interval) {
         arr ||= [];
         interval ||= 32767;
         // var interval = 4095; //used to be 4095 - arr.length, but that increases incompatibility based on load order and other circumstances
@@ -1248,6 +1248,7 @@ const modapi_postinit = "(" + (() => {
         }
         return hash;
     }
+    ModAPI.util.qhash = qhash;
 
 
     ModAPI.keygen = {};
