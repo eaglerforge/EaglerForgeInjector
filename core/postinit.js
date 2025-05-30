@@ -220,6 +220,7 @@ const modapi_postinit = "(" + (() => {
     ModAPI.util.getMethodFromPackage = function (classId, methodName) {
         if (ModAPI.is_1_12) {
             classId = classId.replace(".eaglercraft.v1_8", ".eaglercraft"); //why peyton why must you do this. you couldve changed it to v1_12 too, that would've worked
+            classId = classId.replace(".entity.RenderItem", ".RenderItem");
         }
         var name = "";
         var classStuff = classId.split(".");
