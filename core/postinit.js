@@ -36,7 +36,7 @@ const modapi_postinit = "(" + (() => {
     }
     function getCreditsString() {
         return Object.entries(credits).map((entry) => {
-            return " "+entry[0] + LF + " " + (new Array(entry[0].length)).fill("~").join("") + entry[1].join("") + LF + LF + LF;
+            return " " + entry[0] + LF + " " + (new Array(entry[0].length)).fill("~").join("") + entry[1].join("") + LF + LF + LF;
         }).join("");
     }
     ModAPI.array = {};
@@ -569,6 +569,24 @@ const modapi_postinit = "(" + (() => {
             if (prop === "getRef") {
                 return function () {
                     return target;
+                }
+            }
+            if (prop === "getCorrective") {
+                return function () {
+                    return new Proxy(target, patchProxyConfToCorrective(TeaVMArray_To_Recursive_BaseData_ProxyConf));
+                }
+            }
+            if (prop === "isCorrective") {
+                return function () {
+                    return corrective;
+                }
+            }
+            if (prop === "reload") {
+                return function () {
+                    if (reloadDeprecationWarnings < 10) {
+                        console.warn("ModAPI/PluginAPI reload() is obsolete, please stop using it in code.")
+                        reloadDeprecationWarnings++;
+                    }
                 }
             }
             var outputValue = Reflect.get(target, prop, receiver);
@@ -1196,8 +1214,10 @@ const modapi_postinit = "(" + (() => {
         var NonNullList = ModAPI.reflect.getClassById("net.minecraft.util.NonNullList").class;
         var ArrayAsList = ModAPI.reflect.getClassById("java.util.Arrays$ArrayAsList").class;
     }
-    
-    function qhash(txt, arr, interval) {
+
+    ModAPI.util.qhash = function qhash(txt, arr, interval) {
+        arr ||= [];
+        interval ||= 32767;
         // var interval = 4095; //used to be 4095 - arr.length, but that increases incompatibility based on load order and other circumstances
         if (arr.length >= interval) {
             console.error("[ModAPI.keygen] Ran out of IDs while generating for " + txt);
@@ -1253,8 +1273,17 @@ const modapi_postinit = "(" + (() => {
             return -1;
         }
         const SoundEvent = ModAPI.reflect.getClassByName("SoundEvent")
-        const values = ModAPI.util.wrap(SoundEvent.staticVariables.REGISTRY).getCorrective().underlyingIntegerMap.identityMap.elementData.filter(x=>!!x).map(y=>y.value.value);
+        const values = ModAPI.util.wrap(SoundEvent.staticVariables.REGISTRY).getCorrective().underlyingIntegerMap.identityMap.elementData.filter(x => !!x).map(y => y.value.value);
         return qhash(soundId, values, 4095);
+    }
+    ModAPI.keygen.enchantment = function (enchantment) {
+        const Enchantment = ModAPI.reflect.getClassByName("Enchantment");
+        if (ModAPI.is_1_12) {
+            const values = ModAPI.util.wrap(Enchantment.staticVariables.REGISTRY).getCorrective().underlyingIntegerMap.identityMap.elementData.filter(x => !!x).map(y => y.value.value);
+            return qhash(enchantment, values, 4095);
+        }
+        const values = ModAPI.util.wrap(Enchantment.staticVariables.enchantmentsList).getCorrective().filter(x => !!x).map(y => y.effectId);
+        return qhash(enchantment, values, 4095);
     }
 }).toString() + ")();";
 
@@ -1262,4 +1291,4 @@ if (globalThis.process) {
     module.exports = {
         modapi_postinit: modapi_postinit
     }
-  }
+}
