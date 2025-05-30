@@ -862,7 +862,11 @@ const modapi_postinit = "(" + (() => {
         var v = typeof param === "object" ? param.msg : (param + "");
         v ||= "";
         var jclString = ModAPI.util.string(v);
-        ModAPI.hooks.methods["nmcg_GuiNewChat_printChatMessage"](ModAPI.javaClient.$ingameGUI.$persistantChatGUI, ModAPI.hooks._classMap[ModAPI.util.getCompiledName("net.minecraft.util.ChatComponentText")].constructors[0](jclString));
+        if (ModAPI.is_1_12) {
+            ModAPI.hooks.methods["nmcg_GuiNewChat_printChatMessage"](ModAPI.javaClient.$ingameGUI.$persistantChatGUI, ModAPI.hooks._classMap[ModAPI.util.getCompiledName("net.minecraft.util.text.TextComponentString")].constructors[0](jclString));
+        } else {
+            ModAPI.hooks.methods["nmcg_GuiNewChat_printChatMessage"](ModAPI.javaClient.$ingameGUI.$persistantChatGUI, ModAPI.hooks._classMap[ModAPI.util.getCompiledName("net.minecraft.util.ChatComponentText")].constructors[0](jclString));
+        }
     }
 
     ModAPI.util.makeArray = function makeArray(arrayClass, arrayContents = []) {
