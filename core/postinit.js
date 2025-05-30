@@ -27,6 +27,7 @@ const modapi_postinit = "(" + (() => {
     ModAPI.meta._developerMap = {};
     ModAPI.meta._iconMap = {};
     ModAPI.meta._versionMap = {};
+    ModAPI.isServer = false;
     const credits = {};
     ModAPI.addCredit = function (category, name, contents) {
         if (!credits[category]) {
@@ -980,7 +981,7 @@ const modapi_postinit = "(" + (() => {
     inlineIntegratedServerStartup = ModAPI.hooks._rippedMethodKeys.filter(key => { return key.startsWith(inlineIntegratedServerStartup); })[0];
     const inlineIntegratedServerStartupMethod = ModAPI.hooks.methods[inlineIntegratedServerStartup];
     ModAPI.hooks.methods[inlineIntegratedServerStartup] = function (worker, bootstrap) {
-        var x = inlineIntegratedServerStartupMethod.apply(this, [worker, bootstrap + ";" + globalThis.modapi_postinit + ";" + ModAPI.dedicatedServer._data.join(";")]);
+        var x = inlineIntegratedServerStartupMethod.apply(this, [worker, bootstrap + ";" + globalThis.modapi_postinit + ";ModAPI.isServer=true;" + ModAPI.dedicatedServer._data.join(";")]);
         ModAPI.dedicatedServer._data = [];
         ModAPI.dedicatedServer._wasUsed = true;
         console.log("[ModAPI] Hooked into inline integrated server.");
