@@ -1224,6 +1224,7 @@ const modapi_postinit = "(" + (() => {
         var NonNullList = ModAPI.reflect.getClassById("net.minecraft.util.NonNullList").class;
         var ArrayAsList = ModAPI.reflect.getClassById("java.util.Arrays$ArrayAsList").class;
         easyStaticPropAlias("net.minecraft.block.Block", "REGISTRY", "blockRegistry");
+        easyStaticPropAlias("net.minecraft.item.Item", "REGISTRY", "itemRegistry");
     }
 
     ModAPI.util.qhash = function qhash(txt, arr, interval) {
@@ -1257,11 +1258,19 @@ const modapi_postinit = "(" + (() => {
         return registryNamespaceMethod.apply(this, args);
     }
     ModAPI.keygen.item = function (item) {
-        var values = [...ModAPI.reflect.getClassById("net.minecraft.item.Item").staticVariables.itemRegistry.$modapi_specmap.values()];
+        if (ModAPI.is_1_12) {
+            var values = ModAPI.util.wrap(ModAPI.reflect.getClassById("net.minecraft.item.Item").staticVariables.REGISTRY).getCorrective().underlyingIntegerMap.identityMap.elementData.filter(x => !!x).map(y => y.value.value);
+        } else {
+            var values = [...ModAPI.reflect.getClassById("net.minecraft.item.Item").staticVariables.itemRegistry.$modapi_specmap.values()];
+        }
         return qhash(item, values, 4095);
     }
     ModAPI.keygen.block = function (block) {
-        var values = [...ModAPI.reflect.getClassById("net.minecraft.block.Block").staticVariables.blockRegistry.$modapi_specmap.values()];
+        if (ModAPI.is_1_12) {
+            var values = ModAPI.util.wrap(ModAPI.reflect.getClassById("net.minecraft.block.Block").staticVariables.REGISTRY).getCorrective().underlyingIntegerMap.identityMap.elementData.filter(x => !!x).map(y => y.value.value);
+        } else {
+            var values = [...ModAPI.reflect.getClassById("net.minecraft.block.Block").staticVariables.blockRegistry.$modapi_specmap.values()];
+        }
         return qhash(block, values, 4095);
     }
     ModAPI.keygen.entity = function (entity) {
