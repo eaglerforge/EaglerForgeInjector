@@ -10,3 +10,5 @@ Methods:
     - Example usage is: `var id = ModAPI.keygen.entity("my_example_entity");`
 - `ModAPI.keygen.sound(soundId: String) : number`
     - Example usage is: `var id = ModAPI.keygen.sound("my.example.sound");`
+- `ModAPI.keygen.enchantment(enchantmentId: String) : number`
+    - Example usage is: `var id = ModAPI.keygen.enchantment("sharpness_v2");`
