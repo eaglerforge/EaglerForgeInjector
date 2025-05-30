@@ -196,6 +196,26 @@ ModAPI.meta.credits("By ZXMushroom63");
             return originalL18NFormat.apply(this, args);
         };
 
+        const LanguageMapTranslate = ModAPI.util.getMethodFromPackage("net.minecraft.util.text.translation.LanguageMap", "tryTranslateKey");
+        const originalLanguageMapTranslate = ModAPI.hooks.methods[LanguageMapTranslate];
+        ModAPI.hooks.methods[LanguageMapTranslate] = function (...args) {
+            var key = ModAPI.util.ustr(args[1]);
+            if (AsyncSink.L10N.has(key)) {
+                args[1] = ModAPI.util.str(AsyncSink.L10N.get(key));
+            }
+            return originalLanguageMapTranslate.apply(this, args);
+        };
+
+        const LanguageMapCheckTranslate = ModAPI.util.getMethodFromPackage("net.minecraft.util.text.translation.LanguageMap", "isKeyTranslated");
+        const originalLanguageMapCheckTranslate = ModAPI.hooks.methods[LanguageMapCheckTranslate];
+        ModAPI.hooks.methods[LanguageMapCheckTranslate] = function (...args) {
+            var key = ModAPI.util.ustr(args[1]);
+            if (AsyncSink.L10N.has(key)) {
+                return 1;
+            }
+            return originalLanguageMapTranslate.apply(this, args);
+        };
+
         const L10NCheck = ModAPI.util.getMethodFromPackage("net.minecraft.util.StatCollector", "canTranslate");
         const originalL10NCheck = ModAPI.hooks.methods[L10NCheck];
         ModAPI.hooks.methods[L10NCheck] = function (...args) {
