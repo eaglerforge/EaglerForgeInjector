@@ -27,6 +27,7 @@ const modapi_postinit = "(" + (() => {
     ModAPI.meta._developerMap = {};
     ModAPI.meta._iconMap = {};
     ModAPI.meta._versionMap = {};
+    ModAPI.isServer = false;
     const credits = {};
     ModAPI.addCredit = function (category, name, contents) {
         if (!credits[category]) {
@@ -36,7 +37,7 @@ const modapi_postinit = "(" + (() => {
     }
     function getCreditsString() {
         return Object.entries(credits).map((entry) => {
-            return " "+entry[0] + LF + " " + (new Array(entry[0].length)).fill("~").join("") + entry[1].join("") + LF + LF + LF;
+            return " " + entry[0] + LF + " " + (new Array(entry[0].length)).fill("~").join("") + entry[1].join("") + LF + LF + LF;
         }).join("");
     }
     ModAPI.array = {};
@@ -140,6 +141,9 @@ const modapi_postinit = "(" + (() => {
             }
         });
     }
+    function easyStaticPropAlias(clsId, real, alias) {
+        easyAlias(ModAPI.reflect.getClassById(clsId).staticVariables, real, alias);
+    }
     ModAPI.meta.title = function (title) {
         if (!document.currentScript || document.currentScript.getAttribute("data-isMod") !== "true") {
             return console.log("[ModAPIMeta] Cannot set meta for non-mod script.");
@@ -216,6 +220,7 @@ const modapi_postinit = "(" + (() => {
     ModAPI.util.getMethodFromPackage = function (classId, methodName) {
         if (ModAPI.is_1_12) {
             classId = classId.replace(".eaglercraft.v1_8", ".eaglercraft"); //why peyton why must you do this. you couldve changed it to v1_12 too, that would've worked
+            classId = classId.replace(".entity.RenderItem", ".RenderItem");
         }
         var name = "";
         var classStuff = classId.split(".");
@@ -571,6 +576,24 @@ const modapi_postinit = "(" + (() => {
                     return target;
                 }
             }
+            if (prop === "getCorrective") {
+                return function () {
+                    return new Proxy(target, patchProxyConfToCorrective(TeaVMArray_To_Recursive_BaseData_ProxyConf));
+                }
+            }
+            if (prop === "isCorrective") {
+                return function () {
+                    return corrective;
+                }
+            }
+            if (prop === "reload") {
+                return function () {
+                    if (reloadDeprecationWarnings < 10) {
+                        console.warn("ModAPI/PluginAPI reload() is obsolete, please stop using it in code.")
+                        reloadDeprecationWarnings++;
+                    }
+                }
+            }
             var outputValue = Reflect.get(target, prop, receiver);
             var wrapped = ModAPI.util.wrap(outputValue, target, corrective, true);
             if (wrapped) {
@@ -839,7 +862,11 @@ const modapi_postinit = "(" + (() => {
         var v = typeof param === "object" ? param.msg : (param + "");
         v ||= "";
         var jclString = ModAPI.util.string(v);
-        ModAPI.hooks.methods["nmcg_GuiNewChat_printChatMessage"](ModAPI.javaClient.$ingameGUI.$persistantChatGUI, ModAPI.hooks._classMap[ModAPI.util.getCompiledName("net.minecraft.util.ChatComponentText")].constructors[0](jclString));
+        if (ModAPI.is_1_12) {
+            ModAPI.hooks.methods["nmcg_GuiNewChat_printChatMessage"](ModAPI.javaClient.$ingameGUI.$persistantChatGUI, ModAPI.hooks._classMap[ModAPI.util.getCompiledName("net.minecraft.util.text.TextComponentString")].constructors[0](jclString));
+        } else {
+            ModAPI.hooks.methods["nmcg_GuiNewChat_printChatMessage"](ModAPI.javaClient.$ingameGUI.$persistantChatGUI, ModAPI.hooks._classMap[ModAPI.util.getCompiledName("net.minecraft.util.ChatComponentText")].constructors[0](jclString));
+        }
     }
 
     ModAPI.util.makeArray = function makeArray(arrayClass, arrayContents = []) {
@@ -959,7 +986,7 @@ const modapi_postinit = "(" + (() => {
     inlineIntegratedServerStartup = ModAPI.hooks._rippedMethodKeys.filter(key => { return key.startsWith(inlineIntegratedServerStartup); })[0];
     const inlineIntegratedServerStartupMethod = ModAPI.hooks.methods[inlineIntegratedServerStartup];
     ModAPI.hooks.methods[inlineIntegratedServerStartup] = function (worker, bootstrap) {
-        var x = inlineIntegratedServerStartupMethod.apply(this, [worker, bootstrap + ";" + globalThis.modapi_postinit + ";" + ModAPI.dedicatedServer._data.join(";")]);
+        var x = inlineIntegratedServerStartupMethod.apply(this, [worker, bootstrap + ";" + globalThis.modapi_postinit + ";ModAPI.isServer=true;" + ModAPI.dedicatedServer._data.join(";")]);
         ModAPI.dedicatedServer._data = [];
         ModAPI.dedicatedServer._wasUsed = true;
         console.log("[ModAPI] Hooked into inline integrated server.");
@@ -1112,6 +1139,11 @@ const modapi_postinit = "(" + (() => {
         } else {
             ModAPI.enchantments = new Proxy(ModAPI.reflect.getClassById("net.minecraft.enchantment.Enchantment").staticVariables, StaticProps_ProxyConf);
         }
+
+        if (ModAPI.is_1_12) {
+            //1.12 specific globals
+            ModAPI.blockSounds = new Proxy(ModAPI.reflect.getClassById("net.minecraft.block.SoundType").staticVariables, StaticProps_ProxyConf);
+        }
     }
 
     ModAPI.events.newEvent("bootstrap", "server");
@@ -1193,11 +1225,16 @@ const modapi_postinit = "(" + (() => {
 
     // 1.12 utility junk
     if (ModAPI.is_1_12) {
+        var Block = ModAPI.reflect.getClassById("net.minecraft.block.Block").class;
         var NonNullList = ModAPI.reflect.getClassById("net.minecraft.util.NonNullList").class;
         var ArrayAsList = ModAPI.reflect.getClassById("java.util.Arrays$ArrayAsList").class;
+        easyStaticPropAlias("net.minecraft.block.Block", "REGISTRY", "blockRegistry");
+        easyStaticPropAlias("net.minecraft.item.Item", "REGISTRY", "itemRegistry");
     }
-    
+
     function qhash(txt, arr, interval) {
+        arr ||= [];
+        interval ||= 32767;
         // var interval = 4095; //used to be 4095 - arr.length, but that increases incompatibility based on load order and other circumstances
         if (arr.length >= interval) {
             console.error("[ModAPI.keygen] Ran out of IDs while generating for " + txt);
@@ -1216,6 +1253,7 @@ const modapi_postinit = "(" + (() => {
         }
         return hash;
     }
+    ModAPI.util.qhash = qhash;
 
 
     ModAPI.keygen = {};
@@ -1226,11 +1264,19 @@ const modapi_postinit = "(" + (() => {
         return registryNamespaceMethod.apply(this, args);
     }
     ModAPI.keygen.item = function (item) {
-        var values = [...ModAPI.reflect.getClassById("net.minecraft.item.Item").staticVariables.itemRegistry.$modapi_specmap.values()];
+        if (ModAPI.is_1_12) {
+            var values = ModAPI.util.wrap(ModAPI.reflect.getClassById("net.minecraft.item.Item").staticVariables.REGISTRY).getCorrective().underlyingIntegerMap.identityMap.elementData.filter(x => !!x).map(y => y.value.value);
+        } else {
+            var values = [...ModAPI.reflect.getClassById("net.minecraft.item.Item").staticVariables.itemRegistry.$modapi_specmap.values()];
+        }
         return qhash(item, values, 4095);
     }
     ModAPI.keygen.block = function (block) {
-        var values = [...ModAPI.reflect.getClassById("net.minecraft.block.Block").staticVariables.blockRegistry.$modapi_specmap.values()];
+        if (ModAPI.is_1_12) {
+            var values = ModAPI.util.wrap(ModAPI.reflect.getClassById("net.minecraft.block.Block").staticVariables.REGISTRY).getCorrective().underlyingIntegerMap.identityMap.elementData.filter(x => !!x).map(y => y.value.value);
+        } else {
+            var values = [...ModAPI.reflect.getClassById("net.minecraft.block.Block").staticVariables.blockRegistry.$modapi_specmap.values()];
+        }
         return qhash(block, values, 4095);
     }
     ModAPI.keygen.entity = function (entity) {
@@ -1248,10 +1294,27 @@ const modapi_postinit = "(" + (() => {
         }
         return qhash(entity, values, 127);
     }
+    ModAPI.keygen.sound = function (soundId) {
+        if (!ModAPI.is_1_12) {
+            return -1;
+        }
+        const SoundEvent = ModAPI.reflect.getClassByName("SoundEvent")
+        const values = ModAPI.util.wrap(SoundEvent.staticVariables.REGISTRY).getCorrective().underlyingIntegerMap.identityMap.elementData.filter(x => !!x).map(y => y.value.value);
+        return qhash(soundId, values, 4095);
+    }
+    ModAPI.keygen.enchantment = function (enchantment) {
+        const Enchantment = ModAPI.reflect.getClassByName("Enchantment");
+        if (ModAPI.is_1_12) {
+            const values = ModAPI.util.wrap(Enchantment.staticVariables.REGISTRY).getCorrective().underlyingIntegerMap.identityMap.elementData.filter(x => !!x).map(y => y.value.value);
+            return qhash(enchantment, values, 4095);
+        }
+        const values = ModAPI.util.wrap(Enchantment.staticVariables.enchantmentsList).getCorrective().filter(x => !!x).map(y => y.effectId);
+        return qhash(enchantment, values, 4095);
+    }
 }).toString() + ")();";
 
 if (globalThis.process) {
     module.exports = {
         modapi_postinit: modapi_postinit
     }
-  }
+}

@@ -1,6 +1,6 @@
 {
   "name": "eaglerforgeinjector",
-  "version": "2.7.92",
+  "version": "2.7.93",
   "description": "Advanced modding API injector for unminified, unobfuscated, unsigned eaglercraft builds.",
   "main": "node.js",
   "directories": {

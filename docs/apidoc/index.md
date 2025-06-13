@@ -34,6 +34,8 @@ The global object has the following properties:
     - This is a key-value dictionary of all of the enchantments in the game. It is generated upon init from the static variables of the `Enchantment` class.
     - For example, to access the enchantment class for `knockback`, you can use `ModAPI.enchantments["knockback"]`
     - As the enchantment class has other static variables, `Object.keys` will also return non-enchantment keys such as `enchantmentsBookList`.
+ - `ModAPI.blockSounds: Map<String, SoundType>` (1.12 only)
+    - This is a key-value dictionary of `SoundType`s. Used in `.setSoundType(soundType)` when registering custom blocks in 1.12.
  - `ModAPI.minecraft: Minecraft`
     - This is the minecraft instance for the client, generated upon init.
     - It can also be accessed using `ModAPI.mc`
@@ -81,6 +83,8 @@ The global object has the following properties:
     - The version of ModAPI.
  - `ModAPI.is_1_12: Boolean`
     - Property defining wether or not ModAPI thinks the current version is 1.12-based.
+ - `ModAPI.isServer: Boolean`
+    - Property defining wether or not ModAPI thinks it is running on the dedicated server.
  - `ModAPI.flavour: String`
     - The flavour of ModAPI. Hardcoded to be `"injector"`.
 
