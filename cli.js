@@ -33,7 +33,15 @@ async function main() {
     EFI.conf.doMinifyPlus = args.includes("/minify_extras");
     EFI.conf.verbose = args.includes("/verbose");
     const string = await fs.readFile(inputFile, {encoding: 'utf-8'});
-    const res = await EFI.patchClient(string, new DOMParser());
+    const bannedEscapeCodes = { //babel added support for every newline escape code in existence. browser javascript code can process these unescaped, but babel-cli can't
+        "\u2028": "\\u2028",
+        "\u0085": "\\u0085",
+        "\u2029": "\\u2029",
+    }
+    const res = await EFI.patchClient(
+        Object.entries(bannedEscapeCodes).reduce((acc, ent)=>acc.replaceAll(ent[0], ent[1]), string),
+        new DOMParser()
+    );
     if (res) {
         var output = args[1];
         if (!output || !output.endsWith(".html")) {
