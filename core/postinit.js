@@ -351,12 +351,16 @@ const modapi_postinit = "(" + (() => {
         return ModAPI.hooks._teavm.$rt_createDoubleArray(size);
     }
 
+    function staticKeyMapper(k) {
+        return k.split(/(?=[A-Z])/).map(x=>x.toUpperCase()).join("_");
+    }
+
     //Proxy to make sure static variables are initialized before access, as well as fixing some issues in 1.12
     function makeClinitProxy(staticVariables, clinit) {
         return new Proxy(staticVariables, {
             get: function (a, b, c) {
                 clinit();
-                return Reflect.get(a, b, c) || Reflect.get(a, b.toUpperCase(), c);
+                return Reflect.get(a, b, c) || Reflect.get(a, staticKeyMapper(b), c);
             }
         });
     }
