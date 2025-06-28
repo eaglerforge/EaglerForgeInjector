@@ -351,12 +351,12 @@ const modapi_postinit = "(" + (() => {
         return ModAPI.hooks._teavm.$rt_createDoubleArray(size);
     }
 
-    //Proxy to make sure static variables are initialized before access.
+    //Proxy to make sure static variables are initialized before access, as well as fixing some issues in 1.12
     function makeClinitProxy(staticVariables, clinit) {
         return new Proxy(staticVariables, {
             get: function (a, b, c) {
                 clinit();
-                return Reflect.get(a, b, c);
+                return Reflect.get(a, b, c) || Reflect.get(a, b.toUpperCase(), c);
             }
         });
     }
@@ -675,7 +675,6 @@ const modapi_postinit = "(" + (() => {
         get(target, prop, receiver) {
             var outProp = prop;
             var outputValue = Reflect.get(target, outProp, receiver);
-            outputValue ||= Reflect.get(target, outProp.toUpperCase(), receiver); //1.12 made a lot of variables uppercase (idk why)
             if (outputValue && typeof outputValue === "object" && Array.isArray(outputValue.data) && typeof outputValue.type === "function") {
                 return new Proxy(outputValue.data, TeaVMArray_To_Recursive_BaseData_ProxyConf);
             }
