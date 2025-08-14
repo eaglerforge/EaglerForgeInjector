@@ -352,7 +352,7 @@ const modapi_postinit = "(" + (() => {
     }
 
     function staticKeyMapper(k) {
-        return k.split(/(?=[A-Z])/).map(x=>x.toUpperCase()).join("_");
+        return k.split(/(?=[A-Z])/).map(x => x.toUpperCase()).join("_");
     }
 
     //Proxy to make sure static variables are initialized before access, as well as fixing some issues in 1.12
@@ -476,9 +476,29 @@ const modapi_postinit = "(" + (() => {
                 });
             }
 
+            ModAPI.hooks._classMap[compiledName].areConstructorsBaked = ModAPI.hooks._classMap[compiledName].constructors.length === 0;
+            //^^^ IF TRUE: TeaVM wants us to have an aneurism, and is optimising constructors out of the code.
+            // ModAPI will to it's best to recreate the constructors programmatically
+
+
             ModAPI.hooks._rippedInternalConstructorKeys.forEach(initialiser => { // Find internal constructors/initialisers. Used for calling super() on custom classes. (They are the different implementations of a classes constructor, that don't automatically create an object. Thus, it is identical to calling super)
                 if (initialiser.startsWith(compiledName + "__init_") && !initialiser.includes("$lambda$")) {
-                    ModAPI.hooks._classMap[compiledName].internalConstructors.push(ModAPI.hooks._rippedInternalConstructors[initialiser]);
+                    const internalConstructor = ModAPI.hooks._rippedInternalConstructors[initialiser];
+                    ModAPI.hooks._classMap[compiledName].internalConstructors.push(internalConstructor);
+
+                    if (ModAPI.hooks._classMap[compiledName].areConstructorsBaked) {
+                        // Recreate constructors due to TeaVM over-optimisation
+                        const argIds = (new Array(2)).fill(0).map((x, i) => "_" + i);
+                        ModAPI.hooks._classMap[compiledName].constructors.push(
+                            (new Function(
+                                ...argIds,
+                                "const inst = new this.theClass; this.init(inst, " + argIds.join(", ") + "); return inst;"
+                            )).bind({
+                                theClass: ModAPI.hooks._classMap[compiledName].class,
+                                init: internalConstructor
+                            })
+                        );
+                    }
                 }
             });
 
