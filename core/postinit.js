@@ -1093,6 +1093,7 @@ const modapi_postinit = "(" + (() => {
         var x = serverStartMethod.apply(this, [$this]);
         ModAPI.server = new Proxy($this, ModAPI.util.TeaVM_to_Recursive_BaseData_ProxyConf);
         ModAPI.rawServer = $this;
+        ModAPI.util.bootstrap();
         ModAPI.events.callEvent("serverstart", {});
         return x;
     }
