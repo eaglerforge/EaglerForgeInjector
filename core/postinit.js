@@ -1093,7 +1093,6 @@ const modapi_postinit = "(" + (() => {
         var x = serverStartMethod.apply(this, [$this]);
         ModAPI.server = new Proxy($this, ModAPI.util.TeaVM_to_Recursive_BaseData_ProxyConf);
         ModAPI.rawServer = $this;
-        ModAPI.util.bootstrap();
         ModAPI.events.callEvent("serverstart", {});
         return x;
     }
@@ -1156,6 +1155,9 @@ const modapi_postinit = "(" + (() => {
 
     ModAPI.util.bootstrap = function () {
         ModAPI.items = new Proxy(ModAPI.reflect.getClassById("net.minecraft.init.Items").staticVariables, StaticProps_ProxyConf);
+        if (!ModAPI.items.apple) {
+            return false;
+        }
         ModAPI.blocks = new Proxy(ModAPI.reflect.getClassById("net.minecraft.init.Blocks").staticVariables, StaticProps_ProxyConf);
         ModAPI.materials = new Proxy(ModAPI.reflect.getClassById("net.minecraft.block.material.Material").staticVariables, StaticProps_ProxyConf);
         if (ModAPI.is_1_12) {
@@ -1168,6 +1170,7 @@ const modapi_postinit = "(" + (() => {
             //1.12 specific globals
             ModAPI.blockSounds = new Proxy(ModAPI.reflect.getClassById("net.minecraft.block.SoundType").staticVariables, StaticProps_ProxyConf);
         }
+        return true;
     }
 
     ModAPI.events.newEvent("bootstrap", "server");
@@ -1178,9 +1181,10 @@ const modapi_postinit = "(" + (() => {
             return;
         }
         var x = originalBootstrap.apply(this, args);
-        ModAPI.util.bootstrap();
-        console.log("[ModAPI] Hooked into bootstrap. .blocks, .items, .materials and .enchantments are now accessible.");
-        ModAPI.events.callEvent("bootstrap", {});
+        if (ModAPI.util.bootstrap()) {
+            console.log("[ModAPI] Hooked into bootstrap. .blocks, .items, .materials and .enchantments are now accessible.");
+            ModAPI.events.callEvent("bootstrap", {});
+        }
         return x;
     }
 
