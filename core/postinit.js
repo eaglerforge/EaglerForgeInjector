@@ -1112,16 +1112,18 @@ const modapi_postinit = "(" + (() => {
     const receiveChatMessageMethod = ModAPI.hooks.methods[receiveChatMessageMethodName];
     ModAPI.hooks.methods[receiveChatMessageMethodName] = function (...args) {
         var $this = args[0];
+        const _this = ModAPI.util.wrap($this).getCorrective();
+        const str = _this.message.getRef();
         var data = {
             preventDefault: false,
-            message: ModAPI.util.jclStrToJsStr($this.$message3)
+            message: ModAPI.util.jclStrToJsStr(str)
         }
         ModAPI.events.callEvent("sendchatmessage", data);
         if (data.preventDefault) {
             return;
         }
         if (typeof data.message === "string") {
-            ModAPI.util.setStringContent($this.$message3, data.message)
+            ModAPI.util.setStringContent(str, data.message)
         }
         var x = receiveChatMessageMethod.apply(this, args);
         return x;
