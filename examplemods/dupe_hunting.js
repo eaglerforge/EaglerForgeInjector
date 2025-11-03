@@ -138,6 +138,6 @@ function button_utility_script(inputArr, bindingClass, actionBindMode) {
         "net.minecraft.client.gui.inventory.GuiContainerCreative",
         "net.minecraft.client.gui.inventory.GuiBeacon"
     ].forEach(ui => {
-        button_utility_script(dupeHuntButtons, ui, 0);
+        button_utility_script(dupeHuntButtons, ui, 2);
     });
 })();
