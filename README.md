@@ -1,10 +1,11 @@
-# EaglerForgeInjector
+ # EaglerForgeInjector ( But with EagMan )
 An advanced modding API injector for unminified, unobfuscated, unsigned eaglercraft builds.
 Current features:
 - Method hooking/monkey patching
 - Reflection
 - Custom classes
 - Modify the dedicated server
+- EagMan dependency manager
 
 ### How to use:
 #### Online
